@@ -29,9 +29,7 @@ interface IRegistry {
         bytes32 parentNode,
         bytes32 label,
         address owner
-    )
-        external
-        returns (bytes32 subnode);
+    ) external returns (bytes32 subnode);
 
     /// @notice Atomic subnode record update
     function setSubnodeRecord(
@@ -40,9 +38,7 @@ interface IRegistry {
         address owner,
         address resolver,
         uint64 expires
-    )
-        external
-        returns (bytes32 subnode);
+    ) external returns (bytes32 subnode);
 
     /// @notice Update resolver for a node
     function setResolver(bytes32 node, address resolver) external;

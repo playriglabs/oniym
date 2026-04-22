@@ -4,7 +4,7 @@
 # Run once after cloning.
 #
 # Prerequisites:
-#   - Node.js 20+
+#   - Node.js 24+
 #   - pnpm 9+
 #   - Foundry (https://book.getfoundry.sh/getting-started/installation)
 

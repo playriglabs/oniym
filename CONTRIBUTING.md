@@ -6,7 +6,7 @@ Thanks for your interest. Oniym is still in early development, but contributions
 
 **Prerequisites:**
 
-- Node.js 20+
+- Node.js 24+
 - pnpm 9+
 - Foundry (`curl -L https://foundry.paradigm.xyz | bash && foundryup`)
 

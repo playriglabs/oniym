@@ -22,7 +22,7 @@ Full client API (`resolve`, `lookup`, `register`) ships in v0.1. The current rel
 
 ## Compatibility
 
-- Node.js 20+
+- Node.js 24+
 - All modern browsers (ES2022)
 - ENSIP-1 namehash compatible — drop-in replacement for `viem`'s `namehash()` when you need matching semantics
 

@@ -66,11 +66,7 @@ library Namehash {
         bytes memory data,
         uint256 start,
         uint256 end
-    )
-        private
-        pure
-        returns (bytes32 result)
-    {
+    ) private pure returns (bytes32 result) {
         assembly {
             // `data` points to length prefix; actual bytes start at data + 32
             result := keccak256(add(add(data, 0x20), start), sub(end, start))
