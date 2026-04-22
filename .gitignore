@@ -45,3 +45,5 @@ pnpm-debug.log*
 # Temp
 tmp/
 .tmp/
+# Added by code-review-graph
+.code-review-graph/
