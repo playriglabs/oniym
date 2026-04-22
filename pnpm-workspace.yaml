@@ -1,0 +1,5 @@
+packages:
+  - "indexer"
+  - "sdk"
+  - "web"
+  - "examples/*"

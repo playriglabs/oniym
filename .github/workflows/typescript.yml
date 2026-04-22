@@ -1,0 +1,49 @@
+name: TypeScript CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "sdk/**"
+      - "indexer/**"
+      - "web/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/typescript.yml"
+  pull_request:
+    paths:
+      - "sdk/**"
+      - "indexer/**"
+      - "web/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/typescript.yml"
+
+jobs:
+  check:
+    name: Typecheck, lint, test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

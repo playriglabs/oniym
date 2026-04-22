@@ -1,0 +1,59 @@
+{
+  "name": "@oniym/sdk",
+  "version": "0.0.1",
+  "description": "TypeScript SDK for Oniym — multichain-native naming service",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/playriglabs/oniym.git",
+    "directory": "sdk"
+  },
+  "homepage": "https://oniym.xyz",
+  "bugs": {
+    "url": "https://github.com/playriglabs/oniym/issues"
+  },
+  "author": "Playriglabs <hello@playriglabs.fun> (https://playriglabs.fun)",
+  "license": "MIT",
+  "keywords": [
+    "ens",
+    "naming",
+    "blockchain",
+    "multichain",
+    "web3",
+    "base",
+    "oniym"
+  ]
+}
