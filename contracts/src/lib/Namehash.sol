@@ -30,15 +30,15 @@ library Namehash {
         uint256 labelEnd = len;
         for (uint256 i = len; i > 0; i--) {
             if (uint8(nameBytes[i - 1]) == DOT) {
-                bytes32 labelHash = _keccakSlice(nameBytes, i, labelEnd);
-                node = _hashPair(node, labelHash);
+                bytes32 labelHash = keccakSlice(nameBytes, i, labelEnd);
+                node = hashPair(node, labelHash);
                 labelEnd = i - 1;
             }
         }
 
         // Final (leftmost) label — no preceding dot
-        bytes32 firstLabelHash = _keccakSlice(nameBytes, 0, labelEnd);
-        node = _hashPair(node, firstLabelHash);
+        bytes32 firstLabelHash = keccakSlice(nameBytes, 0, labelEnd);
+        node = hashPair(node, firstLabelHash);
     }
 
     /// @notice Computes a subdomain namehash from parent node and label
@@ -46,13 +46,13 @@ library Namehash {
     /// @param label The label string (no dots)
     /// @return The namehash of parent.label
     function makeNode(bytes32 parentNode, string memory label) internal pure returns (bytes32) {
-        return _hashPair(parentNode, keccak256(bytes(label)));
+        return hashPair(parentNode, keccak256(bytes(label)));
     }
 
     /// @notice Hashes two 32-byte values using keccak256 via scratch space
     /// @dev Uses the EVM's free scratch space at 0x00..0x40 — safe in pure
     ///      functions because nothing else can write to it before keccak256
-    function _hashPair(bytes32 a, bytes32 b) private pure returns (bytes32 result) {
+    function hashPair(bytes32 a, bytes32 b) private pure returns (bytes32 result) {
         assembly {
             mstore(0x00, a)
             mstore(0x20, b)
@@ -62,7 +62,7 @@ library Namehash {
 
     /// @notice Hashes a slice of a bytes array using keccak256
     /// @dev Uses assembly for efficient in-place hashing without memory copy
-    function _keccakSlice(
+    function keccakSlice(
         bytes memory data,
         uint256 start,
         uint256 end

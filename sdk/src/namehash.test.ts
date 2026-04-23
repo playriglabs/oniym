@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { namehash, makeNode, labelhash } from "./namehash.js";
+import { namehash, makeNode, labelhash } from "./namehash";
 
 describe("namehash", () => {
     // Parity tests with Solidity - exact same vectors as Namehash.t.sol

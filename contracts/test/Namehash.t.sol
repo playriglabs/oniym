@@ -82,7 +82,7 @@ contract NamehashTest is Test {
     function testFuzz_singleLabel(string memory label) public pure {
         vm.assume(bytes(label).length > 0);
         vm.assume(bytes(label).length <= 64);
-        vm.assume(!_containsDot(label));
+        vm.assume(!contains_dot(label));
 
         bytes32 expected = keccak256(abi.encodePacked(bytes32(0), keccak256(bytes(label))));
         assertEq(Namehash.namehash(label), expected);
@@ -92,7 +92,7 @@ contract NamehashTest is Test {
     function testFuzz_twoLevel(string memory label, string memory tld) public pure {
         vm.assume(bytes(label).length > 0 && bytes(label).length <= 64);
         vm.assume(bytes(tld).length > 0 && bytes(tld).length <= 64);
-        vm.assume(!_containsDot(label) && !_containsDot(tld));
+        vm.assume(!contains_dot(label) && !contains_dot(tld));
 
         bytes32 tldNode = keccak256(abi.encodePacked(bytes32(0), keccak256(bytes(tld))));
         bytes32 expected = keccak256(abi.encodePacked(tldNode, keccak256(bytes(label))));
@@ -103,7 +103,7 @@ contract NamehashTest is Test {
 
     // -- helpers --
 
-    function _containsDot(string memory s) private pure returns (bool) {
+    function contains_dot(string memory s) private pure returns (bool) {
         bytes memory b = bytes(s);
         for (uint256 i = 0; i < b.length; i++) {
             if (b[i] == 0x2e) return true;
