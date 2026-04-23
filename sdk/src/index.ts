@@ -6,4 +6,4 @@
  * @packageDocumentation
  */
 
-export { namehash, makeNode, labelhash } from "./namehash.js";
+export { namehash, makeNode, labelhash } from "./namehash";
