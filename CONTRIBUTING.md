@@ -64,6 +64,6 @@ Please do NOT open a public issue for security vulnerabilities. Email `security@
 
 ## Code style
 
-- **Solidity:** formatted by `forge fmt`, line length 100
+- **Solidity:** formatted by Prettier we relying on prettier
 - **TypeScript:** formatted by Prettier, strict mode, `noUncheckedIndexedAccess`
 - **Commits:** conventional commits (enforced in CI eventually)
