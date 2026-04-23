@@ -14,7 +14,7 @@ import { concat, keccak256, stringToBytes, type Hex } from "viem";
  * namehash('kyy.oniym')   // keccak256(namehash('oniym') ‖ keccak256('kyy'))
  */
 export function namehash(name: string): Hex {
-    let node = `0x${"00".repeat(32)}` as Hex;
+    let node: Hex = `0x${"00".repeat(32)}`;
     if (name.length === 0) return node;
 
     const labels = name.split(".").reverse();
