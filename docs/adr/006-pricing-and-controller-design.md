@@ -1,0 +1,118 @@
+# ADR-006: Pricing model and controller design
+
+- **Status:** Accepted
+- **Date:** 2026-04-22
+- **Deciders:** Core team
+
+## Context
+
+Oniym's economic and operational model requires decisions on four axes:
+
+1. **Pricing tiers** — flat-rate vs length-based premiums (ENS-style)
+2. **Emergency controls** — should the controller be pausable?
+3. **Registration atomicity** — single tx or multi-tx setup?
+4. **Reverse resolution** — opt-in at registration, or post-registration only?
+
+Each choice affects user experience, security posture, and protocol positioning.
+
+## Decisions
+
+### 1. Flat pricing at $5/year for all registrable lengths
+
+- Minimum length: 3 characters
+- Price: $5 USD/year (in ETH at Chainlink spot), regardless of length
+- No post-expiry premium decay (future work)
+
+### 2. OpenZeppelin Pausable on ETHRegistrarController only
+
+- `commit()`, `register()`, `renew()` are pausable
+- `Registry` and `BaseRegistrar` are NOT pausable
+- Pause controlled by protocol owner (multisig initially, DAO later)
+
+### 3. Multicall resolver data in registration
+
+- `register()` accepts `bytes[] resolverData` to batch setAddr/setText calls
+- Empty array → no resolver setup (user handles later)
+- Non-empty → controller loops and calls resolver atomically
+
+### 4. Opt-in reverse record at registration
+
+- `register()` accepts `bool reverseRecord`
+- If true, controller sets reverse record via `IReverseRegistrar.setNameForAddr`
+- If false, user can set reverse record later (or not at all)
+
+## Rationale
+
+### Flat pricing
+
+**Positioning:** ENS charges $5/$160/$640 for 5+/4/3-char names. Flat $5 is a clear differentiator — Oniym is "the affordable multichain alternative." This matters for Base's price-sensitive user base and emerging-market targeting.
+
+**Squatting reality:** Short names will be squatted on launch regardless of tier. Premium pricing only shifts *who* squats (capitalized squatters) vs *when* they squat (at $5 flat, squatters need less capital but face the same structural incentive). Accept the outcome and move on.
+
+**Revenue expectations:** With 1000 registrations at $5/year, annual revenue is ~$5K. This is a portfolio-scale protocol, not a revenue-optimized business. Flat pricing acknowledges this honestly.
+
+**Future flexibility:** The `IPriceOracle` interface preserves the `Price` struct with `base + premium`. Introducing tiered pricing or post-expiry decay later is an oracle swap, not a controller/registrar change.
+
+### Pausable on controller
+
+**Defense layering:** Combined with `removeController()` on the registrar, this gives three response modes for bugs:
+
+| Severity | Response | Time |
+|----------|----------|------|
+| Bug in controller logic | Pause, fix, unpause | hours |
+| Severe bug in controller | `removeController()`, deploy new | ~1 day |
+| Bug in ownership layer | No recovery — immutable | — |
+
+**Why not pause Registry/Registrar:** The ownership layer must remain functional even during incidents. Users must always be able to transfer or resolve their names. Pausing ownership = bricking user assets temporarily, which is unacceptable.
+
+**Governance constraint:** The pause power is a centralization trade-off. Mitigation: multisig with timelock on the owner role, visible pause events, published criteria for when pause will be used.
+
+### Multicall resolver data
+
+**UX impact:** Without it, registration is a 6-tx flow:
+1. `commit()`
+2. `register()`
+3. `setAddr()` for ETH
+4. `setAddr()` for Solana
+5. `setAddr()` for Bitcoin
+6. `setText()` for avatar
+
+With it, steps 3-6 collapse into step 2. User experiences it as "register and I'm done." For a naming protocol, this is a major UX win.
+
+**Gas cost:** ~5-10K extra gas per extra call (mostly calldata). Total registration cost stays under 250K gas on Base, still well under $0.50 at typical gas prices.
+
+**Security consideration:** The controller performs `bytes` multicall to the resolver. Implementation MUST validate that the resolver address matches the one set in the Registry to prevent cross-contract privilege escalation. Documented in threat model.
+
+### Opt-in reverse record at registration
+
+**Why not default-true:** Users on shared wallets (team multisigs, smart accounts) may not want the wallet address to resolve to a personal name. Opt-in respects user choice.
+
+**Why not default-false:** The large majority of users *want* reverse resolution and won't know to set it manually later. Exposing as a flag makes it discoverable and one-click.
+
+**ENS precedent:** ENS registrar v0.3+ uses this same pattern. Copying proven UX is valuable.
+
+## Consequences
+
+### Positive
+- Simpler pricing logic reduces oracle attack surface
+- Pausable is industry-standard and reviewer-friendly
+- Atomic registration is competitive with ENS's latest UX
+- Opt-in reverse respects user autonomy
+
+### Negative
+- Flat pricing leaves money on the table for premium short names
+- Pausable introduces centralization surface (addressed via timelock)
+- Multicall increases complexity slightly and requires careful validation
+- Reverse record requires deploying `ReverseRegistrar` in Week 3 (additional scope)
+
+### Mitigations
+- Pause power ownership transitions to multisig before mainnet, DAO after
+- Reserve ability to migrate to tiered pricing post-launch (oracle swap)
+- Multicall validation is unit-tested with malicious resolver inputs
+- Reverse record flag defaults to false if resolver is not set
+
+## References
+
+- [ENSIP-16: Record Versioning](https://docs.ens.domains/ensip/16)
+- [ENS ETHRegistrarController v0.3](https://github.com/ensdomains/ens-contracts/blob/main/contracts/ethregistrar/ETHRegistrarController.sol)
+- [OpenZeppelin Pausable](https://docs.openzeppelin.com/contracts/5.x/api/utils#Pausable)
