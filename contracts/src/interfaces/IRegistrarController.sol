@@ -44,14 +44,14 @@ interface IRegistrarController {
     /// @dev Bundled to keep {register} signature readable and allow future extensions
     ///      (referrals, discounts) without breaking callers.
     struct RegisterRequest {
-        string  name;           // label only, no TLD (e.g. "kyy")
-        bytes32 tld;            // namehash of the TLD (e.g. namehash("eth"))
+        string name; // label only, no TLD (e.g. "kyy")
+        bytes32 tld; // namehash of the TLD (e.g. namehash("eth"))
         address owner;
         uint256 duration;
         bytes32 secret;
         address resolver;
-        bytes[] resolverData;   // batch setAddr / setText calls applied atomically at registration
-        bool    reverseRecord;  // opt-in: set the reverse record at registration time
+        bytes[] resolverData; // batch setAddr / setText calls applied atomically at registration
+        bool reverseRecord; // opt-in: set the reverse record at registration time
     }
 
     // ---------------------------------------------------------------
@@ -59,7 +59,7 @@ interface IRegistrarController {
     // ---------------------------------------------------------------
 
     event NameRegistered(
-        string  name,
+        string name,
         bytes32 indexed tld,
         bytes32 indexed label,
         address indexed owner,
@@ -69,7 +69,7 @@ interface IRegistrarController {
     );
 
     event NameRenewed(
-        string  name,
+        string name,
         bytes32 indexed tld,
         bytes32 indexed label,
         uint256 cost,

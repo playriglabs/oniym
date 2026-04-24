@@ -165,7 +165,9 @@ describe("Oniym resolution stubs", () => {
     const oniym = new Oniym();
 
     it("getName returns null (not yet implemented)", async () => {
-        await expect(oniym.getName("0x00000000000e1a99dddd5610111884278bdbda1d")).resolves.toBeNull();
+        await expect(
+            oniym.getName("0x00000000000e1a99dddd5610111884278bdbda1d"),
+        ).resolves.toBeNull();
     });
 
     it("getAddress returns null (not yet implemented)", async () => {

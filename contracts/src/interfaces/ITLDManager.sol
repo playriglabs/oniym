@@ -20,10 +20,10 @@ interface ITLDManager {
 
     /// @notice Metadata for a protocol-managed TLD
     struct Tld {
-        bytes32 node;       // namehash of the TLD label (e.g. namehash("eth"))
-        string  label;      // human-readable label without dot (e.g. "eth")
-        address registrar;  // ITLDRegistrar managing this TLD
-        bool    active;     // whether new registrations are open
+        bytes32 node; // namehash of the TLD label (e.g. namehash("eth"))
+        string label; // human-readable label without dot (e.g. "eth")
+        address registrar; // ITLDRegistrar managing this TLD
+        bool active; // whether new registrations are open
     }
 
     // ---------------------------------------------------------------

@@ -161,11 +161,7 @@ contract TLDConfigTest is Test {
             bytes32 tldNode = Namehash.namehash(tlds[i]);
             bytes32 viaMakeNode = Namehash.makeNode(tldNode, "kyy");
             bytes32 viaNamehash = Namehash.namehash(string.concat("kyy.", tlds[i]));
-            assertEq(
-                viaMakeNode,
-                viaNamehash,
-                string.concat("makeNode mismatch for .', tlds[i]")
-            );
+            assertEq(viaMakeNode, viaNamehash, string.concat("makeNode mismatch for .', tlds[i]"));
         }
     }
 
@@ -229,14 +225,17 @@ contract TLDConfigTest is Test {
         assertNotEq(node, bytes32(0));
     }
 
-    /// @notice Fuzz: name under any short TLD produces a node distinct from the TLD root
+    /// @notice Fuzz: name under any protocol TLD produces a node distinct from the TLD root.
+    /// @dev Uses a uint8 index into the known-valid tlds array to avoid mass vm.assume rejections
+    ///      that would occur when fuzzing a raw string with the 5-char length constraint.
     function testFuzz_nameNodeDistinctFromTldNode(
         string memory label,
-        string memory tld
-    ) public pure {
+        uint8 tldIdx
+    ) public view {
         vm.assume(bytes(label).length > 0 && bytes(label).length <= 64);
-        vm.assume(bytes(tld).length > 0 && bytes(tld).length <= MAX_TLD_LABEL_LENGTH);
-        vm.assume(!containsDot(label) && !containsDot(tld));
+        vm.assume(!containsDot(label));
+
+        string memory tld = tlds[tldIdx % tlds.length];
 
         bytes32 tldNode = Namehash.namehash(tld);
         bytes32 nameNode = Namehash.namehash(string.concat(label, ".", tld));

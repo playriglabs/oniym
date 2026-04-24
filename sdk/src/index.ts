@@ -25,5 +25,4 @@ export type {
     SupportedTLD,
 } from "./oniym";
 
-
 export { namehash, makeNode, labelhash } from "./namehash";
