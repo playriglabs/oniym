@@ -29,8 +29,8 @@ describe("SUPPORTED_TLDS", () => {
         }
     });
 
-    it("MAX_TLD_COUNT is 62", () => {
-        expect(MAX_TLD_COUNT).toBe(62);
+    it("MAX_TLD_COUNT is 65", () => {
+        expect(MAX_TLD_COUNT).toBe(65);
     });
 
     it("MAX_TLD_LENGTH is 5", () => {
