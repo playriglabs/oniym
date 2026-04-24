@@ -23,7 +23,7 @@ Two approaches were considered:
 
 2. **Tooling compatibility** — existing libraries (viem, ethers, web3.py) already ship namehash implementations. We inherit test vectors, edge-case handling, and battle-testing.
 
-3. **Hierarchical subdomains are trivially supported** — `wallet.kyy.oniym` is a natural extension, and subdomain ownership can be delegated without custom logic.
+3. **Hierarchical subdomains are trivially supported** — `wallet.kyy.id` is a natural extension, and subdomain ownership can be delegated without custom logic.
 
 4. **Future L1 interop** — if we ever expose Oniym names as `.eth` via CCIP-Read, the node format must match ENS.
 

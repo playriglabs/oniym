@@ -20,23 +20,26 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 - [x] `Namehash.sol` library with full test suite
 - [x] TypeScript `namehash()` in SDK with matching vectors
 - [x] GitHub Actions CI (contracts + TS)
-- [x] ADRs 001-004
+- [x] ADRs 001-007 (001-004 foundations, 005 branding, 006 pricing, 007 multi-TLD pivot)
+- [x] Multi-TLD interfaces (ITLDManager, ITLDRegistrar, IRegistrarController)
+- [x] SDK skeleton — `Oniym` class with Clusters-style API stubs
 - [ ] Architecture diagram (SVG)
-- [ ] Slither baseline
+- [ ] Slither baseline (run locally: `pnpm contracts:slither`)
 - [ ] Domain + npm scope + GitHub org secured
 
 **Exit criteria:** Public repo green on CI, namehash parity test passes, ADRs merged.
 
 ### Week 2 — Core contracts
 
-**Theme:** Ownership layer. Names as NFTs, commit-reveal registration.
+**Theme:** Ownership layer. Multi-TLD names as NFTs, commit-reveal registration.
 
 - [ ] `Registry.sol` — node → owner/resolver/expires mapping
-- [ ] `BaseRegistrar.sol` — ERC-721 wrapping `.oniym` names
-- [ ] `PriceOracle.sol` — Chainlink ETH/USD, length-based pricing
-- [ ] `ETHRegistrarController.sol` — commit-reveal registration flow
+- [ ] `TLDManager.sol` — protocol-owned manager for 62 web-style TLDs (`.id`, `.one`, `.wagmi`, …)
+- [ ] `TLDRegistrar.sol` — ERC-721 registrar (one instance per TLD)
+- [ ] `PriceOracle.sol` — Chainlink ETH/USD, flat-rate pricing
+- [ ] `RegistrarController.sol` — TLD-agnostic commit-reveal registration flow
 - [ ] Full unit tests + fuzz tests
-- [ ] Deploy to Base Sepolia
+- [ ] Deploy initial TLDs to Base Sepolia
 
 **Exit criteria:** End-to-end registration works on Base Sepolia. `forge test` passes with >95% coverage.
 
@@ -45,14 +48,14 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 **Theme:** The multichain payload. Slither/Mythril self-audit.
 
 - [ ] `PublicResolver.sol` — multichain addresses (SLIP-0044 coinTypes), text records, contenthash
-- [ ] Reverse resolver (`0x...` → `kyy.oniym`)
+- [ ] Reverse resolver (`0x...` → `kyy.id` or any TLD name)
 - [ ] ERC-165 interface detection
 - [ ] Invariant tests (ownership, name expiry, funds)
 - [ ] Self-audit pass (Slither + Mythril)
 - [ ] Gas benchmarks vs ENS
 - [ ] Threat model in `/security`
 
-**Exit criteria:** Resolver supports ETH/SOL/BTC/Cosmos address types with test vectors. Security findings documented and addressed.
+**Exit criteria:** Resolver supports ETH/SOL/BTC/SUI/BNB address types with test vectors. Security findings documented and addressed.
 
 ### Week 4 — Indexer + API
 
@@ -67,13 +70,13 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 - [ ] Docker Compose for local dev
 - [ ] Deploy to Railway
 
-**Exit criteria:** `curl https://api.oniym.xyz/resolve/kyy.oniym` returns all chain addresses. P99 latency < 200ms.
+**Exit criteria:** `curl https://api.oniym.xyz/resolve/kyy.id` returns all chain addresses. P99 latency < 200ms.
 
 ### Week 5 — SDK
 
 **Theme:** Developer experience.
 
-- [ ] `@oniym/sdk` core — `resolve()`, `lookup()`, `register()`
+- [ ] `@oniym/sdk` full impl — `Oniym` class: `getName()`, `getAddress()`, `getAddresses()`, `register()`, `setAddress()`
 - [ ] `@oniym/react` — TanStack Query hooks
 - [ ] Generated TypeDoc site
 - [ ] Example Next.js and Expo apps
@@ -107,7 +110,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 - [ ] UI flow: "Prove you own this Solana address" → sign message in Phantom → submit proof
 - [ ] Test vectors for each chain
 
-**Exit criteria:** Someone with a Solana wallet can prove ownership and bind it to `kyy.oniym`.
+**Exit criteria:** Someone with a Solana wallet can prove ownership and bind it to `kyy.id` (or any TLD name).
 
 ### Week 8 — Launch
 
@@ -131,7 +134,7 @@ Explicitly out of scope for v1 but planned:
 
 - DAO governance token
 - Cross-chain name transfer (LayerZero)
-- Multiple TLDs (`.oniym.eth` via CCIP-Read)
+- Cross-TLD identity bundle (claim `kyy.*` across all TLDs in one tx)
 - Subname marketplace
 - ZK-based private names (Noir/Circom)
 - Mobile app

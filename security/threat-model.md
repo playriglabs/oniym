@@ -15,7 +15,7 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 
 - **Squatters** — register desirable names for resale
 - **Frontrunners** — sandwich registration txs for valuable names
-- **Phishers** — register visually similar names (`vitа𝗅ik.oniym` with Cyrillic)
+- **Phishers** — register visually similar names (`vitа𝗅ik.id` with Cyrillic)
 - **Protocol-level attackers** — exploit contract bugs
 - **Sequencer/L2 attackers** — censor or reorder transactions
 
@@ -23,11 +23,11 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 
 ### 1. Registration frontrunning
 
-**Attack:** Bot watches mempool for `register("vitalik", ...)` tx, submits same registration with higher gas.
+**Attack:** Bot watches mempool for `register("vitalik", "id", ...)` tx, submits same registration with higher gas.
 
 **Mitigation:** Commit-reveal scheme.
 
-1. User submits `commit(hash(name ‖ owner ‖ secret))` — name is not visible
+1. User submits `commit(hash(name ‖ tld ‖ owner ‖ secret))` — name is not visible
 2. 60-second minimum delay
 3. User submits `register(name, owner, secret, ...)` — contract verifies commit
 
@@ -45,7 +45,7 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 
 ### 3. Homograph attacks
 
-**Attack:** Register `vitalik.oniym` using Cyrillic `а` instead of Latin `a`, trick users into sending funds.
+**Attack:** Register `vitalik.id` using Cyrillic `а` instead of Latin `a`, trick users into sending funds.
 
 **Mitigation:**
 

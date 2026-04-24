@@ -2,13 +2,13 @@
 pragma solidity 0.8.28;
 
 /// @title IReverseRegistrar
-/// @notice Manages reverse resolution: "0x123... → kyy.oniym"
+/// @notice Manages reverse resolution: "0x123... → kyy.eth" (or any protocol TLD name)
 /// @dev Reverse records live at a special namespace `[hex-address].addr.reverse`
 ///      under the reverse-resolution TLD. This mirrors ENS's ReverseRegistrar.
 ///
 /// # Why reverse resolution matters
 ///
-/// Forward resolution answers: "What address should I send to for kyy.oniym?"
+/// Forward resolution answers: "What address should I send to for kyy.eth?"
 /// Reverse resolution answers: "What name should I display for 0x123...?"
 ///
 /// Without reverse resolution, dApps showing user addresses can't display
@@ -17,12 +17,12 @@ pragma solidity 0.8.28;
 /// # Trust model
 ///
 /// Reverse records are PERMISSIONLESS — anyone can claim "my address points
-/// to bob.oniym", even if they don't own bob.oniym. Therefore, dApps MUST
+/// to bob.eth", even if they don't own bob.eth. Therefore, dApps MUST
 /// always verify forward resolution matches:
 ///
-///   1. Read reverse: 0x123... → claims "kyy.oniym"
-///   2. Read forward: kyy.oniym → is address 0x123... in the addr list?
-///   3. Only if both match, display "kyy.oniym"
+///   1. Read reverse: 0x123... → claims "kyy.eth"
+///   2. Read forward: kyy.eth → is address 0x123... in the addr list?
+///   3. Only if both match, display "kyy.eth"
 ///
 /// This pattern is called "Reverse + Forward verification."
 interface IReverseRegistrar {

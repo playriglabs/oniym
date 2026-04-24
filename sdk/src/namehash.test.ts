@@ -27,26 +27,26 @@ describe("namehash", () => {
     });
 
     it("handles multi-level subdomains", () => {
-        // wallet.kyy.oniym should equal the step-by-step construction
-        const oniym = namehash("oniym");
-        const kyyOniym = makeNode(oniym, "kyy");
-        const walletKyyOniym = makeNode(kyyOniym, "wallet");
+        // wallet.kyy.eth should equal the step-by-step construction
+        const eth = namehash("eth");
+        const kyyEth = makeNode(eth, "kyy");
+        const walletKyyEth = makeNode(kyyEth, "wallet");
 
-        expect(namehash("wallet.kyy.oniym")).toBe(walletKyyOniym);
+        expect(namehash("wallet.kyy.eth")).toBe(walletKyyEth);
     });
 
     it("is deterministic", () => {
-        const a = namehash("kyy.oniym");
-        const b = namehash("kyy.oniym");
+        const a = namehash("kyy.eth");
+        const b = namehash("kyy.eth");
         expect(a).toBe(b);
     });
 });
 
 describe("makeNode", () => {
     it("matches full namehash for subdomain construction", () => {
-        const parent = namehash("oniym");
+        const parent = namehash("eth");
         const viaMakeNode = makeNode(parent, "kyy");
-        const viaNamehash = namehash("kyy.oniym");
+        const viaNamehash = namehash("kyy.eth");
 
         expect(viaMakeNode).toBe(viaNamehash);
     });

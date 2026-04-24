@@ -6,9 +6,9 @@ pragma solidity 0.8.28;
 /// @dev Reference: https://docs.ens.domains/ensip/1
 ///
 /// The namehash algorithm recursively hashes labels right-to-left:
-///   namehash('')              = 0x00...00
-///   namehash('oniym')         = keccak256(0x00...00 ‖ keccak256('oniym'))
-///   namehash('kyy.oniym')     = keccak256(namehash('oniym') ‖ keccak256('kyy'))
+///   namehash('')          = 0x00...00
+///   namehash('eth')       = keccak256(0x00...00 ‖ keccak256('eth'))
+///   namehash('kyy.eth')   = keccak256(namehash('eth') ‖ keccak256('kyy'))
 ///
 /// Input MUST be pre-normalized (lowercase, UTS-46). This library does not
 /// perform normalization — callers are responsible for passing valid input.
@@ -17,7 +17,7 @@ library Namehash {
     uint8 private constant DOT = 0x2e;
 
     /// @notice Computes the namehash of a dot-separated name
-    /// @param name The fully-qualified name (e.g. "kyy.oniym")
+    /// @param name The fully-qualified name (e.g. "kyy.eth")
     /// @return node The 32-byte namehash
     function namehash(string memory name) internal pure returns (bytes32 node) {
         bytes memory nameBytes = bytes(name);

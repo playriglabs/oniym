@@ -32,8 +32,9 @@ ENS solved this for Ethereum, but the crypto world is no longer single-chain. To
 
 **Oniym is a naming service built for the multichain era.**
 
-- Register `kyy.oniym` **once** on Base (~$5/year)
-- Map it to addresses on Ethereum, Solana, Bitcoin, Cosmos, and more
+- Choose your TLD: `.id`, `.one`, `.xyz`, `.wagmi`, `.degen` and 57 more — pick the one that fits your identity
+- Register `kyy.id` **once** on Base (~$5/year)
+- Map it to addresses on Ethereum, Solana, Bitcoin, Sui, BNB, and more — any TLD resolves all chains
 - Resolve from any chain via SDK, API, or CCIP-Read
 - Cryptographically verify non-EVM address ownership
 
@@ -76,7 +77,9 @@ oniym/
 ├── contracts/         # Solidity contracts (Foundry)
 │   ├── src/
 │   │   ├── Registry.sol
-│   │   ├── BaseRegistrar.sol
+│   │   ├── TLDManager.sol        # manages 62 web-style TLDs (.id .one .xyz .wagmi …)
+│   │   ├── TLDRegistrar.sol      # per-TLD ERC-721 registrar
+│   │   ├── RegistrarController.sol
 │   │   ├── PublicResolver.sol
 │   │   └── lib/Namehash.sol
 │   └── test/

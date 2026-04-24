@@ -40,15 +40,16 @@ Oniym consists of four layers:
         │   Indexer        │    │   Base L2        │
         │  ┌────────────┐  │    │  ┌────────────┐  │
         │  │ Ponder     │  │◄───┤  │ Registry   │  │
-        │  │ Postgres   │  │    │  │ Registrar  │  │
-        │  │ Redis      │  │    │  │ Resolver   │  │
-        │  └────────────┘  │    │  └────────────┘  │
-        └──────────────────┘    └──────────────────┘
+        │  │ Postgres   │  │    │  │ TLDManager │  │
+        │  │ Redis      │  │    │  │ Registrars │  │
+        │  └────────────┘  │    │  │ Resolver   │  │
+        └──────────────────┘    │  └────────────┘  │
+                                └──────────────────┘
 ```
 
 ## Contracts layer
 
-Three contracts, modeled after ENS with simplifications:
+Five contracts, modeled after ENS with simplifications and extended for multi-TLD (see ADR-007).
 
 ### Registry (`Registry.sol`)
 
@@ -58,34 +59,59 @@ The ownership tree. Each node (namehash) maps to:
 struct Record {
     address owner;      // Controls this node and subnodes
     address resolver;   // Where to look up data
-    uint64  expires;    // Unix timestamp (0 = permanent, e.g. for TLD)
+    uint64  expires;    // Unix timestamp (0 = permanent, e.g. for TLD roots)
 }
 mapping(bytes32 node => Record) records;
 ```
+
+TLD-agnostic by design — any TLD root node is just another `bytes32` in the same tree.
 
 Operations:
 - `setOwner(node, owner)` — transfer ownership
 - `setResolver(node, resolver)` — point at a resolver
 - `setSubnodeOwner(node, label, owner)` — create/reassign subnode
-- `owner(node) view returns (address)`
-- `resolver(node) view returns (address)`
+- `ownerOf(node) view returns (address)`
+- `resolverOf(node) view returns (address)`
 
-### Registrar (`BaseRegistrar.sol` + `ETHRegistrarController.sol`)
+### TLD Manager (`TLDManager.sol`)
 
-Issues `.oniym` names as ERC-721 NFTs. Registration uses commit-reveal:
+Protocol-owned contract that manages the live set of TLDs. Owns each TLD root node in the Registry.
 
 ```
-t=0   : user submits commit(keccak256(name ‖ owner ‖ secret))
-t=60s : user submits register(name, owner, secret, duration)
+Launch TLDs (62 total, web-style and chain-neutral, each ≤ 5 chars):
+  .id    .one   .me    .xyz   .web3  .io    .app   .dev   .onm   .go
+  .ape   .fud   .hodl  .fomo  .moon  .rekt  .wagmi .ngmi  .degen .whale
+  .buidl .dyor  .pump  .alpha .safu  .gm    .lfg   .ser   .fren  .goat
+  .cope  .pepe  .mint  .bear  .gas   .dao   .ath   .dex   .cex   .burn
+  .node  .swap  .yield .bag   .bags  .seed  .drop  .stake .pool  .wrap
+  .farm  .shill .xxx   .regs  .main  .test  .exit  .fair  .guh   .bots
+  .vcs   .keys
+```
+
+TLD choice is a pure identity preference — any TLD name resolves addresses for all supported chains (ETH, SOL, BTC, SUI, BNB). Chain resolution is driven by SLIP-0044 coin type in the resolver, not by TLD label.
+
+New TLDs are added via `addTld(label, registrar)` — no Registry or Resolver changes needed.
+
+### Registrar (`ITLDRegistrar.sol` per TLD)
+
+Each TLD gets its own registrar instance. Issues second-level names as ERC-721 NFTs. Registration uses commit-reveal:
+
+```
+t=0   : user submits commit(keccak256(name ‖ tld ‖ owner ‖ secret))
+t=60s : user submits register(name, tld, owner, secret, duration)
 t=60s : contract verifies commit exists and hash matches
         → mints NFT, sets registry record, charges fee
 ```
 
-This prevents frontrunning bots from stealing desirable names.
+This prevents frontrunning bots from stealing desirable names. The same flow works for any TLD.
+
+### Controller (`RegistrarController.sol`)
+
+Single controller that services all TLDs. `RegisterRequest` carries a `tld` field (namehash of the TLD label) so one contract handles `.id`, `.one`, `.wagmi`, and every other protocol TLD.
 
 ### Resolver (`PublicResolver.sol`)
 
-Stores the actual data per name:
+Stores the actual data per name node. TLD-agnostic — uses `bytes32 node` throughout:
 
 ```solidity
 // Multichain addresses (SLIP-0044 coinType)
@@ -100,6 +126,8 @@ mapping(bytes32 node => bytes) contenthash;
 
 `bytes` (not `address`) for addresses — required for non-EVM chains where addresses aren't 20 bytes (Solana: 32, Bitcoin: variable).
 
+**Key insight (Clusters-style):** TLD is an identity preference, not a chain restriction. A `.degen` name stores ETH, BTC, SOL, SUI, and BNB addresses in the same resolver node.
+
 ## Indexer layer
 
 Off-chain cache. Not source of truth — if the indexer lies, clients can verify against Base directly.
@@ -111,6 +139,7 @@ names
   id              (uuid, pk)
   node            (bytes32, unique)
   label           (text)
+  tld             (text, indexed)      -- e.g. "id", "one", "wagmi"
   owner           (address, indexed)
   resolver        (address)
   expires_at      (timestamp)
@@ -122,6 +151,12 @@ resolutions
   coin_type       (int, indexed)
   address         (bytes)
   updated_at      (timestamp)
+
+tlds
+  label           (text, pk)
+  node            (bytes32, unique)
+  registrar       (address)
+  active          (bool)
 
 events
   id              (uuid, pk)
@@ -142,23 +177,33 @@ Ponder handles this natively via block-level rollbacks. On reorg:
 
 ## SDK layer
 
-`@oniym/sdk` provides:
+`@oniym/sdk` exposes a Clusters-style API:
 
 ```typescript
-// Core
-resolve(name: string, chain: ChainId): Promise<string | null>
-lookup(address: string, chain: ChainId): Promise<string | null>
+import { Oniym } from "@oniym/sdk";
 
-// Writes (with a wallet client)
-register(name: string, duration: number, owner: Address): Promise<Hash>
-setAddress(name: string, chain: ChainId, address: string): Promise<Hash>
+const oniym = new Oniym();
 
-// Utilities
-namehash(name: string): Hex
-normalize(name: string): string  // UTS-46
+// Reverse: address → primary name (like clusters.getName)
+const name = await oniym.getName("0x123...");           // "kyy.id"
+
+// Forward: name → address on a specific chain
+const addr = await oniym.getAddress("kyy.id", "sol");   // "..."
+
+// All addresses for a name (multichain bundle)
+const all = await oniym.getAddresses("kyy.id");
+// { eth: "0x...", sol: "...", btc: "...", sui: "...", bnb: "..." }
+
+// Available TLDs
+const tlds = await oniym.getTLDs();
+// [{ label: "id", node: "0x...", active: true }, ...]
+
+// Writes (requires wallet)
+await oniym.register("kyy", "id", 365 * 86400, ownerAddress);
+await oniym.setAddress("kyy.id", "sol", solanaAddress);
 ```
 
-SDK tries in order:
+SDK resolution order:
 1. Indexer API (fast, typically <50ms)
 2. Direct Base RPC (trustless fallback)
 3. CCIP-Read gateway (for L1 compatibility)
@@ -168,8 +213,14 @@ SDK tries in order:
 ### Namehash
 ENSIP-1. Recursive keccak256, right-to-left label processing. See [`lib/Namehash.sol`](../contracts/src/lib/Namehash.sol).
 
+Example:
+```
+namehash("kyy.id") = keccak256(namehash("id") ‖ keccak256("kyy"))
+namehash("id")     = keccak256(0x00…00 ‖ keccak256("id"))
+```
+
 ### Commit-reveal
-Standard 60s-minimum-commit scheme to prevent frontrunning.
+Standard 60s-minimum-commit scheme to prevent frontrunning. Works identically across all TLDs.
 
 ### Non-EVM address proofs (week 7)
 
@@ -187,6 +238,7 @@ The signature is verified on-chain using ed25519. This prevents users from claim
 |----------------------|--------------------------------------------|-------------------------------|
 | Base sequencer       | Honest censorship resistance (short-term)  | Temporary censorship          |
 | Registry contract    | Code is correct (audited)                  | Catastrophic if buggy         |
+| TLDManager           | Owner multisig is honest                   | TLD activation/deactivation   |
 | Indexer              | Up and honest                              | Degraded UX, falls back to RPC|
 | CCIP-Read gateway    | Honest signing                             | L1 resolution fails           |
 | Ed25519 precompile   | Chain supports / library correct           | Solana binding fails          |

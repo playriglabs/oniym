@@ -9,9 +9,9 @@ import { concat, keccak256, stringToBytes, type Hex } from "viem";
  * @returns 32-byte namehash as 0x-prefixed hex
  *
  * @example
- * namehash('')            // 0x000...000
- * namehash('oniym')       // keccak256(0x0 ‖ keccak256('oniym'))
- * namehash('kyy.oniym')   // keccak256(namehash('oniym') ‖ keccak256('kyy'))
+ * namehash('')          // 0x000...000
+ * namehash('eth')       // keccak256(0x0 ‖ keccak256('eth'))
+ * namehash('kyy.eth')   // keccak256(namehash('eth') ‖ keccak256('kyy'))
  */
 export function namehash(name: string): Hex {
     let node: Hex = `0x${"00".repeat(32)}`;
