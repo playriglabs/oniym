@@ -1,0 +1,190 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 620" width="860" height="620" font-family="'SF Mono', 'Fira Code', 'Consolas', monospace">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f6feb"/>
+      <stop offset="100%" style="stop-color:#0d4a9e"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#5b21b6"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#16a34a"/>
+      <stop offset="100%" style="stop-color:#166534"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c"/>
+      <stop offset="100%" style="stop-color:#9a3412"/>
+    </linearGradient>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#1f6feb"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#4a5568"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#16a34a"/>
+    </marker>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="860" height="620" fill="url(#bgGrad)" rx="12"/>
+
+  <!-- Grid lines (subtle) -->
+  <line x1="0" y1="200" x2="860" y2="200" stroke="#21262d" stroke-width="1" stroke-dasharray="4,6"/>
+  <line x1="0" y1="330" x2="860" y2="330" stroke="#21262d" stroke-width="1" stroke-dasharray="4,6"/>
+  <line x1="0" y1="460" x2="860" y2="460" stroke="#21262d" stroke-width="1" stroke-dasharray="4,6"/>
+
+  <!-- Title -->
+  <text x="430" y="34" text-anchor="middle" font-size="18" font-weight="700" fill="#f0f6fc" letter-spacing="1">ONIYM — System Architecture</text>
+  <text x="430" y="52" text-anchor="middle" font-size="11" fill="#8b949e">One name · All chains · Base L2</text>
+
+  <!-- ══════════════════ LAYER 1: Users ══════════════════ -->
+  <rect x="200" y="68" width="460" height="46" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="430" y="87" text-anchor="middle" font-size="10" font-weight="600" fill="#8b949e" letter-spacing="2">LAYER 1</text>
+  <text x="430" y="103" text-anchor="middle" font-size="13" font-weight="700" fill="#f0f6fc">Users &amp; Developers</text>
+
+  <!-- Down arrows from Users -->
+  <line x1="280" y1="114" x2="200" y2="154" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowGray)"/>
+  <line x1="430" y1="114" x2="430" y2="154" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowGray)"/>
+  <line x1="580" y1="114" x2="660" y2="154" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowGray)"/>
+
+  <!-- ══════════════════ LAYER 2: Client Apps ══════════════════ -->
+  <!-- oniym.xyz -->
+  <rect x="50" y="158" width="190" height="86" rx="8" fill="#0d2240" stroke="#1f6feb" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="50" y="158" width="190" height="22" rx="8" fill="url(#blueGrad)"/>
+  <rect x="50" y="172" width="190" height="8" fill="url(#blueGrad)"/>
+  <text x="145" y="172" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="1">FRONTEND</text>
+  <text x="145" y="197" text-anchor="middle" font-size="14" font-weight="800" fill="#79c0ff">oniym.xyz</text>
+  <text x="145" y="214" text-anchor="middle" font-size="10" fill="#8b949e">Next.js 15 · App Router</text>
+  <text x="145" y="229" text-anchor="middle" font-size="10" fill="#8b949e">Privy · IPFS</text>
+
+  <!-- @oniym/sdk -->
+  <rect x="335" y="158" width="190" height="86" rx="8" fill="#1a0d3a" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="335" y="158" width="190" height="22" rx="8" fill="url(#purpleGrad)"/>
+  <rect x="335" y="172" width="190" height="8" fill="url(#purpleGrad)"/>
+  <text x="430" y="172" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="1">SDK</text>
+  <text x="430" y="197" text-anchor="middle" font-size="14" font-weight="800" fill="#d2a8ff">@oniym/sdk</text>
+  <text x="430" y="214" text-anchor="middle" font-size="10" fill="#8b949e">TypeScript · Viem</text>
+  <text x="430" y="229" text-anchor="middle" font-size="10" fill="#8b949e">getName · getAddress · register</text>
+
+  <!-- Third-party dApps -->
+  <rect x="620" y="158" width="190" height="86" rx="8" fill="#1a1a0d" stroke="#d29922" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="620" y="158" width="190" height="22" rx="8" fill="#5c4a00"/>
+  <rect x="620" y="172" width="190" height="8" fill="#5c4a00"/>
+  <text x="715" y="172" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="1">THIRD-PARTY</text>
+  <text x="715" y="197" text-anchor="middle" font-size="14" font-weight="800" fill="#e3b341">dApps &amp; Wallets</text>
+  <text x="715" y="214" text-anchor="middle" font-size="10" fill="#8b949e">CCIP-Read compatible</text>
+  <text x="715" y="229" text-anchor="middle" font-size="10" fill="#8b949e">ENS-style resolution</text>
+
+  <!-- Down arrows to gateway -->
+  <line x1="145" y1="244" x2="330" y2="293" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <line x1="430" y1="244" x2="430" y2="293" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <line x1="715" y1="244" x2="530" y2="293" stroke="#4a5568" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <!-- ══════════════════ LAYER 3: Resolution Gateway ══════════════════ -->
+  <rect x="100" y="297" width="660" height="88" rx="8" fill="#0d2613" stroke="#16a34a" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="100" y="297" width="660" height="24" rx="8" fill="url(#greenGrad)"/>
+  <rect x="100" y="313" width="660" height="8" fill="url(#greenGrad)"/>
+  <text x="430" y="313" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="2">RESOLUTION GATEWAY</text>
+
+  <!-- Three mode boxes inside gateway -->
+  <rect x="118" y="325" width="192" height="48" rx="6" fill="#0d1f0d" stroke="#238636" stroke-width="1"/>
+  <text x="214" y="341" text-anchor="middle" font-size="9" font-weight="700" fill="#3fb950" letter-spacing="1">MODE 1</text>
+  <text x="214" y="357" text-anchor="middle" font-size="11" font-weight="600" fill="#56d364">Direct Base RPC</text>
+  <text x="214" y="370" text-anchor="middle" font-size="9" fill="#6e7681">trustless · on-chain</text>
+
+  <rect x="334" y="325" width="192" height="48" rx="6" fill="#0d1f0d" stroke="#238636" stroke-width="1"/>
+  <text x="430" y="341" text-anchor="middle" font-size="9" font-weight="700" fill="#3fb950" letter-spacing="1">MODE 2</text>
+  <text x="430" y="357" text-anchor="middle" font-size="11" font-weight="600" fill="#56d364">Indexer API</text>
+  <text x="430" y="370" text-anchor="middle" font-size="9" fill="#6e7681">fast reads · &lt; 50ms</text>
+
+  <rect x="550" y="325" width="192" height="48" rx="6" fill="#0d1f0d" stroke="#238636" stroke-width="1"/>
+  <text x="646" y="341" text-anchor="middle" font-size="9" font-weight="700" fill="#3fb950" letter-spacing="1">MODE 3</text>
+  <text x="646" y="357" text-anchor="middle" font-size="11" font-weight="600" fill="#56d364">CCIP-Read</text>
+  <text x="646" y="370" text-anchor="middle" font-size="9" fill="#6e7681">L1 bridge · ENS compat</text>
+
+  <!-- Down arrows from gateway to layer 4 -->
+  <line x1="260" y1="385" x2="210" y2="432" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <line x1="600" y1="385" x2="650" y2="432" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Bidirectional arrow between indexer and Base -->
+  <line x1="385" y1="498" x2="455" y2="498" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="455,494 463,498 455,502" fill="#4a5568"/>
+  <polygon points="385,494 377,498 385,502" fill="#4a5568"/>
+  <text x="420" y="492" text-anchor="middle" font-size="8" fill="#6e7681">indexes</text>
+
+  <!-- ══════════════════ LAYER 4: Infrastructure ══════════════════ -->
+  <!-- Indexer box -->
+  <rect x="50" y="436" width="310" height="148" rx="8" fill="#1a0d00" stroke="#ea580c" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="50" y="436" width="310" height="24" rx="8" fill="url(#orangeGrad)"/>
+  <rect x="50" y="452" width="310" height="8" fill="url(#orangeGrad)"/>
+  <text x="205" y="452" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="2">INDEXER LAYER</text>
+
+  <rect x="68" y="466" width="130" height="36" rx="5" fill="#2d1a00" stroke="#7c3a0a" stroke-width="1"/>
+  <text x="133" y="481" text-anchor="middle" font-size="10" font-weight="600" fill="#fb923c">Ponder</text>
+  <text x="133" y="496" text-anchor="middle" font-size="9" fill="#6e7681">event indexer</text>
+
+  <rect x="212" y="466" width="130" height="36" rx="5" fill="#2d1a00" stroke="#7c3a0a" stroke-width="1"/>
+  <text x="277" y="481" text-anchor="middle" font-size="10" font-weight="600" fill="#fb923c">Postgres</text>
+  <text x="277" y="496" text-anchor="middle" font-size="9" fill="#6e7681">names · resolutions</text>
+
+  <rect x="68" y="510" width="130" height="36" rx="5" fill="#2d1a00" stroke="#7c3a0a" stroke-width="1"/>
+  <text x="133" y="525" text-anchor="middle" font-size="10" font-weight="600" fill="#fb923c">Redis</text>
+  <text x="133" y="540" text-anchor="middle" font-size="9" fill="#6e7681">cache layer</text>
+
+  <rect x="212" y="510" width="130" height="36" rx="5" fill="#2d1a00" stroke="#7c3a0a" stroke-width="1"/>
+  <text x="277" y="525" text-anchor="middle" font-size="10" font-weight="600" fill="#fb923c">Hono REST API</text>
+  <text x="277" y="540" text-anchor="middle" font-size="9" fill="#6e7681">/resolve · /lookup</text>
+
+  <text x="205" y="572" text-anchor="middle" font-size="9" fill="#6e7681">Deploy: Railway</text>
+
+  <!-- Base L2 box -->
+  <rect x="500" y="436" width="310" height="148" rx="8" fill="#00101a" stroke="#1f6feb" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="500" y="436" width="310" height="24" rx="8" fill="url(#blueGrad)"/>
+  <rect x="500" y="452" width="310" height="8" fill="url(#blueGrad)"/>
+  <text x="655" y="452" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" letter-spacing="2">BASE L2 — CONTRACTS</text>
+
+  <rect x="518" y="466" width="130" height="36" rx="5" fill="#001c3a" stroke="#1158a3" stroke-width="1"/>
+  <text x="583" y="481" text-anchor="middle" font-size="10" font-weight="600" fill="#79c0ff">Registry.sol</text>
+  <text x="583" y="496" text-anchor="middle" font-size="9" fill="#6e7681">node → owner/resolver</text>
+
+  <rect x="662" y="466" width="130" height="36" rx="5" fill="#001c3a" stroke="#1158a3" stroke-width="1"/>
+  <text x="727" y="481" text-anchor="middle" font-size="10" font-weight="600" fill="#79c0ff">TLDManager.sol</text>
+  <text x="727" y="496" text-anchor="middle" font-size="9" fill="#6e7681">62 TLDs · .id .one…</text>
+
+  <rect x="518" y="510" width="130" height="36" rx="5" fill="#001c3a" stroke="#1158a3" stroke-width="1"/>
+  <text x="583" y="525" text-anchor="middle" font-size="10" font-weight="600" fill="#79c0ff">TLDRegistrar.sol</text>
+  <text x="583" y="540" text-anchor="middle" font-size="9" fill="#6e7681">ERC-721 · commit-reveal</text>
+
+  <rect x="662" y="510" width="130" height="36" rx="5" fill="#001c3a" stroke="#1158a3" stroke-width="1"/>
+  <text x="727" y="525" text-anchor="middle" font-size="10" font-weight="600" fill="#79c0ff">PublicResolver.sol</text>
+  <text x="727" y="540" text-anchor="middle" font-size="9" fill="#6e7681">SLIP-0044 · multichain</text>
+
+  <text x="655" y="572" text-anchor="middle" font-size="9" fill="#6e7681">Deploy: Base Mainnet</text>
+
+  <!-- Footer / legend -->
+  <line x1="50" y1="598" x2="810" y2="598" stroke="#21262d" stroke-width="1"/>
+  <circle cx="76" cy="611" r="4" fill="#16a34a"/>
+  <text x="86" y="615" font-size="9" fill="#6e7681">trustless path</text>
+  <circle cx="180" cy="611" r="4" fill="#4a5568"/>
+  <text x="190" y="615" font-size="9" fill="#6e7681">fast path</text>
+  <circle cx="260" cy="611" r="4" fill="#8b5cf6"/>
+  <text x="270" y="615" font-size="9" fill="#6e7681">sdk</text>
+  <text x="710" y="615" text-anchor="end" font-size="9" fill="#30363d">oniym.xyz · v1</text>
+  <text x="810" y="615" text-anchor="end" font-size="9" fill="#30363d">2026</text>
+</svg>

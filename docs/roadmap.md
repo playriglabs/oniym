@@ -11,7 +11,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 ## Timeline
 
-### Week 1 — Foundations ⏳ *in progress*
+### Week 1 — Foundations ✅ *complete*
 
 **Theme:** Prove cryptographic foundations, establish CI and project structure.
 
@@ -23,9 +23,9 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 - [x] ADRs 001-007 (001-004 foundations, 005 branding, 006 pricing, 007 multi-TLD pivot)
 - [x] Multi-TLD interfaces (ITLDManager, ITLDRegistrar, IRegistrarController)
 - [x] SDK skeleton — `Oniym` class with Clusters-style API stubs
-- [ ] Architecture diagram (SVG)
-- [ ] Slither baseline (run locally: `pnpm contracts:slither`)
-- [ ] Domain + npm scope + GitHub org secured
+- [x] Architecture diagram (SVG)
+- [x] Slither baseline (run locally: `pnpm contracts:slither`)
+- [x] Domain + npm scope + GitHub org secured
 
 **Exit criteria:** Public repo green on CI, namehash parity test passes, ADRs merged.
 
@@ -92,7 +92,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 - [ ] Search + availability check
 - [ ] Register flow with commit-reveal UX
 - [ ] Manage page (addresses, avatar, text records)
-- [ ] Dynamic Labs wallet connection
+- [ ] Privy wallet connection
 - [ ] IPFS avatar upload
 - [ ] Mobile responsive, dark mode
 - [ ] Deploy to Vercel at `oniym.xyz`
