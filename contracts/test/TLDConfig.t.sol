@@ -12,7 +12,7 @@ import { Namehash } from "../src/lib/Namehash.sol";
 /// must be reflected in both files.
 contract TLDConfigTest is Test {
     // Must match ITLDManager.maxTldCount() and sdk MAX_TLD_COUNT
-    uint256 private constant MAX_TLD_COUNT = 62;
+    uint256 private constant MAX_TLD_COUNT = 65;
 
     // Must match ITLDManager.maxTldLabelLength() and sdk MAX_TLD_LENGTH
     uint256 private constant MAX_TLD_LABEL_LENGTH = 5;
@@ -24,10 +24,12 @@ contract TLDConfigTest is Test {
         tlds.push("id");
         tlds.push("one");
         tlds.push("me");
+        tlds.push("co");
         // Web3 / tech signals
         tlds.push("xyz");
         tlds.push("web3");
         tlds.push("io");
+        tlds.push("pro");
         tlds.push("app");
         tlds.push("dev");
         tlds.push("onm");
@@ -48,6 +50,7 @@ contract TLDConfigTest is Test {
         tlds.push("pump");
         tlds.push("alpha");
         tlds.push("safu");
+        tlds.push("l2");
         tlds.push("gm");
         tlds.push("lfg");
         tlds.push("ser");
@@ -55,6 +58,7 @@ contract TLDConfigTest is Test {
         tlds.push("goat");
         tlds.push("cope");
         tlds.push("pepe");
+        tlds.push("wen");
         // Finance / DeFi
         tlds.push("mint");
         tlds.push("bear");
@@ -85,7 +89,6 @@ contract TLDConfigTest is Test {
         tlds.push("fair");
         tlds.push("guh");
         tlds.push("bots");
-        tlds.push("vcs");
         tlds.push("keys");
     }
 
@@ -102,7 +105,7 @@ contract TLDConfigTest is Test {
     }
 
     function test_constants() public pure {
-        assertEq(MAX_TLD_COUNT, 62);
+        assertEq(MAX_TLD_COUNT, 65);
         assertEq(MAX_TLD_LABEL_LENGTH, 5);
     }
 

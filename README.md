@@ -92,12 +92,6 @@ oniym/
 └── examples/          # Integration examples
 ```
 
-## Status
-
-**Week 1** — Foundations (in progress)
-
-See the [roadmap](./docs/roadmap.md).
-
 ## Principles
 
 1. **Fully decentralized** — ownership is on-chain, period

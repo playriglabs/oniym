@@ -15,7 +15,7 @@ export const COIN_TYPES = {
 export type SupportedChain = keyof typeof COIN_TYPES;
 
 /** Maximum number of TLDs the protocol will ever register (enforced on-chain in ITLDManager) */
-export const MAX_TLD_COUNT = 62;
+export const MAX_TLD_COUNT = 65;
 
 /** Maximum character length of a TLD label, excluding the leading dot */
 export const MAX_TLD_LENGTH = 5;
@@ -26,24 +26,79 @@ export const MAX_TLD_LENGTH = 5;
  * Any TLD name resolves to ALL supported chain addresses. TLD choice is
  * purely about identity preference, not chain restriction.
  *
- * Capped at MAX_TLD_COUNT (62). Each label is ≤ MAX_TLD_LENGTH (5) chars.
+ * Capped at MAX_TLD_COUNT (65). Each label is ≤ MAX_TLD_LENGTH (5) chars.
  */
 export const SUPPORTED_TLDS = [
     // General identity
-    "id", "one", "me",
+    "id",
+    "one",
+    "me",
+    "co",
     // Web3 / tech signals
-    "xyz", "web3", "io", "app", "dev", "onm", "go",
+    "xyz",
+    "web3",
+    "io",
+    "pro",
+    "app",
+    "dev",
+    "onm",
+    "go",
     // Crypto culture
-    "ape", "fud", "hodl", "fomo", "moon", "rekt", "wagmi", "ngmi",
-    "degen", "whale", "buidl", "dyor", "pump", "alpha", "safu",
-    "gm", "lfg", "ser", "fren", "goat", "cope", "pepe",
+    "ape",
+    "fud",
+    "hodl",
+    "fomo",
+    "moon",
+    "rekt",
+    "wagmi",
+    "ngmi",
+    "degen",
+    "whale",
+    "buidl",
+    "dyor",
+    "pump",
+    "alpha",
+    "safu",
+    "l2",
+    "gm",
+    "lfg",
+    "ser",
+    "fren",
+    "goat",
+    "cope",
+    "pepe",
+    "wen",
     // Finance / DeFi
-    "mint", "bear", "gas", "dao", "ath", "dex", "cex",
-    "burn", "node", "swap", "yield", "bag", "bags", "seed",
-    "drop", "stake", "pool", "wrap", "farm", "shill",
+    "mint",
+    "bear",
+    "gas",
+    "dao",
+    "ath",
+    "dex",
+    "cex",
+    "burn",
+    "node",
+    "swap",
+    "yield",
+    "bag",
+    "bags",
+    "seed",
+    "drop",
+    "stake",
+    "pool",
+    "wrap",
+    "farm",
+    "shill",
     // Misc
-    "xxx", "regs", "main", "test", "exit", "fair",
-    "guh", "bots", "vcs", "keys",
+    "xxx",
+    "regs",
+    "main",
+    "test",
+    "exit",
+    "fair",
+    "guh",
+    "bots",
+    "keys",
 ] as const;
 export type SupportedTLD = (typeof SUPPORTED_TLDS)[number];
 

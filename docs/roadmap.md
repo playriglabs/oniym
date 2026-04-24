@@ -29,17 +29,17 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** Public repo green on CI, namehash parity test passes, ADRs merged.
 
-### Week 2 — Core contracts
+### Week 2 — Core contracts ✅ *complete*
 
 **Theme:** Ownership layer. Multi-TLD names as NFTs, commit-reveal registration.
 
-- [ ] `Registry.sol` — node → owner/resolver/expires mapping
-- [ ] `TLDManager.sol` — protocol-owned manager for 62 web-style TLDs (`.id`, `.one`, `.wagmi`, …)
-- [ ] `TLDRegistrar.sol` — ERC-721 registrar (one instance per TLD)
-- [ ] `PriceOracle.sol` — Chainlink ETH/USD, flat-rate pricing
-- [ ] `RegistrarController.sol` — TLD-agnostic commit-reveal registration flow
-- [ ] Full unit tests + fuzz tests
-- [ ] Deploy initial TLDs to Base Sepolia
+- [x] `Registry.sol` — node → owner/resolver/expires mapping
+- [x] `TLDManager.sol` — protocol-owned manager for 62 web-style TLDs (`.id`, `.one`, `.wagmi`, …)
+- [x] `TLDRegistrar.sol` — ERC-721 registrar (one instance per TLD)
+- [x] `PriceOracle.sol` — Chainlink ETH/USD, flat-rate pricing
+- [x] `RegistrarController.sol` — TLD-agnostic commit-reveal registration flow
+- [x] Full unit tests + fuzz tests
+- [x] Deploy initial TLDs to Base Sepolia
 
 **Exit criteria:** End-to-end registration works on Base Sepolia. `forge test` passes with >95% coverage.
 
