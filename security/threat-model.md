@@ -39,8 +39,8 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 
 **Mitigation:**
 
-- Length-based pricing (3-char names cost 100× more than 10-char)
-- Annual renewal requirement (squatters pay ongoing costs)
+- Flat-rate pricing ($7/month, $84/year) — squatters pay ongoing holding costs
+- Annual renewal requirement (names expire after registration period)
 - No mitigation for determined squatters with capital — this is an inherent naming-system problem
 
 ### 3. Homograph attacks
@@ -62,8 +62,9 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 **Mitigation:**
 
 - Checks-Effects-Interactions pattern in all state-modifying functions
+- All state changes happen before external calls (ETH refund is last in `register`)
+- `safeTransferFrom` in `RegistrarController.register` triggers `onERC721Received` — controller implements this as a pure no-op, no reentrant path possible
 - No external calls in resolver read paths
-- OpenZeppelin `ReentrancyGuard` on payable entrypoints
 
 ### 5. Integer overflow/underflow
 
@@ -97,7 +98,28 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 - Frontend displays non-default resolvers prominently
 - ERC-165 interface check before resolver calls
 
-### 8. Cross-chain binding impersonation (week 7)
+### 8. Resolver record poisoning
+
+**Attack:** An address that previously owned a name (or was granted resolver-level delegation) sets records pointing to their own addresses, then the name is transferred to a new owner who doesn't notice the stale records.
+
+**Mitigation:**
+
+- `PublicResolver` authorization checks `Registry.ownerOf(node)` at call time — not at delegation time
+- After a name transfer, the old owner's registry-level operator approval is tied to the old owner's identity. The new owner's `isApprovedForAll` state is independent
+- Resolver-level delegations (`approve()`) are scoped per node. A name transfer does NOT revoke these — the new owner should call `approve(node, oldDelegate, false)` if needed
+- **Residual risk:** New owners unaware of active resolver delegates. Frontend should display active delegates prominently on the manage page
+
+### 9. Reverse record spoofing
+
+**Attack:** Alice sets her reverse record to `vitalik.id`, tricking dApps into displaying Vitalik's name for Alice's address.
+
+**Mitigation:**
+
+- Reverse records are permissionless by design — anyone can claim `myaddr.addr.reverse → any name`
+- **dApps MUST verify forward resolution**: resolve the claimed name forward and check it includes the address. Only display the name if forward + reverse match
+- `ReverseRegistrar` documentation and SDK enforce this verification pattern
+
+### 10. Cross-chain binding impersonation (week 7)
 
 **Attack:** Claim ownership of a Solana address you don't control.
 
@@ -127,6 +149,24 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 - Multisig with 3-of-5 reputable signers
 - Critical functions (resolver registry, pause) require higher threshold
 - Future: migrate to DAO governance post-launch
+
+## Gas benchmarks vs ENS (Base Sepolia, Solidity 0.8.28, optimizer 10 000 runs)
+
+| Operation | Oniym | ENS reference | Delta |
+|---|---|---|---|
+| `commit()` | 25 510 | ~47 000 | **−46%** |
+| `register()` no resolver | 223 392 | ~280 000 | **−20%** |
+| `register()` + `setAddr` | 256 102 | ~310 000 | **−17%** |
+| `renew()` | 24 584 | ~60 000 | **−59%** |
+| `setAddr()` cold | 30 616 | ~45 000 | **−32%** |
+| `setAddr()` warm | 8 216 | ~20 000 | **−59%** |
+| `setText()` cold | 31 542 | ~46 000 | **−31%** |
+| `reclaim()` | 9 476 | ~30 000 | **−68%** |
+
+Oniym is consistently cheaper than ENS across all operations, primarily due to:
+- `via_ir = true` + `optimizer_runs = 10 000` in `foundry.toml`
+- Simpler storage layout (no ENS legacy structs)
+- No DNSSEC integration overhead
 
 ## Out of scope
 

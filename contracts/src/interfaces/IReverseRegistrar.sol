@@ -72,7 +72,7 @@ interface IReverseRegistrar {
 
     /// @notice Compute the reverse namehash for an address
     /// @dev node = namehash("[lowercase-hex-without-0x].addr.reverse")
-    function node(address addr) external pure returns (bytes32);
+    function node(address addr) external view returns (bytes32);
 
     /// @notice The default resolver used when none is explicitly set
     function defaultResolver() external view returns (address);
