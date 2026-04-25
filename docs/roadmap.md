@@ -1,17 +1,17 @@
 # Oniym Roadmap
 
-An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates — if a week slips, scope is cut rather than extended.
+An 8-sprint journey from zero to mainnet launch. Deliverables are hard gates — if a sprint slips, scope is cut rather than extended.
 
 ## Principles
 
 1. **Ship over polish** — a working end-to-end slice beats a gold-plated partial feature
-2. **Weekly deliverables are non-negotiable** — if behind at week-end, cut scope
+2. **Deliverables are non-negotiable** — if behind at sprint-end, cut scope
 3. **Decentralize ownership, pragmatize reads** — on-chain state is canonical, off-chain indexers are optimizations
 4. **ENS-compatible where sensible** — borrow interfaces, don't reinvent
 
 ## Timeline
 
-### Week 1 — Foundations ✅ *complete*
+### 1 — Foundations ✅ *complete*
 
 **Theme:** Prove cryptographic foundations, establish CI and project structure.
 
@@ -29,7 +29,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** Public repo green on CI, namehash parity test passes, ADRs merged.
 
-### Week 2 — Core contracts ✅ *complete*
+### 2 — Core contracts ✅ *complete*
 
 **Theme:** Ownership layer. Multi-TLD names as NFTs, commit-reveal registration.
 
@@ -43,7 +43,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** End-to-end registration works on Base Sepolia. `forge test` passes with >95% coverage.
 
-### Week 3 — Resolvers + security pass ✅ *complete*
+### 3 — Resolvers + security pass ✅ *complete*
 
 **Theme:** The multichain payload. Slither/Mythril self-audit.
 
@@ -57,7 +57,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** Resolver supports ETH/SOL/BTC/SUI/BNB address types with test vectors. Security findings documented and addressed.
 
-### Week 4 — Indexer + API
+### 4 — Indexer + API
 
 **Theme:** Fast reads from anywhere.
 
@@ -72,7 +72,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** `curl https://api.oniym.xyz/resolve/kyy.id` returns all chain addresses. P99 latency < 200ms.
 
-### Week 5 — SDK
+### 5 — SDK
 
 **Theme:** Developer experience.
 
@@ -84,7 +84,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** `pnpm add @oniym/sdk` works, docs site live, 2 working examples.
 
-### Week 6 — Frontend
+### 6 — Frontend
 
 **Theme:** The product users actually touch.
 
@@ -99,7 +99,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** A non-developer can register a name without help.
 
-### Week 7 — "Oh damn" feature
+### 7 — "Oh damn" feature
 
 **Theme:** Cryptographic depth. Chosen: **non-EVM reverse resolution via signature verification.**
 
@@ -112,7 +112,7 @@ An 8-week sprint from zero to mainnet launch. Weekly deliverables are hard gates
 
 **Exit criteria:** Someone with a Solana wallet can prove ownership and bind it to `kyy.id` (or any TLD name).
 
-### Week 8 — Launch
+### 8 — Launch
 
 **Theme:** Real humans use real product.
 
@@ -142,7 +142,7 @@ Explicitly out of scope for v1 but planned:
 
 ## Cutting scope
 
-If any week is at risk, cut in this priority order:
+If any sprint is at risk, cut in this priority order:
 
 1. Gas optimization pass (defer to v1.1)
 2. GraphQL API (REST is enough)
