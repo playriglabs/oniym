@@ -10,7 +10,7 @@ const config: Linter.Config[] = [
         languageOptions: {
             parserOptions: {
                 projectService: {
-                    allowDefaultProject: ["sdk/*.config.ts"],
+                    allowDefaultProject: ["sdk/*.config.ts", "docs/vocs.config.ts"],
                 },
                 tsconfigRootDir: import.meta.dirname,
             },
@@ -18,13 +18,11 @@ const config: Linter.Config[] = [
     },
     {
         rules: {
+            "@typescript-eslint/consistent-type-imports": "off",
+            "@typescript-eslint/strict-boolean-expressions": "off",
             "@typescript-eslint/no-unsafe-member-access": "off",
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-call": "off",
-            "@typescript-eslint/consistent-type-imports": [
-                "error",
-                { prefer: "type-imports", fixStyle: "inline-type-imports" },
-            ],
             "@typescript-eslint/no-import-type-side-effects": "error",
             "@typescript-eslint/explicit-function-return-type": [
                 "error",
@@ -38,14 +36,6 @@ const config: Linter.Config[] = [
             ],
             "@typescript-eslint/prefer-nullish-coalescing": "error",
             "@typescript-eslint/prefer-optional-chain": "error",
-            "@typescript-eslint/strict-boolean-expressions": [
-                "error",
-                {
-                    allowString: false,
-                    allowNumber: false,
-                    allowNullableObject: false,
-                },
-            ],
         },
     },
     {

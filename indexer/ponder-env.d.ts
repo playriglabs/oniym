@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
 /// <reference types="ponder/virtual" />
 
 declare module "ponder:internal" {

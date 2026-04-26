@@ -134,13 +134,13 @@ describe("Oniym.namehash / labelhash / makeNode", () => {
 describe("Oniym.getTLDs", () => {
     const oniym = new Oniym();
 
-    it("returns exactly MAX_TLD_COUNT TLDs", async () => {
-        const tlds = await oniym.getTLDs();
+    it("returns exactly MAX_TLD_COUNT TLDs", () => {
+        const tlds = oniym.getTLDs();
         expect(tlds).toHaveLength(MAX_TLD_COUNT);
     });
 
-    it("each TLD has the correct shape", async () => {
-        const tlds = await oniym.getTLDs();
+    it("each TLD has the correct shape", () => {
+        const tlds = oniym.getTLDs();
         for (const tld of tlds) {
             expect(tld.label).toBeTruthy();
             expect(tld.node).toMatch(/^0x[0-9a-f]{64}$/);
@@ -148,14 +148,14 @@ describe("Oniym.getTLDs", () => {
         }
     });
 
-    it("TLD labels match SUPPORTED_TLDS", async () => {
-        const tlds = await oniym.getTLDs();
+    it("TLD labels match SUPPORTED_TLDS", () => {
+        const tlds = oniym.getTLDs();
         const labels = tlds.map((t) => t.label);
         expect(labels).toEqual([...SUPPORTED_TLDS]);
     });
 
-    it("all TLD nodes are distinct", async () => {
-        const tlds = await oniym.getTLDs();
+    it("all TLD nodes are distinct", () => {
+        const tlds = oniym.getTLDs();
         const nodes = new Set(tlds.map((t) => t.node));
         expect(nodes.size).toBe(tlds.length);
     });
@@ -192,7 +192,12 @@ describe("Oniym resolution (mocked fetch)", () => {
     it("getName returns name from reverse lookup", async () => {
         vi.mocked(fetch).mockResolvedValue(
             new Response(
-                JSON.stringify({ address: "0x123", name: "kyy.web3", reverseNode: "0xabc", verified: false }),
+                JSON.stringify({
+                    address: "0x123",
+                    name: "kyy.web3",
+                    reverseNode: "0xabc",
+                    verified: false,
+                }),
                 { status: 200, headers: { "content-type": "application/json" } },
             ),
         );
