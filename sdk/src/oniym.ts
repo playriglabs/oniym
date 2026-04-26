@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import {
     createPublicClient,
     http,
@@ -39,15 +41,71 @@ export const MAX_TLD_COUNT = 65;
 export const MAX_TLD_LENGTH = 5;
 
 export const SUPPORTED_TLDS = [
-    "id", "one", "me", "co",
-    "xyz", "web3", "io", "pro", "app", "dev", "onm", "go",
-    "ape", "fud", "hodl", "fomo", "moon", "rekt", "wagmi", "ngmi",
-    "degen", "whale", "buidl", "dyor", "pump", "alpha", "safu", "l2",
-    "gm", "lfg", "ser", "fren", "goat", "cope", "pepe", "wen",
-    "mint", "bear", "gas", "dao", "ath", "dex", "cex", "burn",
-    "node", "swap", "yield", "bag", "bags", "seed", "drop", "stake",
-    "pool", "wrap", "farm", "shill",
-    "xxx", "regs", "main", "test", "exit", "fair", "guh", "bots", "keys",
+    "id",
+    "one",
+    "me",
+    "co",
+    "xyz",
+    "web3",
+    "io",
+    "pro",
+    "app",
+    "dev",
+    "onm",
+    "go",
+    "ape",
+    "fud",
+    "hodl",
+    "fomo",
+    "moon",
+    "rekt",
+    "wagmi",
+    "ngmi",
+    "degen",
+    "whale",
+    "buidl",
+    "dyor",
+    "pump",
+    "alpha",
+    "safu",
+    "l2",
+    "gm",
+    "lfg",
+    "ser",
+    "fren",
+    "goat",
+    "cope",
+    "pepe",
+    "wen",
+    "mint",
+    "bear",
+    "gas",
+    "dao",
+    "ath",
+    "dex",
+    "cex",
+    "burn",
+    "node",
+    "swap",
+    "yield",
+    "bag",
+    "bags",
+    "seed",
+    "drop",
+    "stake",
+    "pool",
+    "wrap",
+    "farm",
+    "shill",
+    "xxx",
+    "regs",
+    "main",
+    "test",
+    "exit",
+    "fair",
+    "guh",
+    "bots",
+    "keys",
 ] as const;
 
 export type SupportedTLD = (typeof SUPPORTED_TLDS)[number];
@@ -81,6 +139,18 @@ export interface LookupResult {
     name: string | null;
     reverseNode: string;
     verified: boolean;
+}
+
+export interface OwnedName {
+    name: string;
+    node: string;
+    expiresAt: string;
+    expired: boolean;
+}
+
+export interface NamesResult {
+    address: string;
+    names: OwnedName[];
 }
 
 export interface RegisterOptions {
@@ -153,6 +223,14 @@ export class Oniym {
         return result.addresses[coinType] ?? null;
     }
 
+    async getNames(address: string): Promise<OwnedName[]> {
+        const url = this._indexerUrl(`/names/${address}`);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`getNames failed: ${res.status}`);
+        const data = (await res.json()) as NamesResult;
+        return data.names;
+    }
+
     async getAddresses(name: string): Promise<MultiChainAddresses> {
         const result = await this.resolve(name);
         if (!result) return {};
@@ -188,7 +266,7 @@ export class Oniym {
         return base + premium;
     }
 
-    async getTLDs(): Promise<TLDInfo[]> {
+    getTLDs(): TLDInfo[] {
         return SUPPORTED_TLDS.map((label) => ({
             label,
             node: _namehash(label),
@@ -277,9 +355,7 @@ export class Oniym {
 
         const node = _namehash(name);
         const coinType = BigInt(COIN_TYPES[chain]);
-        const addrBytes: Hex = chain === "eth"
-            ? toHex(toBytes(address as Address))
-            : toHex(toBytes(address as Hex));
+        const addrBytes: Hex = chain === "eth" ? toHex(toBytes(address)) : toHex(toBytes(address));
 
         return walletClient.writeContract({
             address: this.addresses.PublicResolver,
@@ -372,9 +448,8 @@ export class Oniym {
         if (addresses) {
             for (const [chain, addr] of Object.entries(addresses) as [SupportedChain, string][]) {
                 if (!addr) continue;
-                const addrBytes: Hex = chain === "eth"
-                    ? toHex(toBytes(addr as Address))
-                    : toHex(toBytes(addr as Hex));
+                const addrBytes: Hex =
+                    chain === "eth" ? toHex(toBytes(addr)) : toHex(toBytes(addr));
                 calls.push(
                     encodeFunctionData({
                         abi: publicResolverAbi,

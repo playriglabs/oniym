@@ -1,0 +1,54 @@
+# GET /names/:address
+
+List all names owned by an Ethereum address.
+
+## Request
+
+```
+GET /names/0x11702b8eF5F882191Af862a7e27096C44A5e2B37
+```
+
+## Response
+
+```json
+{
+  "address": "0x11702b8eF5F882191Af862a7e27096C44A5e2B37",
+  "names": [
+    {
+      "name": "kyy.web3",
+      "node": "0x...",
+      "expiresAt": "1777179607",
+      "expired": false
+    },
+    {
+      "name": "kite.app",
+      "node": "0x...",
+      "expiresAt": "1779771607",
+      "expired": false
+    }
+  ]
+}
+```
+
+### Fields
+
+| Field       | Type     | Description                              |
+| ----------- | -------- | ---------------------------------------- |
+| `address`   | `string` | Input address                            |
+| `names`     | `array`  | All names currently owned by this address |
+
+### Name object
+
+| Field       | Type      | Description                      |
+| ----------- | --------- | -------------------------------- |
+| `name`      | `string`  | Full name e.g. `kyy.web3`        |
+| `node`      | `string`  | Namehash of the name             |
+| `expiresAt` | `string`  | Unix timestamp (seconds)         |
+| `expired`   | `boolean` | Whether the registration expired |
+
+## Errors
+
+| Status | Body                                      | Reason                  |
+| ------ | ----------------------------------------- | ----------------------- |
+| `400`  | `{ "error": "Invalid Ethereum address" }` | Not a valid EVM address |
+| `429`  | `{ "error": "Rate limit exceeded" }`      | Too many requests       |

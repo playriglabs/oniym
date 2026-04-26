@@ -1,0 +1,46 @@
+# useNames
+
+Fetch all names owned by an Ethereum address.
+
+## Usage
+
+```tsx
+import { useNames } from "@oniym/react";
+
+function OwnedNames({ address }: { address: string }) {
+  const { data: names, isLoading } = useNames(address);
+
+  if (isLoading) return <span>Loading...</span>;
+
+  return (
+    <ul>
+      {names?.map((n) => (
+        <li key={n.node}>{n.name}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `address` | `string \| undefined` | EVM address. Query disabled when `undefined`. |
+
+## Returns
+
+`UseQueryResult<OwnedName[]>`
+
+```ts
+interface OwnedName {
+  name: string;
+  node: string;
+  expiresAt: string;
+  expired: boolean;
+}
+```
+
+## Query key
+
+`["oniym", "names", address]`

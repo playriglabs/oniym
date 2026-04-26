@@ -30,7 +30,7 @@ GET /lookup/0x11702b8eF5F882191Af862a7e27096C44A5e2B37
 | `address`     | `string`         | Input address (checksummed)          |
 | `name`        | `string \| null` | Claimed primary name, or `null`      |
 | `reverseNode` | `string`         | The reverse node hash                |
-| `verified`    | `boolean`        | Always `false` — clients must verify |
+| `verified`    | `boolean`        | `true` if forward resolution of `name` returns this address |
 
 ## Errors
 

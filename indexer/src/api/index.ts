@@ -167,14 +167,81 @@ app.get("/lookup/:address", async (c) => {
         .limit(1)
         .then((r) => r[0] ?? null);
 
+    const claimedName = nameText?.value ?? null;
+
+    let verified = false;
+    if (claimedName) {
+        const parsed = parseName(claimedName);
+        if (parsed) {
+            const nameRow = await db
+                .select()
+                .from(schema.name)
+                .where(eq(schema.name.fullName, claimedName))
+                .limit(1)
+                .then((r) => r[0] ?? null);
+
+            if (nameRow) {
+                const ethRecord = await db
+                    .select()
+                    .from(schema.addrRecord)
+                    .where(
+                        and(
+                            eq(schema.addrRecord.nameNode, nameRow.id),
+                            eq(schema.addrRecord.coinType, 60n),
+                        ),
+                    )
+                    .limit(1)
+                    .then((r) => r[0] ?? null);
+
+                if (ethRecord) {
+                    // addr is stored as raw hex bytes; last 40 chars = EVM address
+                    const storedAddr = ethRecord.addr.slice(-40).toLowerCase();
+                    verified = storedAddr === address.slice(2).toLowerCase();
+                }
+            }
+        }
+    }
+
     const result = {
         address: raw,
-        name: nameText.value ?? null,
+        name: claimedName,
         reverseNode: reverseRow.reverseNode,
-        verified: false, // clients must verify forward resolution
+        verified,
     };
 
     if (result.name) await setCache(cacheKey, result);
+    return c.json(result);
+});
+
+/**
+ * List all names owned by an address.
+ * GET /names/0x1234...
+ */
+app.get("/names/:address", async (c) => {
+    const raw = c.req.param("address");
+    if (!isAddress(raw)) return c.json({ error: "Invalid Ethereum address" }, 400);
+
+    const address = getAddress(raw).toLowerCase() as `0x${string}`;
+    const cacheKey = `names:${address}`;
+    const cached = await getCached<object>(cacheKey);
+    if (cached) return c.json(cached);
+
+    const now = BigInt(Math.floor(Date.now() / 1000));
+
+    const rows = await db
+        .select()
+        .from(schema.name)
+        .where(eq(schema.name.owner, address));
+
+    const names = rows.map((r) => ({
+        name: r.fullName,
+        node: r.id,
+        expiresAt: r.expiresAt.toString(),
+        expired: r.expiresAt < now,
+    }));
+
+    const result = { address: raw, names };
+    await setCache(cacheKey, result);
     return c.json(result);
 });
 

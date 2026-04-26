@@ -1,9 +1,19 @@
-import { useQuery, useMutation, type UseQueryResult, type UseMutationResult } from "@tanstack/react-query";
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+import {
+    useQuery,
+    useMutation,
+    type UseQueryResult,
+    type UseMutationResult,
+} from "@tanstack/react-query";
 import type { WalletClient } from "viem";
 import type {
     ResolveResult,
     LookupResult,
     MultiChainAddresses,
+    OwnedName,
     SupportedChain,
     RegisterOptions,
 } from "@oniym/sdk";
@@ -24,11 +34,23 @@ export function useName(address: string | undefined): UseQueryResult<string | nu
     return useQuery({
         queryKey: ["oniym", "name", address],
         queryFn: async (): Promise<string | null> => {
-            const res = await fetch(`${(oniym.config.indexerUrl ?? "http://localhost:42069").replace(/\/$/, "")}/lookup/${address!}`);
+            const res = await fetch(
+                `${(oniym.config.indexerUrl ?? "http://localhost:42069").replace(/\/$/, "")}/lookup/${address!}`,
+            );
             if (res.status === 404) return null;
             const data = (await res.json()) as LookupResult;
             return data.name;
         },
+        enabled: !!address,
+        staleTime: 30_000,
+    });
+}
+
+export function useNames(address: string | undefined): UseQueryResult<OwnedName[]> {
+    const oniym = useOniym();
+    return useQuery({
+        queryKey: ["oniym", "names", address],
+        queryFn: () => oniym.getNames(address!),
         enabled: !!address,
         staleTime: 30_000,
     });

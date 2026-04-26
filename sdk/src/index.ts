@@ -34,6 +34,8 @@ export type {
     SupportedTLD,
     ResolveResult,
     LookupResult,
+    OwnedName,
+    NamesResult,
     RegisterOptions,
 } from "./oniym";
 

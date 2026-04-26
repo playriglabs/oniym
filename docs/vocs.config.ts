@@ -48,6 +48,7 @@ export default defineConfig({
                 { text: "Getting started", link: "/react/getting-started" },
                 { text: "useResolve", link: "/react/use-resolve" },
                 { text: "useName", link: "/react/use-name" },
+                { text: "useNames", link: "/react/use-names" },
                 { text: "useAddresses", link: "/react/use-addresses" },
                 { text: "useAvailable", link: "/react/use-available" },
                 { text: "useRentPrice", link: "/react/use-rent-price" },
@@ -71,6 +72,7 @@ export default defineConfig({
                 { text: "Overview", link: "/api/overview" },
                 { text: "GET /resolve/:name", link: "/api/resolve" },
                 { text: "GET /lookup/:address", link: "/api/lookup" },
+                { text: "GET /names/:address", link: "/api/names" },
             ],
         },
         {
