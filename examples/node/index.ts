@@ -21,7 +21,9 @@ async function main(): Promise<void> {
     const result = await oniym.resolve(name);
     if (result) {
         console.log(`  owner:     ${result.owner}`);
-        console.log(`  expiresAt: ${new Date(Number(result.expiresAt) * 1000).toLocaleDateString()}`);
+        console.log(
+            `  expiresAt: ${new Date(Number(result.expiresAt) * 1000).toLocaleDateString()}`,
+        );
         console.log(`  expired:   ${String(result.expired)}`);
         console.log(`  addresses: ${JSON.stringify(result.addresses)}`);
         console.log(`  texts:     ${JSON.stringify(result.texts)}`);
@@ -40,8 +42,8 @@ async function main(): Promise<void> {
     console.log(`  available: ${String(isAvailable)}`);
 
     // Rent price (via RPC)
-    console.log("\nRent price for kyy.web3 (1 year)...");
-    const price = await oniym.rentPrice("kyy", "web3", 365 * 24 * 60 * 60);
+    console.log("\nRent price for kyy.dev (1 year)...");
+    const price = await oniym.rentPrice("kyy", "dev", 365 * 24 * 60 * 60);
     console.log(`  price: ${price.toString()} wei (${(Number(price) / 1e18).toString()} ETH)`);
 
     // Namehash utilities
