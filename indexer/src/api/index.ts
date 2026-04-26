@@ -68,8 +68,6 @@ function parseName(raw: string): { label: string; tld: string } | null {
 //                           ROUTES
 // ---------------------------------------------------------------
 
-app.get("/status", (c) => c.json({ status: "ok" }));
-
 /**
  * Resolve a name to all its records.
  * GET /resolve/kyy.id
