@@ -1,0 +1,69 @@
+# useAddresses
+
+Fetch all registered chain addresses for a name.
+
+## Usage
+
+```tsx
+import { useAddresses } from "@oniym/react";
+
+function AddressList({ name }: { name: string }) {
+  const { data: addresses = {} } = useAddresses(name);
+
+  return (
+    <ul>
+      {Object.entries(addresses).map(([chain, addr]) => (
+        <li key={chain}>{chain}: {addr}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string \| undefined` | Full name with TLD. Query disabled when `undefined`. |
+
+## Returns
+
+`UseQueryResult<Partial<Record<SupportedChain, string>>>`
+
+Only chains with a record set on-chain are present in the result.
+
+## Query key
+
+`["oniym", "addresses", name]`
+
+---
+
+# useAddress
+
+Fetch the address for a single chain.
+
+## Usage
+
+```tsx
+import { useAddress } from "@oniym/react";
+
+function EthAddress({ name }: { name: string }) {
+  const { data: address } = useAddress(name, "eth");
+  return <span>{address ?? "not set"}</span>;
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string \| undefined` | Full name with TLD. |
+| `chain` | `SupportedChain` | `"btc" \| "eth" \| "sol" \| "sui" \| "bnb"` |
+
+## Returns
+
+`UseQueryResult<string | null>`
+
+## Query key
+
+`["oniym", "address", name, chain]`

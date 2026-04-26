@@ -1,0 +1,35 @@
+# useName
+
+Reverse lookup — resolve an address to its primary name.
+
+## Usage
+
+```tsx
+import { useName } from "@oniym/react";
+
+function Avatar({ address }: { address: string }) {
+  const { data: name } = useName(address);
+
+  return <span>{name ?? address}</span>;
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `address` | `string \| undefined` | EVM address. Query disabled when `undefined`. |
+
+## Returns
+
+`UseQueryResult<string | null>`
+
+Returns the claimed primary name, or `null` if no reverse record is set.
+
+:::warning
+Always verify forward resolution matches before displaying a reverse name as a verified identity.
+:::
+
+## Query key
+
+`["oniym", "name", address]`

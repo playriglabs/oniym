@@ -1,0 +1,42 @@
+# useResolve
+
+Fetch all on-chain records for a name.
+
+## Usage
+
+```tsx
+import { useResolve } from "@oniym/react";
+
+function NameCard({ name }: { name: string }) {
+  const { data, isLoading, error } = useResolve(name);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (!data) return <p>Name not found</p>;
+
+  return (
+    <div>
+      <p>Owner: {data.owner}</p>
+      <p>Expires: {new Date(Number(data.expiresAt) * 1000).toLocaleDateString()}</p>
+      <p>ETH: {data.addresses["60"] ?? "not set"}</p>
+    </div>
+  );
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string \| undefined` | Full name with TLD. Query disabled when `undefined`. |
+
+## Returns
+
+`UseQueryResult<ResolveResult | null>`
+
+See [ResolveResult](/sdk/resolution#resolve) for the full type.
+
+## Query key
+
+`["oniym", "resolve", name]`
+
+Invalidate with `queryClient.invalidateQueries({ queryKey: ["oniym", "resolve", name] })`.

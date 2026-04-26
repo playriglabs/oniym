@@ -18,7 +18,7 @@ pnpm add @oniym/react @oniym/sdk @tanstack/react-query viem
 
 Wrap your app with `OniymProvider` and `QueryClientProvider`:
 
-```tsx twoslash
+```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OniymProvider } from "@oniym/react";
 
@@ -37,7 +37,7 @@ export function App() {
 
 ## Usage
 
-```tsx twoslash
+```tsx
 import { useResolve, useName, useAvailable, useRegister } from "@oniym/react";
 
 function Profile({ address }: { address: string }) {

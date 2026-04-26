@@ -1,0 +1,54 @@
+# PublicResolver
+
+Stores address records, text records, and contenthash for registered names. Implements ENSIP-9 multichain addressing.
+
+**Address (Base Sepolia):** `0xA37eD413181537c60586317a70f612a304EB0681`
+
+## Address records
+
+Addresses are stored per SLIP-0044 coin type.
+
+```solidity
+// Write
+function setAddr(bytes32 node, uint256 coinType, bytes calldata addr) external;
+
+// Read
+function addr(bytes32 node, uint256 coinType) external view returns (bytes memory);
+```
+
+Common coin types:
+
+| Chain | Coin type |
+|-------|-----------|
+| Ethereum / Base | `60` |
+| Bitcoin | `0` |
+| Solana | `501` |
+| Sui | `784` |
+| BNB | `714` |
+
+## Text records
+
+```solidity
+// Write
+function setText(bytes32 node, string calldata key, string calldata value) external;
+
+// Read
+function text(bytes32 node, string calldata key) external view returns (string memory);
+```
+
+Common keys: `avatar`, `description`, `url`, `twitter`, `github`, `email`
+
+## Contenthash
+
+```solidity
+function setContenthash(bytes32 node, bytes calldata hash) external;
+function contenthash(bytes32 node) external view returns (bytes memory);
+```
+
+## Events
+
+| Event | When |
+|-------|------|
+| `AddrChanged(node, coinType, addr)` | Address record updated |
+| `TextChanged(node, key, value)` | Text record updated |
+| `ContenthashChanged(node, hash)` | Contenthash updated |

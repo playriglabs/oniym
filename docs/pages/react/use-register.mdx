@@ -1,0 +1,66 @@
+# useRegister
+
+Mutation hook for registering a name. Wraps the full commit-reveal flow from `oniym.register()`.
+
+## Usage
+
+```tsx
+import { useRegister, useAvailable, useRentPrice } from "@oniym/react";
+import { useWalletClient } from "wagmi"; // or your wallet library
+
+function RegisterForm() {
+  const { data: walletClient } = useWalletClient();
+  const { data: available } = useAvailable("alice", "web3");
+  const { data: price } = useRentPrice("alice", "web3", 365 * 24 * 60 * 60);
+
+  const {
+    mutate: register,
+    isPending,
+    isSuccess,
+    error,
+  } = useRegister(walletClient);
+
+  return (
+    <div>
+      <p>Price: {price ? `${Number(price) / 1e18} ETH` : "—"}</p>
+      <button
+        disabled={!available || isPending || !walletClient}
+        onClick={() =>
+          register({
+            name: "alice",
+            tld: "web3",
+            duration: 365 * 24 * 60 * 60,
+            reverseRecord: true,
+            onCommit: (hash) => console.log("Committed:", hash),
+            onWaiting: (ms) => console.log(`Waiting ${ms / 1000}s...`),
+          })
+        }
+      >
+        {isPending ? "Registering..." : "Register alice.web3"}
+      </button>
+      {isSuccess && <p>Registered!</p>}
+      {error && <p>Error: {error.message}</p>}
+    </div>
+  );
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `walletClient` | `WalletClient \| undefined` | viem wallet client. Mutation throws if `undefined`. |
+
+## Returns
+
+`UseMutationResult<Hash, Error, RegisterOptions>`
+
+- `mutate(options)` — start registration
+- `isPending` — `true` while committing or waiting or registering
+- `isSuccess` — `true` after `register()` tx is submitted
+- `data` — transaction hash of the `register()` call
+- `error` — error if any step failed
+
+## RegisterOptions
+
+See [RegisterOptions](/sdk/registration#registeroptions) in the SDK docs.

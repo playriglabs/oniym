@@ -1,0 +1,33 @@
+# useAvailable
+
+Check if a name is available for registration. Makes a live RPC call to `RegistrarController.available()`.
+
+## Usage
+
+```tsx
+import { useAvailable } from "@oniym/react";
+
+function AvailabilityBadge({ name, tld }: { name: string; tld: string }) {
+  const { data: available, isLoading } = useAvailable(name, tld);
+
+  if (isLoading) return <span>Checking...</span>;
+  return <span>{available ? "Available" : "Taken"}</span>;
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string \| undefined` | Label only (e.g. `"alice"`). Query disabled when `undefined`. |
+| `tld` | `string \| undefined` | TLD label (e.g. `"web3"`). Query disabled when `undefined`. |
+
+## Returns
+
+`UseQueryResult<boolean>`
+
+## Query key
+
+`["oniym", "available", name, tld]`
+
+Stale time is 10 seconds (shorter than other queries since availability can change quickly).

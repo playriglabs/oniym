@@ -1,0 +1,92 @@
+# Resolution
+
+All read methods use the indexer API for fast off-chain queries. Set `indexerUrl` in the config to point to a deployed indexer.
+
+## resolve
+
+Returns all on-chain records for a name, or `null` if not found.
+
+```ts
+const result = await oniym.resolve("kyy.web3");
+```
+
+**Returns:** `ResolveResult | null`
+
+```ts
+interface ResolveResult {
+  name: string;
+  node: string;           // ENSIP-1 namehash
+  owner: string;          // current owner address
+  resolver: string | null;
+  expiresAt: string;      // unix timestamp
+  expired: boolean;
+  addresses: Record<string, string>; // coinType → address
+  texts: Record<string, string>;     // key → value
+  contenthash: string | null;
+}
+```
+
+## getName
+
+Reverse lookup — resolve an address to its primary name.
+
+```ts
+const name = await oniym.getName("0x11702b8eF5F882191Af862a7e27096C44A5e2B37");
+// "kyy.web3" or null
+```
+
+:::warning
+This returns the **claimed** name. Always verify forward resolution matches before displaying it as a verified identity.
+:::
+
+**Returns:** `string | null`
+
+## getAddress
+
+Resolve a name to an address on a specific chain.
+
+```ts
+const eth = await oniym.getAddress("kyy.web3", "eth");
+const sol = await oniym.getAddress("kyy.web3", "sol");
+```
+
+**Supported chains:** `"btc" | "eth" | "sol" | "sui" | "bnb"`
+
+**Returns:** `string | null`
+
+## getAddresses
+
+Resolve a name to all registered chain addresses at once.
+
+```ts
+const all = await oniym.getAddresses("kyy.web3");
+// { eth: "0x...", sol: "...", btc: "..." }
+```
+
+**Returns:** `Partial<Record<SupportedChain, string>>`
+
+## available
+
+Check if a name is available for registration. Makes a direct RPC call to `RegistrarController.available()`.
+
+```ts
+const isAvailable = await oniym.available("alice", "web3");
+```
+
+**Returns:** `boolean`
+
+## rentPrice
+
+Get the registration price in wei for a name and duration. Makes a direct RPC call to `RegistrarController.rentPrice()`.
+
+```ts
+const price = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60);
+console.log(`${Number(price) / 1e18} ETH`);
+```
+
+**Parameters:**
+- `name` — label only (e.g. `"alice"`)
+- `tld` — TLD label (e.g. `"web3"`)
+- `duration` — duration in seconds
+
+**Returns:** `bigint` (base + premium combined)

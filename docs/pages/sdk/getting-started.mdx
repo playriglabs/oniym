@@ -20,7 +20,7 @@ yarn add @oniym/sdk viem
 
 ## Initialise
 
-```ts twoslash
+```ts
 import { Oniym } from "@oniym/sdk";
 
 const oniym = new Oniym({
@@ -39,10 +39,9 @@ const oniym = new Oniym({
 
 ## Read a name
 
-```ts twoslash
+```ts
 import { Oniym } from "@oniym/sdk";
 const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
-// ---cut---
 // All records for a name
 const result = await oniym.resolve("kyy.web3");
 console.log(result?.owner);      // "0x..."
@@ -63,10 +62,9 @@ const name = await oniym.getName("0x11702b...");
 
 ## Check availability & price
 
-```ts twoslash
+```ts
 import { Oniym } from "@oniym/sdk";
 const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
-// ---cut---
 const isAvailable = await oniym.available("alice", "web3");
 const price = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60);
 console.log(`${Number(price) / 1e18} ETH`);
@@ -76,7 +74,7 @@ console.log(`${Number(price) / 1e18} ETH`);
 
 Registration requires a connected [viem](https://viem.sh) `WalletClient`.
 
-```ts twoslash
+```ts
 import { Oniym } from "@oniym/sdk";
 import { createWalletClient, custom } from "viem";
 import { baseSepolia } from "viem/chains";

@@ -1,0 +1,39 @@
+# useRentPrice
+
+Fetch the registration price in wei for a name and duration. Makes a live RPC call to `RegistrarController.rentPrice()`.
+
+## Usage
+
+```tsx
+import { useRentPrice } from "@oniym/react";
+import { formatEther } from "viem";
+
+function PriceDisplay({ name, tld }: { name: string; tld: string }) {
+  const duration = 365 * 24 * 60 * 60; // 1 year
+  const { data: price } = useRentPrice(name, tld, duration);
+
+  return (
+    <span>
+      {price !== undefined ? `${formatEther(price)} ETH` : "—"}
+    </span>
+  );
+}
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `string \| undefined` | Label only (e.g. `"alice"`). Query disabled when `undefined`. |
+| `tld` | `string \| undefined` | TLD label (e.g. `"web3"`). Query disabled when `undefined`. |
+| `duration` | `number` | Registration duration in seconds. |
+
+## Returns
+
+`UseQueryResult<bigint>`
+
+Returns the total price (base + premium) in wei.
+
+## Query key
+
+`["oniym", "rentPrice", name, tld, duration]`

@@ -1,0 +1,82 @@
+# Utilities
+
+## namehash
+
+Compute an ENSIP-1 namehash for any name.
+
+```ts
+oniym.namehash("kyy.web3");
+// 0xf7d7c4fb47297d0f2106ac50d24c93063bc0fe50d559ed65e99edb91cc86f8a2
+
+oniym.namehash(""); // 0x0000...0000 (root)
+```
+
+Also exported as a standalone function:
+
+```ts
+import { namehash } from "@oniym/sdk";
+```
+
+## labelhash
+
+keccak256 of a single label string.
+
+```ts
+oniym.labelhash("kyy");
+// 0x...
+```
+
+## makeNode
+
+Compute a child node from a parent node and label. Equivalent to `keccak256(parentNode ‖ labelhash(label))`.
+
+```ts
+const web3Node = oniym.namehash("web3");
+const kyyWeb3 = oniym.makeNode(web3Node, "kyy");
+// same as oniym.namehash("kyy.web3")
+```
+
+## parseName
+
+Split a full name into its label and TLD parts. Returns `null` for invalid names.
+
+```ts
+oniym.parseName("kyy.web3");   // { label: "kyy", tld: "web3" }
+oniym.parseName("kyy");        // null — no TLD
+oniym.parseName("sub.kyy.id"); // null — subnames not supported
+oniym.parseName(".web3");      // null — empty label
+```
+
+## coinTypeFor
+
+Get the SLIP-0044 coin type for a supported chain.
+
+```ts
+oniym.coinTypeFor("eth");  // 60
+oniym.coinTypeFor("btc");  // 0
+oniym.coinTypeFor("sol");  // 501
+oniym.coinTypeFor("sui");  // 784
+oniym.coinTypeFor("bnb");  // 714
+```
+
+## getTLDs
+
+List all 65 supported TLDs with their namehash nodes.
+
+```ts
+const tlds = oniym.getTLDs();
+// [{ label: "id", node: "0x...", active: true }, ...]
+```
+
+## Exported constants
+
+```ts
+import {
+  COIN_TYPES,       // { btc: 0, eth: 60, sol: 501, ... }
+  SUPPORTED_TLDS,   // readonly string[] of all 65 TLD labels
+  MAX_TLD_COUNT,    // 65
+  MAX_TLD_LENGTH,   // 5
+  CHAIN_IDS,        // { baseSepolia: 84532, base: 8453 }
+  CONTRACT_ADDRESSES, // deployed addresses per chain
+} from "@oniym/sdk";
+```

@@ -1,6 +1,7 @@
 import { defineConfig } from "vocs";
 
 export default defineConfig({
+    rootDir: ".",
     title: "Oniym",
     description: "One name, all chains. Multichain-native naming service.",
     logoUrl: "/logo.svg",

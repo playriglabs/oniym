@@ -1,0 +1,50 @@
+# RegistrarController
+
+The public entry point for name registration. Enforces commit-reveal, pricing, and name validation.
+
+**Address (Base Sepolia):** `0xF14E154633EFf408a99d3E6c9b01f918F93Ba5b1`
+
+## Constants
+
+| Constant | Value |
+|----------|-------|
+| `MIN_COMMITMENT_AGE` | 60 seconds |
+| `MAX_COMMITMENT_AGE` | 24 hours |
+| `MIN_NAME_LENGTH` | 3 characters |
+
+## Registration flow
+
+```
+1. makeCommitment(req)  → bytes32 commitment hash (pure, off-chain)
+2. commit(commitment)   → stores timestamp on-chain
+3. wait ≥ 60 seconds
+4. register(req)        → mints name, sets resolver data, transfers NFT
+```
+
+## Key functions
+
+```solidity
+struct RegisterRequest {
+    string name;          // label only, e.g. "alice"
+    bytes32 tld;          // namehash of TLD, e.g. namehash("web3")
+    address owner;
+    uint256 duration;     // seconds
+    bytes32 secret;       // random 32 bytes
+    address resolver;
+    bytes[] resolverData; // encoded setAddr/setText calls
+    bool reverseRecord;   // set reverse record at registration
+}
+
+function makeCommitment(RegisterRequest calldata req) external pure returns (bytes32);
+function commit(bytes32 commitment) external;
+function register(RegisterRequest calldata req) external payable;
+function rentPrice(string calldata name, bytes32 tld, uint256 duration)
+    external view returns (uint256 base, uint256 premium);
+function available(string calldata name, bytes32 tld) external view returns (bool);
+```
+
+## Name validation
+
+- Minimum 3 characters
+- Lowercase ASCII letters (`a-z`), digits (`0-9`), and hyphens (`-`)
+- No leading or trailing hyphens

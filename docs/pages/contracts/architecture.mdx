@@ -1,0 +1,48 @@
+# Architecture
+
+Oniym's contract system follows an ENS-inspired layered architecture adapted for multi-TLD, multichain registration.
+
+## Contract layers
+
+```
+┌─────────────────────────────────────────┐
+│           RegistrarController           │  ← public entry point
+│         (commit-reveal, pricing)        │
+└────────────────────┬────────────────────┘
+                     │ registers via
+         ┌───────────▼───────────┐
+         │      TLDManager       │  ← manages all TLD registrars
+         └───────────┬───────────┘
+                     │ one per TLD
+         ┌───────────▼───────────┐
+         │    TLDRegistrar(s)    │  ← ERC-721 NFT + expiry
+         └───────────┬───────────┘
+                     │ setSubnodeRecord
+┌────────────────────▼────────────────────┐
+│              Registry                   │  ← canonical owner/resolver store
+└───────────┬─────────────────────────────┘
+            │ resolves via
+┌───────────▼───────────┐  ┌──────────────────────┐
+│    PublicResolver     │  │   ReverseRegistrar   │
+│  (addr, text, hash)   │  │  (address → name)    │
+└───────────────────────┘  └──────────────────────┘
+```
+
+## Key relationships
+
+- **Registry** is the single source of truth for `node → owner` and `node → resolver`
+- **TLDRegistrar** is an ERC-721 where each token = one registered name. Transfer of the NFT triggers a registry sync hook
+- **TLDManager** owns the TLD nodes in the registry and deploys a new `TLDRegistrar` for each TLD
+- **RegistrarController** is the only address allowed to call `TLDRegistrar.register()` and `TLDRegistrar.renew()`
+- **PublicResolver** stores address records, text records, and contenthash per nameNode
+- **ReverseRegistrar** owns the `reverse` top-level node and maps `addr.reverse → name`
+
+## Name lifecycle
+
+```
+commit() → wait 60s → register() → active → [renew] → expired → grace(90d) → available
+```
+
+## Design decisions
+
+See [ADR-001](/adr/001) through [ADR-007](/adr/007) for the reasoning behind each major architectural choice.

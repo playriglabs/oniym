@@ -1,0 +1,92 @@
+# Registration
+
+Write methods require a connected [viem](https://viem.sh) `WalletClient` passed as the last argument.
+
+## register
+
+Registers a name via the commit-reveal flow. The SDK handles the full sequence automatically:
+
+1. Generates a random secret
+2. Calls `commit(makeCommitment(req))`
+3. Waits `MIN_COMMITMENT_AGE` (60 seconds + 5s buffer)
+4. Calls `register(req)` with the correct payment
+
+```ts
+import { createWalletClient, custom } from "viem";
+import { baseSepolia } from "viem/chains";
+
+const walletClient = createWalletClient({
+  chain: baseSepolia,
+  transport: custom(window.ethereum),
+});
+
+const hash = await oniym.register(
+  {
+    name: "alice",
+    tld: "web3",
+    duration: 365 * 24 * 60 * 60, // 1 year (default)
+    owner: "0x...",               // defaults to walletClient.account.address
+    reverseRecord: true,          // set reverse record at registration
+    addresses: {
+      eth: "0x11702b8eF5F882191Af862a7e27096C44A5e2B37",
+    },
+    texts: {
+      twitter: "@alice",
+    },
+    onCommit: (hash) => console.log("Committed:", hash),
+    onWaiting: (ms) => console.log(`Waiting ${ms / 1000}s...`),
+  },
+  walletClient,
+);
+```
+
+### RegisterOptions
+
+```ts
+interface RegisterOptions {
+  name: string;               // label only, e.g. "alice"
+  tld: string;                // TLD label, e.g. "web3"
+  duration?: number;          // seconds, default 365 days
+  owner?: Address;            // default: walletClient.account.address
+  resolver?: Address;         // default: PublicResolver
+  reverseRecord?: boolean;    // default: false
+  addresses?: Partial<Record<SupportedChain, string>>;
+  texts?: Record<string, string>;
+  onCommit?: (hash: Hash) => void;
+  onWaiting?: (remainingMs: number) => void;
+}
+```
+
+**Returns:** `Hash` — transaction hash of the `register()` call
+
+## setAddress
+
+Set a chain address on an existing name.
+
+```ts
+const hash = await oniym.setAddress("kyy.web3", "sol", "solanaAddress...", walletClient);
+```
+
+**Supported chains:** `"btc" | "eth" | "sol" | "sui" | "bnb"`
+
+## setText
+
+Set a text record on an existing name.
+
+```ts
+const hash = await oniym.setText("kyy.web3", "twitter", "@kyy", walletClient);
+```
+
+Common text record keys: `twitter`, `github`, `url`, `email`, `avatar`, `description`
+
+## setResolver
+
+Set the resolver contract for a name. Requires owning the name.
+
+```ts
+const hash = await oniym.setResolver(
+  "kyy.web3",
+  "0xA37eD413181537c60586317a70f612a304EB0681",
+  walletClient,
+);
+```

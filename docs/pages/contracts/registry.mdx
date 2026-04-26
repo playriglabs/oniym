@@ -1,0 +1,35 @@
+# Registry
+
+The Registry is the canonical on-chain store mapping name nodes to owners and resolvers.
+
+**Address (Base Sepolia):** `0x4d0203cf6188247c282f1ee1b866ea55f71aabe4`
+
+## Key functions
+
+```solidity
+// Read
+function owner(bytes32 node) external view returns (address);
+function resolver(bytes32 node) external view returns (address);
+function ttl(bytes32 node) external view returns (uint64);
+
+// Write (owner only)
+function setOwner(bytes32 node, address owner) external;
+function setResolver(bytes32 node, address resolver) external;
+function setSubnodeOwner(bytes32 node, bytes32 label, address owner) external returns (bytes32);
+function setSubnodeRecord(bytes32 node, bytes32 label, address owner, address resolver, uint64 ttl) external returns (bytes32);
+```
+
+## Access control
+
+Each node is controlled by its owner. Only the owner of a node can:
+- Transfer ownership (`setOwner`)
+- Change the resolver (`setResolver`)
+- Create subnodes (`setSubnodeOwner`, `setSubnodeRecord`)
+
+## Events
+
+| Event | When |
+|-------|------|
+| `Transfer(node, owner)` | Ownership changes |
+| `NewResolver(node, resolver)` | Resolver changes |
+| `NewOwner(node, label, owner)` | Subnode created |

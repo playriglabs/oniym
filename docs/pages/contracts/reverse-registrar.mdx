@@ -1,0 +1,44 @@
+# ReverseRegistrar
+
+Manages reverse records — mapping an Ethereum address to its claimed primary name.
+
+**Address (Base Sepolia):** `0xa5d904401d5f3ed1eb19188ce9de28bef3c083b9`
+
+## How it works
+
+The `ReverseRegistrar` owns the `reverse` top-level node in the Registry. For each address, it creates a subnode under `addr.reverse` where the name text record is stored.
+
+Reverse node for an address:
+```
+namehash("<lowercase_address>.addr.reverse")
+```
+
+## Setting a reverse record
+
+The easiest way is to pass `reverseRecord: true` when registering via `RegistrarController`. This sets the reverse record atomically in the same transaction.
+
+To set it separately:
+
+```solidity
+function setName(string calldata name) external returns (bytes32);
+function setNameForAddr(
+    address addr,
+    address owner,
+    address resolver,
+    string calldata name
+) external returns (bytes32);
+```
+
+## Verification
+
+The indexer returns `verified: false` on all reverse lookups — clients are responsible for verifying that:
+
+```
+forward_resolve(reverse_record.name) == address
+```
+
+Only show the name as a verified identity if this check passes.
+
+## Grace period
+
+Reverse records are not automatically cleared when a name expires. If a name expires and is re-registered by someone else, the old reverse record will still exist but forward resolution will no longer match — clients will catch this via the verification step.

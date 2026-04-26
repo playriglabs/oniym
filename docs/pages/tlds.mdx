@@ -1,0 +1,57 @@
+# Supported TLDs
+
+Oniym supports 65 top-level domains across four categories. All TLDs are equal — any resolves to any chain.
+
+## General identity
+
+| TLD | Node |
+|-----|------|
+| `.id` | `namehash("id")` |
+| `.one` | `namehash("one")` |
+| `.me` | `namehash("me")` |
+| `.co` | `namehash("co")` |
+
+## Web3 / tech
+
+| TLD |
+|-----|
+| `.xyz` `.web3` `.io` `.pro` `.app` `.dev` `.onm` `.go` |
+
+## Crypto culture
+
+| TLD |
+|-----|
+| `.ape` `.fud` `.hodl` `.fomo` `.moon` `.rekt` `.wagmi` `.ngmi` |
+| `.degen` `.whale` `.buidl` `.dyor` `.pump` `.alpha` `.safu` `.l2` |
+| `.gm` `.lfg` `.ser` `.fren` `.goat` `.cope` `.pepe` `.wen` |
+
+## DeFi / Finance
+
+| TLD |
+|-----|
+| `.mint` `.bear` `.gas` `.dao` `.ath` `.dex` `.cex` `.burn` |
+| `.node` `.swap` `.yield` `.bag` `.bags` `.seed` `.drop` `.stake` |
+| `.pool` `.wrap` `.farm` `.shill` |
+
+## Misc
+
+| TLD |
+|-----|
+| `.xxx` `.regs` `.main` `.test` `.exit` `.fair` `.guh` `.bots` `.keys` |
+
+## Constraints
+
+- Max **65** TLDs total (enforced on-chain by `ITLDManager`)
+- Max **5** characters per TLD label
+- Labels are lowercase ASCII only
+
+## Computing TLD nodes
+
+TLD nodes follow ENSIP-1 namehash from the root:
+
+```ts
+import { namehash } from "@oniym/sdk";
+
+const web3Node = namehash("web3");
+// 0x587d09fe5fa45354680537d38145a28b772971e0f293af3ee0c536fc919710fb
+```
