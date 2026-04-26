@@ -1,0 +1,56 @@
+# How it works
+
+## Name structure
+
+Every Oniym name is a two-part label: `<label>.<tld>` — for example `kyy.web3` or `alice.id`.
+
+- **Label** — the unique identifier you register (e.g. `kyy`)
+- **TLD** — one of 65 protocol-managed top-level domains (e.g. `web3`)
+
+Subnames (`sub.kyy.web3`) are not supported in v1.
+
+## Namehash
+
+Oniym uses [ENSIP-1](https://docs.ens.domains/ensip/1) namehash to derive a deterministic 32-byte node for any name:
+
+```
+namehash("") = 0x00...00
+namehash("web3") = keccak256(namehash("") ‖ keccak256("web3"))
+namehash("kyy.web3") = keccak256(namehash("web3") ‖ keccak256("kyy"))
+```
+
+The node is the canonical on-chain identifier for a name — used as the primary key in the Registry and all resolver records.
+
+## Registration flow
+
+Registration uses a **commit-reveal** scheme to prevent frontrunning:
+
+```
+1. commit(makeCommitment(req))   // name is hidden
+2. wait ≥ 60 seconds             // commitment matures
+3. register(req) + payment       // reveals and mints
+```
+
+The `req` encodes name, TLD, owner, duration, a random secret, and optional resolver data. Because the commitment is a hash of all fields including the secret, nobody can copy your transaction and steal the name before you.
+
+## Multichain addresses
+
+Addresses are stored per coin type following [ENSIP-9](https://docs.ens.domains/ensip/9) / SLIP-0044:
+
+| Chain | Coin type |
+|-------|-----------|
+| Ethereum / Base / EVM | 60 |
+| Bitcoin | 0 |
+| Solana | 501 |
+| Sui | 784 |
+| BNB | 714 |
+
+## Reverse resolution
+
+When registering with `reverseRecord: true`, the `ReverseRegistrar` contract sets a reverse record mapping `address → name`. This lets wallets and dapps display `kyy.web3` instead of `0x1170...`.
+
+Callers should always verify the forward resolution matches before displaying a reverse name as a verified identity.
+
+## Expiry and renewal
+
+Names expire after their registration duration. A **90-day grace period** follows expiry during which only the original owner can renew. After the grace period the name becomes available for anyone to register.

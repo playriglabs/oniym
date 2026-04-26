@@ -1,0 +1,95 @@
+# ADR-007: Multi-TLD naming and Clusters-style identity
+
+- **Status:** Accepted
+- **Date:** 2026-04-24
+- **Deciders:** Core team
+- **Supersedes:** Parts of ADR-002, ADR-005 (drops `.oniym` as the single TLD)
+
+## Context
+
+The original design committed to a single proprietary TLD — `.oniym` — following the ENS/Basenames playbook. After reviewing the competitive landscape, two products demonstrate a superior model:
+
+- **[Space.ID](https://www.space.id/tld)** — aggregates multiple TLDs (`.bnb`, `.arb`, `.eth`) under one protocol and one SDK. Users pick the TLD that matches their primary chain identity.
+- **[Clusters](https://clusters.xyz)** — a chain-agnostic name (`kyy`, no TLD) that maps to all chain addresses at once. SDK is minimal: `clusters.getName(address)` returns the name.
+
+A single `.oniym` TLD has three weaknesses:
+
+1. **Cold brand with no community.** `.oniym` carries zero recognition. Web-style TLDs like `.id`, `.degen`, `.wagmi` are immediately legible to web3 users — no onboarding cost.
+2. **Forces brand-first identity over personal identity.** Users want to express *who they are*, not what protocol they use. `.wagmi.id` says something; `.wagmi.oniym` is just an ad.
+3. **Misses the multi-TLD aggregation opportunity.** Space.ID already proves the model works at scale.
+
+## Decision
+
+**Drop `.oniym` as the sole TLD. Adopt a multi-TLD model inspired by Space.ID, with a unified-identity resolver and simplified SDK inspired by Clusters.**
+
+### TLDs offered (protocol-controlled)
+
+62 web-style, chain-neutral labels — max 5 characters each:
+
+```
+.id   .one  .me   .xyz  .web3 .io   .app  .dev  .onm  .go
+.ape  .fud  .hodl .fomo .moon .rekt .wagmi .ngmi .degen .whale
+.buidl .dyor .pump .alpha .safu .gm  .lfg  .ser  .fren .goat
+.cope .pepe .mint .bear .gas  .dao  .ath  .dex  .cex  .burn
+.node .swap .yield .bag  .bags .seed .drop .stake .pool .wrap
+.farm .shill .xxx  .regs .main .test .exit .fair .guh  .bots
+.vcs  .keys
+```
+
+TLD labels are intentionally **not** chain names. TLD choice is a pure identity preference — any TLD name resolves addresses for all supported chains (ETH, SOL, BTC, SUI, BNB) via SLIP-0044 coin type in the resolver.
+
+Additional TLDs can be added via `ITLDManager.addTld()` without touching the Registry or Resolver.
+
+### Key design principles (Clusters-style)
+
+- **TLD is an identity preference, not a chain restriction.** A `.degen` name stores ETH, SOL, BTC, SUI, and BNB addresses in the same resolver node. Any TLD resolves across all chains.
+- **One resolver, all TLDs.** The existing `Resolver.sol` is already node-based (`bytes32`) — it handles every TLD with no changes.
+- **Simplified SDK API.** `new Oniym()` exposes `getName(address)`, `getAddress(name, chain)`, `getAddresses(name)` — the same ergonomics as the Clusters SDK.
+
+### New contract: `ITLDManager`
+
+Protocol-owned contract managing the live set of TLDs. Owns each TLD's root node in the Registry. Authorizes per-TLD `ITLDRegistrar` deployments. New TLDs are added via a single `addTld()` call — no Registry or Resolver changes needed. Constants: `maxTldCount() = 62`, `maxTldLabelLength() = 5`.
+
+### Renamed / refactored contracts
+
+| Old | New | Reason |
+|-----|-----|--------|
+| `IBaseRegistrar` | `ITLDRegistrar` | Generic; parameterized by TLD node at construction |
+| `IETHRegistrarController` | `IRegistrarController` | `ETH` prefix implied chain-specificity |
+
+`RegisterRequest` gains a `tld` field (`bytes32`, the namehash of the TLD label) so one controller can service all TLDs.
+
+## Rationale
+
+1. **Web-style TLDs are chain-neutral by design.** `.id`, `.one`, `.wagmi` carry no chain assumption — a Solana-native and an ETH-native user are both comfortable picking from this list.
+2. **Multi-TLD aggregation is the winning model.** Space.ID at scale proves that a single SDK over multiple TLDs is more valuable than any one naming service.
+3. **Clusters proves simplified API drives adoption.** `getName(address)` is a one-liner that any dApp can drop in. Lower integration friction = more integrations.
+4. **Registry and Resolver are already TLD-agnostic.** Core on-chain logic uses `bytes32` node everywhere — the pivot costs almost nothing in contract changes.
+5. **Timing is right.** Contracts are in Week 1 (interface-only). No implementation to rewrite.
+6. **No ENS collision risk.** Using web-style labels (not `.eth`, `.sol`) eliminates any namespace confusion with existing naming services.
+
+## Consequences
+
+### Positive
+- No collision with ENS, SNS, or any existing naming service — all TLD labels are novel
+- Any future TLD is addable via `addTld()` without touching Registry or Resolver
+- SDK API is simpler and more adoptable than the original design
+- No proprietary `.oniym` cold-start — web-style TLDs feel familiar across all web3 communities
+- Culture-first TLDs (`.degen`, `.wagmi`, `.hodl`) create natural community identity
+
+### Negative
+- Web-style TLDs don't carry chain-native recognition (trade-off vs. the original chain-TLD model)
+- 62 TLDs increase `ITLDManager` admin surface
+- `kyy.id` and `kyy.one` are distinct registry records — no automatic cross-TLD identity linking in v1
+
+### Mitigations
+- Docs and UI make chain resolution explicit: any name resolves all chains regardless of TLD label
+- `ITLDManager` owner is a multisig from day one
+- Cross-TLD identity bundle (`kyy.*`) is a planned post-launch feature
+
+## References
+- [Space.ID TLD model](https://www.space.id/tld)
+- [Clusters](https://clusters.xyz) · [Clusters docs](https://docs.clusters.xyz)
+- [ADR-002: ENSIP-1 Namehash](./002-ensip-1-namehash.md)
+- [ADR-005: Playriglabs-first branding](./005-playriglabs-first-branding.md)
+- [ADR-006: Pricing and controller design](./006-pricing-and-controller-design.md)

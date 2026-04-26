@@ -1,0 +1,42 @@
+# GET /lookup/:address
+
+Reverse lookup — resolve an Ethereum address to its claimed primary name.
+
+:::warning
+This returns the **claimed** name. Always verify that forward resolution of the returned name points back to the same address before displaying it as a verified identity.
+:::
+
+## Request
+
+```
+GET /lookup/0x11702b8eF5F882191Af862a7e27096C44A5e2B37
+```
+
+## Response
+
+```json
+{
+    "address": "0x11702b8eF5F882191Af862a7e27096C44A5e2B37",
+    "name": "kyy.web3",
+    "reverseNode": "0x...",
+    "verified": false
+}
+```
+
+### Fields
+
+| Field         | Type             | Description                          |
+| ------------- | ---------------- | ------------------------------------ |
+| `address`     | `string`         | Input address (checksummed)          |
+| `name`        | `string \| null` | Claimed primary name, or `null`      |
+| `reverseNode` | `string`         | The reverse node hash                |
+| `verified`    | `boolean`        | Always `false` — clients must verify |
+
+## Errors
+
+| Status | Body                                      | Reason                                     |
+| ------ | ----------------------------------------- | ------------------------------------------ |
+| `400`  | `{ "error":" Name not found" }`           | Name not found for current registered data |
+| `400`  | `{ "error": "Invalid Ethereum address" }` | Not a valid EVM address                    |
+| `404`  | `{ "error": "No reverse record found" }`  | No reverse record set                      |
+| `429`  | `{ "error": "Rate limit exceeded" }`      | Too many requests                          |

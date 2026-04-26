@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "ponder dev",
-    "start": "ponder start",
+    "dev": "NODE_OPTIONS=--no-deprecation ponder dev",
+    "start": "NODE_OPTIONS=--no-deprecation ponder start",
     "codegen": "ponder codegen",
     "typecheck": "tsc --noEmit"
   },

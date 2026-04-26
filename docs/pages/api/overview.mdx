@@ -1,0 +1,25 @@
+# Indexer API
+
+The Oniym indexer is a [Ponder](https://ponder.sh) application that reads on-chain events and exposes a REST API for fast off-chain queries.
+
+## Base URL
+
+| Environment | URL |
+|-------------|-----|
+| Local dev | `http://localhost:42069` |
+| Testnet (Base Sepolia) | Coming soon |
+
+## Rate limiting
+
+100 requests per 60 seconds per IP (enforced via Redis). Returns `429` when exceeded.
+
+## Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | [`/resolve/:name`](/api/resolve) | Resolve a name to all its records |
+| `GET` | [`/lookup/:address`](/api/lookup) | Reverse lookup — address to claimed name |
+
+## Caching
+
+Responses are cached in Redis for 60 seconds. Expired names are never cached.

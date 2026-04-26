@@ -1,0 +1,50 @@
+# What is Oniym?
+
+Oniym is a multichain-native naming service built on Base. One name resolves to addresses on every supported chain — Ethereum, Solana, Bitcoin, Sui, BNB, and more.
+
+## Key ideas
+
+**One name, all chains.** Register `alice.web3` once and set addresses for every chain you use. No per-chain registrations.
+
+**65 TLDs, all equal.** Pick the TLD that fits your identity — `.id`, `.web3`, `.degen`, `.wagmi`, and 61 more. Any TLD resolves to any chain.
+
+**ENS-compatible resolver.** Oniym uses ENSIP-1 namehash and ENSIP-9 multichain address records, making it compatible with ENS tooling.
+
+**Commit-reveal registration.** A two-step commit-reveal flow prevents frontrunning when registering names.
+
+## Quick example
+
+```ts twoslash
+import { Oniym } from "@oniym/sdk";
+
+const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
+
+// Forward: name → address
+const eth = await oniym.getAddress("alice.web3", "eth");
+const sol = await oniym.getAddress("alice.web3", "sol");
+
+// Reverse: address → name
+const name = await oniym.getName("0x11702b...");
+
+// All addresses at once
+const all = await oniym.getAddresses("alice.web3");
+// { eth: "0x...", sol: "...", btc: "..." }
+```
+
+## Packages
+
+| Package                                  | Description                                          |
+| ---------------------------------------- | ---------------------------------------------------- |
+| [`@oniym/sdk`](/sdk/getting-started)     | TypeScript SDK — resolution, registration, utilities |
+| [`@oniym/react`](/react/getting-started) | React hooks built on TanStack Query                  |
+
+## Contracts
+
+Deployed on **Base Sepolia** (testnet). Mainnet launch (soon).
+
+| Contract            | Address                                      |
+| ------------------- | -------------------------------------------- |
+| Registry            | `0x4d0203cf6188247c282f1ee1b866ea55f71aabe4` |
+| RegistrarController | `0xF14E154633EFf408a99d3E6c9b01f918F93Ba5b1` |
+| PublicResolver      | `0xA37eD413181537c60586317a70f612a304EB0681` |
+| ReverseRegistrar    | `0xa5d904401d5f3ed1eb19188ce9de28bef3c083b9` |

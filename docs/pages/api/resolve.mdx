@@ -1,0 +1,51 @@
+# GET /resolve/:name
+
+Resolve a name to all its on-chain records.
+
+## Request
+
+```
+GET /resolve/kyy.web3
+```
+
+## Response
+
+```json
+{
+  "name": "kyy.web3",
+  "node": "0xf7d7c4fb47297d0f2106ac50d24c93063bc0fe50d559ed65e99edb91cc86f8a2",
+  "owner": "0x11702b8ef5f882191af862a7e27096c44a5e2b37",
+  "resolver": "0xa37ed413181537c60586317a70f612a304eb0681",
+  "expiresAt": "1808715608",
+  "expired": false,
+  "addresses": {
+    "60": "0x11702b8ef5f882191af862a7e27096c44a5e2b37"
+  },
+  "texts": {
+    "twitter": "@kyy"
+  },
+  "contenthash": null
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string` | Full name with TLD |
+| `node` | `string` | ENSIP-1 namehash (bytes32 hex) |
+| `owner` | `string` | Current owner address |
+| `resolver` | `string \| null` | Resolver contract address |
+| `expiresAt` | `string` | Unix timestamp of expiry |
+| `expired` | `boolean` | Whether the name is expired |
+| `addresses` | `Record<string, string>` | Coin type → address map |
+| `texts` | `Record<string, string>` | Text record key → value map |
+| `contenthash` | `string \| null` | Raw contenthash hex |
+
+## Errors
+
+| Status | Body | Reason |
+|--------|------|--------|
+| `400` | `{ "error": "Invalid name format. Expected label.tld" }` | Malformed name |
+| `404` | `{ "error": "Name not found" }` | Name not registered or indexed |
+| `429` | `{ "error": "Rate limit exceeded" }` | Too many requests |

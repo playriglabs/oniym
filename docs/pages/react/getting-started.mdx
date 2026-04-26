@@ -1,0 +1,68 @@
+# Getting started
+
+## Installation
+
+:::code-group
+
+```bash [npm]
+npm install @oniym/react @oniym/sdk @tanstack/react-query viem
+```
+
+```bash [pnpm]
+pnpm add @oniym/react @oniym/sdk @tanstack/react-query viem
+```
+
+:::
+
+## Setup
+
+Wrap your app with `OniymProvider` and `QueryClientProvider`:
+
+```tsx twoslash
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { OniymProvider } from "@oniym/react";
+
+const queryClient = new QueryClient();
+
+export function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <OniymProvider config={{ indexerUrl: "https://api.oniym.xyz" }}>
+        {/* your app */}
+      </OniymProvider>
+    </QueryClientProvider>
+  );
+}
+```
+
+## Usage
+
+```tsx twoslash
+import { useResolve, useName, useAvailable, useRegister } from "@oniym/react";
+
+function Profile({ address }: { address: string }) {
+  const { data: name } = useName(address);
+  const { data: result } = useResolve(name ?? undefined);
+
+  return (
+    <div>
+      <p>{name ?? address}</p>
+      <p>Expires: {result?.expiresAt}</p>
+    </div>
+  );
+}
+
+function Register() {
+  const { data: available } = useAvailable("alice", "web3");
+  const { mutate: register, isPending } = useRegister(undefined); // pass walletClient
+
+  return (
+    <button
+      disabled={!available || isPending}
+      onClick={() => register({ name: "alice", tld: "web3", reverseRecord: true })}
+    >
+      {isPending ? "Registering..." : "Register alice.web3"}
+    </button>
+  );
+}
+```

@@ -1,0 +1,105 @@
+# Getting started
+
+## Installation
+
+:::code-group
+
+```bash [npm]
+npm install @oniym/sdk viem
+```
+
+```bash [pnpm]
+pnpm add @oniym/sdk viem
+```
+
+```bash [yarn]
+yarn add @oniym/sdk viem
+```
+
+:::
+
+## Initialise
+
+```ts twoslash
+import { Oniym } from "@oniym/sdk";
+
+const oniym = new Oniym({
+  indexerUrl: "https://api.oniym.xyz", // fast reads
+  rpcUrl: "https://mainnet.base.org",  // fallback / write calls
+});
+```
+
+### Config options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `indexerUrl` | `string` | Base URL of the Oniym indexer API. Defaults to `http://localhost:42069`. |
+| `rpcUrl` | `string` | Base RPC URL for direct contract reads and write calls. Defaults to the public Base Sepolia endpoint. |
+| `chainId` | `84532 \| 8453` | Chain to use. Defaults to `84532` (Base Sepolia). |
+
+## Read a name
+
+```ts twoslash
+import { Oniym } from "@oniym/sdk";
+const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
+// ---cut---
+// All records for a name
+const result = await oniym.resolve("kyy.web3");
+console.log(result?.owner);      // "0x..."
+console.log(result?.expiresAt);  // unix timestamp string
+console.log(result?.addresses);  // { "60": "0x..." }
+console.log(result?.texts);      // { "twitter": "..." }
+
+// Just one chain's address
+const eth = await oniym.getAddress("kyy.web3", "eth");
+
+// All chain addresses at once
+const all = await oniym.getAddresses("kyy.web3");
+// { eth: "0x...", sol: "...", btc: "..." }
+
+// Reverse: address → name
+const name = await oniym.getName("0x11702b...");
+```
+
+## Check availability & price
+
+```ts twoslash
+import { Oniym } from "@oniym/sdk";
+const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
+// ---cut---
+const isAvailable = await oniym.available("alice", "web3");
+const price = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60);
+console.log(`${Number(price) / 1e18} ETH`);
+```
+
+## Register a name
+
+Registration requires a connected [viem](https://viem.sh) `WalletClient`.
+
+```ts twoslash
+import { Oniym } from "@oniym/sdk";
+import { createWalletClient, custom } from "viem";
+import { baseSepolia } from "viem/chains";
+
+const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
+const walletClient = createWalletClient({
+  chain: baseSepolia,
+  transport: custom(window.ethereum),
+});
+
+const hash = await oniym.register(
+  {
+    name: "alice",
+    tld: "web3",
+    duration: 365 * 24 * 60 * 60,
+    reverseRecord: true,
+    addresses: { eth: "0x11702b8eF5F882191Af862a7e27096C44A5e2B37" },
+    onCommit: (hash) => console.log("Committed:", hash),
+    onWaiting: (ms) => console.log(`Waiting ${ms / 1000}s...`),
+  },
+  walletClient,
+);
+console.log("Registered:", hash);
+```
+
+The SDK handles the full commit → wait → reveal flow automatically.
