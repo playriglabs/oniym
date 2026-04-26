@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import { db } from "ponder:api";
 import { Hono } from "hono";
 import { eq, and } from "drizzle-orm";
@@ -228,10 +227,7 @@ app.get("/names/:address", async (c) => {
 
     const now = BigInt(Math.floor(Date.now() / 1000));
 
-    const rows = await db
-        .select()
-        .from(schema.name)
-        .where(eq(schema.name.owner, address));
+    const rows = await db.select().from(schema.name).where(eq(schema.name.owner, address));
 
     const names = rows.map((r) => ({
         name: r.fullName,
