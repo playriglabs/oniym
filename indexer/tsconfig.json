@@ -4,11 +4,8 @@
     "module": "ES2022",
     "moduleResolution": "bundler",
     "strict": true,
-    "paths": {
-      "ponder:registry": ["./.ponder/registry.ts"],
-      "ponder:schema": ["./.ponder/schema.ts"],
-      "ponder:api": ["./.ponder/api.ts"]
-    }
+    "skipLibCheck": true
   },
-  "include": ["src", "api", "ponder.config.ts", "ponder.schema.ts"]
+  "include": ["src", "api", "ponder.config.ts", "ponder.schema.ts", "ponder-env.d.ts"],
+  "exclude": ["node_modules"]
 }
