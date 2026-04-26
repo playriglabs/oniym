@@ -5,16 +5,20 @@ on:
     branches: [master]
     paths:
       - "sdk/**"
+      - "react/**"
       - "indexer/**"
-      - "web/**"
+      - "examples/**"
+      - "docs/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - ".github/workflows/typescript.yml"
   pull_request:
     paths:
       - "sdk/**"
+      - "react/**"
       - "indexer/**"
-      - "web/**"
+      - "examples/**"
+      - "docs/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - ".github/workflows/typescript.yml"
@@ -38,6 +42,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build SDK
+        run: pnpm --filter @oniym/sdk build
 
       - name: Lint
         run: pnpm lint
