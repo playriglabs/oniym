@@ -9,8 +9,15 @@ export default defineConfig({
     ogImageUrl: "https://oniym.xyz/og.png",
     theme: {
         accentColor: {
-            light: "#6366f1",
-            dark: "#818cf8",
+            light: "#40b5c7",
+            dark: "#85efff",
+        },
+    },
+    font: {
+        google: "DM Sans",
+        // Optional: Change the monospace/code font
+        mono: {
+            google: "Source Code Pro",
         },
     },
     socials: [

@@ -43,6 +43,8 @@ async function main(): Promise<void> {
 
     // Rent price (via RPC)
     console.log("\nRent price for kyy.dev (1 year)...");
+    const isKyyDevAvailable = await oniym.available("kyy", "dev");
+    console.log(`  available: ${String(isKyyDevAvailable)}`);
     const price = await oniym.rentPrice("kyy", "dev", 365 * 24 * 60 * 60);
     console.log(`  price: ${price.toString()} wei (${(Number(price) / 1e18).toString()} ETH)`);
 
