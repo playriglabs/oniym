@@ -22,7 +22,7 @@ async function main(): Promise<void> {
     if (result) {
         console.log(`  owner:     ${result.owner}`);
         console.log(`  expiresAt: ${new Date(Number(result.expiresAt) * 1000).toLocaleDateString()}`);
-        console.log(`  expired:   ${result.expired}`);
+        console.log(`  expired:   ${String(result.expired)}`);
         console.log(`  addresses: ${JSON.stringify(result.addresses)}`);
         console.log(`  texts:     ${JSON.stringify(result.texts)}`);
     } else {
@@ -37,12 +37,12 @@ async function main(): Promise<void> {
     // Availability check (via RPC)
     console.log("\nChecking availability of alice.web3...");
     const isAvailable = await oniym.available("alice", "web3");
-    console.log(`  available: ${isAvailable}`);
+    console.log(`  available: ${String(isAvailable)}`);
 
     // Rent price (via RPC)
     console.log("\nRent price for kyy.web3 (1 year)...");
     const price = await oniym.rentPrice("kyy", "web3", 365 * 24 * 60 * 60);
-    console.log(`  price: ${price} wei (${Number(price) / 1e18} ETH)`);
+    console.log(`  price: ${price.toString()} wei (${(Number(price) / 1e18).toString()} ETH)`);
 
     // Namehash utilities
     console.log("\nNamehash utilities:");

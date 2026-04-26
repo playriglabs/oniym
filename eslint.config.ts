@@ -10,7 +10,12 @@ const config: Linter.Config[] = [
         languageOptions: {
             parserOptions: {
                 projectService: {
-                    allowDefaultProject: ["sdk/*.config.ts", "docs/vocs.config.ts"],
+                    allowDefaultProject: [
+                        "sdk/*.config.ts",
+                        "docs/*.config.ts",
+                        "react/*.config.ts",
+                        "examples/node/index.ts",
+                    ],
                 },
                 tsconfigRootDir: import.meta.dirname,
             },
