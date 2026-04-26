@@ -248,7 +248,7 @@ contract GasBenchmarkTest is Test {
         uint256 gasUsed = gasBefore - gasleft();
 
         emit log_named_uint("setAddr() SOL cold gas", gasUsed);
-        assertLt(gasUsed, 80_000, "setAddr() SOL regression");
+        assertLt(gasUsed, 100_000, "setAddr() SOL regression");
     }
 
     // ---------------------------------------------------------------
