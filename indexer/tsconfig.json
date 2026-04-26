@@ -6,6 +6,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src", "api", "ponder.config.ts", "ponder.schema.ts", "ponder-env.d.ts"],
+  "include": ["src", "ponder.config.ts", "ponder.schema.ts", "ponder-env.d.ts"],
   "exclude": ["node_modules"]
 }
