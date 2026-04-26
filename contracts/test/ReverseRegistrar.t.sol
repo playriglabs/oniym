@@ -91,7 +91,7 @@ contract ReverseRegistrarTest is Test {
             tld: tldNode,
             owner: owner,
             duration: YEAR,
-            secret: bytes32("secret"),
+            secret: keccak256("secret"),
             resolver: address(pubResolver),
             resolverData: new bytes[](0),
             reverseRecord: false

@@ -67,7 +67,7 @@ contract ProtocolInvariantTest is StdInvariant, Test {
     function invariant_controller_eth_accounting() public view {
         assertEq(
             address(ctrl).balance,
-            handler.ghost_totalPaid() - handler.ghost_totalWithdrawn(),
+            handler.ghostTotalPaid() - handler.ghostTotalWithdrawn(),
             "INV-1: controller balance != totalPaid - totalWithdrawn"
         );
     }
@@ -83,7 +83,7 @@ contract ProtocolInvariantTest is StdInvariant, Test {
         string[5] memory names = handler.names();
         for (uint256 i = 0; i < names.length; i++) {
             uint256 tokenId = uint256(keccak256(bytes(names[i])));
-            uint256 ghostExp = handler.ghost_lastExpiry(tokenId);
+            uint256 ghostExp = handler.ghostLastExpiry(tokenId);
             if (ghostExp == 0) continue; // never registered
 
             assertEq(
@@ -132,7 +132,7 @@ contract ProtocolInvariantTest is StdInvariant, Test {
         string[5] memory names = handler.names();
         for (uint256 i = 0; i < names.length; i++) {
             uint256 tokenId = uint256(keccak256(bytes(names[i])));
-            if (!handler.ghost_everRegistered(tokenId)) continue;
+            if (!handler.ghostEverRegistered(tokenId)) continue;
 
             uint256 expires = registrar.nameExpires(tokenId);
             // Only check live names — expired names have registry owner = address(0)

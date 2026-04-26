@@ -134,10 +134,7 @@ contract ReverseRegistrar is IReverseRegistrar, Ownable2Step {
     ///      or an operator approved on the reverse node owner's behalf.
     function _requireAuthorised(address addr) internal view {
         if (msg.sender == addr) return;
-        // forge-lint: disable-next-line(asm-keccak256)
-        bytes32 reverseNode = keccak256(
-            abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(_addrToHex(addr))))
-        );
+        bytes32 reverseNode = keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(_addrToHex(addr))))); // forge-lint: disable-line(asm-keccak256)
         address currentOwner = REGISTRY.ownerOf(reverseNode);
         if (currentOwner != address(0)) {
             if (msg.sender == currentOwner) return;

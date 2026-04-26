@@ -78,7 +78,7 @@ contract PublicResolverTest is Test {
             tld: tldNode,
             owner: owner,
             duration: YEAR,
-            secret: bytes32("secret"),
+            secret: keccak256("secret"),
             resolver: address(resolver),
             resolverData: new bytes[](0),
             reverseRecord: false

@@ -69,7 +69,7 @@ contract GasBenchmarkTest is Test {
             tld: tldNode,
             owner: alice,
             duration: YEAR,
-            secret: bytes32("secret"),
+            secret: keccak256("secret"),
             resolver: address(0),
             resolverData: new bytes[](0),
             reverseRecord: false
@@ -124,7 +124,7 @@ contract GasBenchmarkTest is Test {
             tld: tldNode,
             owner: alice,
             duration: YEAR,
-            secret: bytes32("secret"),
+            secret: keccak256("secret"),
             resolver: address(resolver),
             resolverData: resolverData,
             reverseRecord: false

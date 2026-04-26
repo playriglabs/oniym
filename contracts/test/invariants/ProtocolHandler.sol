@@ -36,16 +36,16 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
     // ---------------------------------------------------------------
 
     /// @dev Total ETH paid via register() and renew()
-    uint256 public ghost_totalPaid;
+    uint256 public ghostTotalPaid;
 
     /// @dev Total ETH removed via withdraw()
-    uint256 public ghost_totalWithdrawn;
+    uint256 public ghostTotalWithdrawn;
 
     /// @dev tokenId => last recorded expiry (set on register / renew)
-    mapping(uint256 => uint256) public ghost_lastExpiry;
+    mapping(uint256 => uint256) public ghostLastExpiry;
 
     /// @dev tokenId => whether the name has ever been registered
-    mapping(uint256 => bool) public ghost_everRegistered;
+    mapping(uint256 => bool) public ghostEverRegistered;
 
     constructor(
         Registry _reg,
@@ -82,7 +82,7 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
             tld: tldNode,
             owner: user,
             duration: duration,
-            secret: bytes32("handler-secret"),
+            secret: keccak256("handler-secret"),
             resolver: address(0),
             resolverData: new bytes[](0),
             reverseRecord: false
@@ -101,9 +101,9 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
         uint256 expectedExpiry = block.timestamp + duration;
         ctrl.register{ value: price }(req);
 
-        ghost_totalPaid += price;
-        ghost_lastExpiry[tokenId] = expectedExpiry;
-        ghost_everRegistered[tokenId] = true;
+        ghostTotalPaid += price;
+        ghostLastExpiry[tokenId] = expectedExpiry;
+        ghostEverRegistered[tokenId] = true;
     }
 
     function renew(uint256 nameIdx, uint256 durationSeed) external {
@@ -112,7 +112,7 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
         uint256 tokenId = uint256(keccak256(bytes(name)));
 
         // Must be registered (even if expired — renew still works within grace period)
-        if (!ghost_everRegistered[tokenId]) return;
+        if (!ghostEverRegistered[tokenId]) return;
         if (registrar.available(tokenId)) return; // past grace period
 
         uint256 expBefore = registrar.nameExpires(tokenId);
@@ -125,8 +125,8 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
 
         ctrl.renew{ value: price }(name, tldNode, duration);
 
-        ghost_totalPaid += price;
-        ghost_lastExpiry[tokenId] = expectedExpiry;
+        ghostTotalPaid += price;
+        ghostLastExpiry[tokenId] = expectedExpiry;
     }
 
     function withdraw() external {
@@ -137,7 +137,7 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
         vm.prank(protocolOwner);
         ctrl.withdraw(treasury);
 
-        ghost_totalWithdrawn += bal;
+        ghostTotalWithdrawn += bal;
     }
 
     function warpTime(uint256 seconds_) external {
