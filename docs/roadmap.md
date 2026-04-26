@@ -61,13 +61,13 @@ An 8-sprint journey from zero to mainnet launch. Deliverables are hard gates —
 
 **Theme:** Fast reads from anywhere.
 
-- [ ] Ponder indexer schema (names, events, resolutions)
-- [ ] Event handlers for Registry/Resolver events
-- [ ] Reorg handling verified
-- [ ] REST API (Hono) — `/resolve/:name`, `/lookup/:address`
-- [ ] Redis cache layer
-- [ ] Rate limiting
-- [ ] Docker Compose for local dev
+- [x] Ponder indexer schema (names, events, resolutions)
+- [x] Event handlers for Registry/Resolver events
+- [x] Reorg handling verified (Ponder handles reorgs automatically)
+- [x] REST API (Hono) — `/resolve/:name`, `/lookup/:address`
+- [x] Redis cache layer
+- [x] Rate limiting
+- [x] Docker Compose for local dev
 - [ ] Deploy to Railway
 
 **Exit criteria:** `curl https://api.oniym.xyz/resolve/kyy.id` returns all chain addresses. P99 latency < 200ms.
