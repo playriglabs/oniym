@@ -1,0 +1,13 @@
+{
+  "name": "@oniym/example-node",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-strip-types index.ts",
+    "dev": "node --watch --experimental-strip-types index.ts"
+  },
+  "dependencies": {
+    "@oniym/sdk": "workspace:*"
+  }
+}

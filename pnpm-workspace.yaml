@@ -1,5 +1,6 @@
 packages:
   - "indexer"
   - "sdk"
+  - "react"
   - "web"
   - "examples/*"

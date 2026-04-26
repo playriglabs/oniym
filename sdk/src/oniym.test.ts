@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Oniym, COIN_TYPES, SUPPORTED_TLDS, MAX_TLD_COUNT, MAX_TLD_LENGTH } from "./oniym";
 
 // ---------------------------------------------------------------
@@ -161,21 +161,63 @@ describe("Oniym.getTLDs", () => {
     });
 });
 
-describe("Oniym resolution stubs", () => {
-    const oniym = new Oniym();
+describe("Oniym resolution (mocked fetch)", () => {
+    const oniym = new Oniym({ indexerUrl: "http://localhost:42069" });
 
-    it("getName returns null (not yet implemented)", async () => {
+    beforeEach(() => {
+        vi.stubGlobal("fetch", vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    it("getName returns null when indexer returns 404", async () => {
+        vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 404 }));
         await expect(
             oniym.getName("0x00000000000e1a99dddd5610111884278bdbda1d"),
         ).resolves.toBeNull();
     });
 
-    it("getAddress returns null (not yet implemented)", async () => {
+    it("getAddress returns null when name not found", async () => {
+        vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 404 }));
         await expect(oniym.getAddress("kyy.id", "eth")).resolves.toBeNull();
-        await expect(oniym.getAddress("kyy.one", "sol")).resolves.toBeNull();
     });
 
-    it("getAddresses returns empty object (not yet implemented)", async () => {
+    it("getAddresses returns empty object when name not found", async () => {
+        vi.mocked(fetch).mockResolvedValue(new Response(null, { status: 404 }));
         await expect(oniym.getAddresses("kyy.id")).resolves.toEqual({});
+    });
+
+    it("getName returns name from reverse lookup", async () => {
+        vi.mocked(fetch).mockResolvedValue(
+            new Response(
+                JSON.stringify({ address: "0x123", name: "kyy.web3", reverseNode: "0xabc", verified: false }),
+                { status: 200, headers: { "content-type": "application/json" } },
+            ),
+        );
+        await expect(oniym.getName("0x123")).resolves.toBe("kyy.web3");
+    });
+
+    it("getAddress extracts correct coinType from resolve result", async () => {
+        vi.mocked(fetch).mockResolvedValue(
+            new Response(
+                JSON.stringify({
+                    name: "kyy.web3",
+                    node: "0xf7d7c4fb47297d0f2106ac50d24c93063bc0fe50d559ed65e99edb91cc86f8a2",
+                    owner: "0x123",
+                    resolver: null,
+                    expiresAt: "9999999999",
+                    expired: false,
+                    addresses: { "60": "0x11702b8eF5F882191Af862a7e27096C44A5e2B37" },
+                    texts: {},
+                    contenthash: null,
+                }),
+                { status: 200, headers: { "content-type": "application/json" } },
+            ),
+        );
+        await expect(oniym.getAddress("kyy.web3", "eth")).resolves.toBe(
+            "0x11702b8eF5F882191Af862a7e27096C44A5e2B37",
+        );
     });
 });

@@ -1,9 +1,30 @@
-/* eslint-disable @typescript-eslint/require-await */
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
-import type { Hex } from "viem";
+import {
+    createPublicClient,
+    http,
+    toBytes,
+    toHex,
+    encodeFunctionData,
+    type Hex,
+    type Address,
+    type Hash,
+    type WalletClient,
+} from "viem";
+import { baseSepolia } from "viem/chains";
+import type { Chain } from "viem";
 import { namehash as _namehash, labelhash as _labelhash, makeNode as _makeNode } from "./namehash";
+import {
+    CHAIN_IDS,
+    CONTRACT_ADDRESSES,
+    registrarControllerAbi,
+    publicResolverAbi,
+    registryAbi,
+    type ChainId,
+} from "./contracts";
 
-// SLIP-0044 coin types for supported chains
+// ---------------------------------------------------------------
+//                          CONSTANTS
+// ---------------------------------------------------------------
+
 export const COIN_TYPES = {
     btc: 0,
     eth: 60,
@@ -14,211 +35,160 @@ export const COIN_TYPES = {
 
 export type SupportedChain = keyof typeof COIN_TYPES;
 
-/** Maximum number of TLDs the protocol will ever register (enforced on-chain in ITLDManager) */
 export const MAX_TLD_COUNT = 65;
-
-/** Maximum character length of a TLD label, excluding the leading dot */
 export const MAX_TLD_LENGTH = 5;
 
-/**
- * Protocol-managed TLDs — web-style, chain-neutral (see ADR-007).
- *
- * Any TLD name resolves to ALL supported chain addresses. TLD choice is
- * purely about identity preference, not chain restriction.
- *
- * Capped at MAX_TLD_COUNT (65). Each label is ≤ MAX_TLD_LENGTH (5) chars.
- */
 export const SUPPORTED_TLDS = [
-    // General identity
-    "id",
-    "one",
-    "me",
-    "co",
-    // Web3 / tech signals
-    "xyz",
-    "web3",
-    "io",
-    "pro",
-    "app",
-    "dev",
-    "onm",
-    "go",
-    // Crypto culture
-    "ape",
-    "fud",
-    "hodl",
-    "fomo",
-    "moon",
-    "rekt",
-    "wagmi",
-    "ngmi",
-    "degen",
-    "whale",
-    "buidl",
-    "dyor",
-    "pump",
-    "alpha",
-    "safu",
-    "l2",
-    "gm",
-    "lfg",
-    "ser",
-    "fren",
-    "goat",
-    "cope",
-    "pepe",
-    "wen",
-    // Finance / DeFi
-    "mint",
-    "bear",
-    "gas",
-    "dao",
-    "ath",
-    "dex",
-    "cex",
-    "burn",
-    "node",
-    "swap",
-    "yield",
-    "bag",
-    "bags",
-    "seed",
-    "drop",
-    "stake",
-    "pool",
-    "wrap",
-    "farm",
-    "shill",
-    // Misc
-    "xxx",
-    "regs",
-    "main",
-    "test",
-    "exit",
-    "fair",
-    "guh",
-    "bots",
-    "keys",
+    "id", "one", "me", "co",
+    "xyz", "web3", "io", "pro", "app", "dev", "onm", "go",
+    "ape", "fud", "hodl", "fomo", "moon", "rekt", "wagmi", "ngmi",
+    "degen", "whale", "buidl", "dyor", "pump", "alpha", "safu", "l2",
+    "gm", "lfg", "ser", "fren", "goat", "cope", "pepe", "wen",
+    "mint", "bear", "gas", "dao", "ath", "dex", "cex", "burn",
+    "node", "swap", "yield", "bag", "bags", "seed", "drop", "stake",
+    "pool", "wrap", "farm", "shill",
+    "xxx", "regs", "main", "test", "exit", "fair", "guh", "bots", "keys",
 ] as const;
+
 export type SupportedTLD = (typeof SUPPORTED_TLDS)[number];
 
+// ---------------------------------------------------------------
+//                            TYPES
+// ---------------------------------------------------------------
+
 export interface TLDInfo {
-    /** Human-readable label without leading dot (e.g. "eth") */
     label: SupportedTLD | string;
-    /** namehash of the label */
     node: Hex;
-    /** Whether new registrations are currently open */
     active: boolean;
 }
 
-/**
- * Multichain addresses keyed by chain name.
- * Only chains that have a record set on-chain are present.
- */
 export type MultiChainAddresses = Partial<Record<SupportedChain, string>>;
 
-export interface OniymConfig {
-    /** Indexer API base URL for fast reads. Falls back to direct RPC if omitted. */
-    indexerUrl?: string;
-    /** Base RPC URL for trustless fallback reads. */
-    rpcUrl?: string;
+export interface ResolveResult {
+    name: string;
+    node: Hex;
+    owner: string;
+    resolver: string | null;
+    expiresAt: string;
+    expired: boolean;
+    addresses: Record<string, string>;
+    texts: Record<string, string>;
+    contenthash: string | null;
 }
 
-/**
- * Oniym SDK — multichain naming service client.
- *
- * Inspired by the Clusters SDK: a simple, chain-agnostic API for
- * name ↔ address resolution across ETH, SOL, BTC, SUI, and Base.
- *
- * @example
- * ```ts
- * import { Oniym } from "@oniym/sdk";
- *
- * const oniym = new Oniym();
- *
- * // Reverse: address → primary name (like clusters.getName)
- * const name = await oniym.getName("0x123...");           // "kyy.id"
- *
- * // Forward: name → address on a specific chain
- * const addr = await oniym.getAddress("kyy.id", "sol");   // "..."
- *
- * // All addresses for a name (multichain bundle)
- * const all = await oniym.getAddresses("kyy.id");
- * // { eth: "0x...", sol: "...", btc: "...", bnb: "..." }
- * ```
- */
+export interface LookupResult {
+    address: string;
+    name: string | null;
+    reverseNode: string;
+    verified: boolean;
+}
+
+export interface RegisterOptions {
+    name: string;
+    tld: SupportedTLD | string;
+    duration?: number;
+    owner?: Address;
+    resolver?: Address;
+    reverseRecord?: boolean;
+    addresses?: Partial<Record<SupportedChain, string>>;
+    texts?: Record<string, string>;
+    onCommit?: (hash: Hash) => void;
+    onWaiting?: (remainingMs: number) => void;
+}
+
+export interface OniymConfig {
+    indexerUrl?: string;
+    rpcUrl?: string;
+    chainId?: ChainId;
+}
+
+// ---------------------------------------------------------------
+//                         ONIYM CLASS
+// ---------------------------------------------------------------
+
 export class Oniym {
     readonly config: OniymConfig;
+    private readonly chainId: ChainId;
+    private readonly addresses: (typeof CONTRACT_ADDRESSES)[ChainId];
+    private readonly chain: Chain;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private readonly publicClient: ReturnType<typeof createPublicClient<any, Chain>>;
 
     constructor(config: OniymConfig = {}) {
         this.config = config;
+        this.chainId = config.chainId ?? CHAIN_IDS.baseSepolia;
+        this.addresses = CONTRACT_ADDRESSES[this.chainId];
+        this.chain = baseSepolia;
+        this.publicClient = createPublicClient({
+            chain: this.chain,
+            transport: http(config.rpcUrl),
+        });
     }
 
     // ---------------------------------------------------------------
-    //                     REVERSE RESOLUTION
+    //                      INDEXER READS
     // ---------------------------------------------------------------
 
-    /**
-     * Resolve an address to its primary name across all protocol TLDs.
-     * Equivalent to `clusters.getName(address)`.
-     *
-     * Returns the first verified reverse record found, or `null` if none.
-     * Verification: forward-resolves the returned name and confirms address match
-     * (Reverse + Forward verification — see IReverseRegistrar).
-     *
-     * @param address EVM address (0x-prefixed) or chain-native address string
-     * @returns Full name with TLD (e.g. "kyy.id") or null
-     */
+    async resolve(name: string): Promise<ResolveResult | null> {
+        const url = this._indexerUrl(`/resolve/${encodeURIComponent(name)}`);
+        const res = await fetch(url);
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error(`Resolve failed: ${res.status}`);
+        return res.json() as Promise<ResolveResult>;
+    }
+
     async getName(address: string): Promise<string | null> {
-        // TODO: query indexer API / RPC once contracts are deployed
-        void address;
-        return null;
+        const url = this._indexerUrl(`/lookup/${address}`);
+        const res = await fetch(url);
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error(`Lookup failed: ${res.status}`);
+        const data = (await res.json()) as LookupResult;
+        return data.name;
     }
 
-    // ---------------------------------------------------------------
-    //                     FORWARD RESOLUTION
-    // ---------------------------------------------------------------
-
-    /**
-     * Resolve a name to an address on a specific chain.
-     *
-     * @param name  Full name with TLD (e.g. "kyy.id")
-     * @param chain Target chain key (e.g. "eth", "sol", "btc")
-     * @returns Chain-native address string, or null if no record is set
-     */
     async getAddress(name: string, chain: SupportedChain): Promise<string | null> {
-        // TODO: query indexer API / RPC once contracts are deployed
-        void name;
-        void chain;
-        return null;
+        const result = await this.resolve(name);
+        if (!result) return null;
+        const coinType = COIN_TYPES[chain].toString();
+        return result.addresses[coinType] ?? null;
     }
 
-    /**
-     * Resolve a name to all registered chain addresses at once.
-     *
-     * @param name Full name with TLD (e.g. "kyy.id")
-     * @returns Map of chain → address for every chain that has a record set
-     */
     async getAddresses(name: string): Promise<MultiChainAddresses> {
-        // TODO: query indexer API / RPC once contracts are deployed
-        void name;
-        return {};
+        const result = await this.resolve(name);
+        if (!result) return {};
+
+        const out: MultiChainAddresses = {};
+        for (const [chain, coinType] of Object.entries(COIN_TYPES) as [SupportedChain, number][]) {
+            const addr = result.addresses[coinType.toString()];
+            if (addr) out[chain] = addr;
+        }
+        return out;
     }
 
     // ---------------------------------------------------------------
-    //                         TLD DISCOVERY
+    //                       RPC READS
     // ---------------------------------------------------------------
 
-    /**
-     * List all active TLDs offered by the protocol.
-     *
-     * When contracts are deployed this reads from ITLDManager.listTLDs().
-     * Until then it returns the static launch set.
-     *
-     * @returns Array of TLD metadata objects
-     */
+    async available(name: string, tld: string): Promise<boolean> {
+        return this.publicClient.readContract({
+            address: this.addresses.RegistrarController,
+            abi: registrarControllerAbi,
+            functionName: "available",
+            args: [name, _namehash(tld)],
+        });
+    }
+
+    async rentPrice(name: string, tld: string, duration: number): Promise<bigint> {
+        const [base, premium] = await this.publicClient.readContract({
+            address: this.addresses.RegistrarController,
+            abi: registrarControllerAbi,
+            functionName: "rentPrice",
+            args: [name, _namehash(tld), BigInt(duration)],
+        });
+        return base + premium;
+    }
+
     async getTLDs(): Promise<TLDInfo[]> {
-        // TODO: read from ITLDManager contract when deployed
         return SUPPORTED_TLDS.map((label) => ({
             label,
             node: _namehash(label),
@@ -227,91 +197,206 @@ export class Oniym {
     }
 
     // ---------------------------------------------------------------
-    //                           WRITES
+    //                          WRITES
     // ---------------------------------------------------------------
 
-    /**
-     * Register a name under a specific TLD.
-     *
-     * Handles the full commit-reveal flow: commits, waits for MIN_COMMITMENT_AGE,
-     * then reveals. Requires a connected wallet client.
-     *
-     * @param name     Label only, no TLD (e.g. "kyy")
-     * @param tld      TLD label (e.g. "id", "one", "xyz")
-     * @param duration Registration duration in seconds
-     * @param owner    Owner address to receive the name NFT
-     * @returns Transaction hash of the register() call
-     */
-    async register(
+    async register(options: RegisterOptions, walletClient: WalletClient): Promise<Hash> {
+        const account = walletClient.account;
+        if (!account) throw new Error("walletClient.account is required");
+
+        const owner = options.owner ?? account.address;
+        const resolver = options.resolver ?? this.addresses.PublicResolver;
+        const duration = options.duration ?? 365 * 24 * 60 * 60;
+        const tldNode = _namehash(options.tld);
+        const nameNode = _makeNode(tldNode, options.name);
+        const secret = toHex(crypto.getRandomValues(new Uint8Array(32)));
+
+        const resolverData = this._buildResolverData(nameNode, options.addresses, options.texts);
+
+        const req = {
+            name: options.name,
+            tld: tldNode,
+            owner,
+            duration: BigInt(duration),
+            secret,
+            resolver,
+            resolverData,
+            reverseRecord: options.reverseRecord ?? false,
+        } as const;
+
+        // 1. Commit
+        const commitment = await this.publicClient.readContract({
+            address: this.addresses.RegistrarController,
+            abi: registrarControllerAbi,
+            functionName: "makeCommitment",
+            args: [req],
+        });
+
+        const commitHash = await walletClient.writeContract({
+            address: this.addresses.RegistrarController,
+            abi: registrarControllerAbi,
+            functionName: "commit",
+            args: [commitment],
+            chain: this.chain,
+            account,
+        });
+        options.onCommit?.(commitHash);
+
+        // 2. Wait for MIN_COMMITMENT_AGE
+        const minAge = await this.publicClient.readContract({
+            address: this.addresses.RegistrarController,
+            abi: registrarControllerAbi,
+            functionName: "MIN_COMMITMENT_AGE",
+        });
+
+        const waitMs = (Number(minAge) + 5) * 1000;
+        options.onWaiting?.(waitMs);
+        await new Promise<void>((r) => setTimeout(r, waitMs));
+
+        // 3. Register
+        const total = await this.rentPrice(options.name, options.tld, duration);
+        return walletClient.writeContract({
+            address: this.addresses.RegistrarController,
+            abi: registrarControllerAbi,
+            functionName: "register",
+            args: [req],
+            value: total,
+            chain: this.chain,
+            account,
+        });
+    }
+
+    async setAddress(
         name: string,
-        tld: SupportedTLD | string,
-        duration: number,
-        owner: string,
-    ): Promise<string> {
-        // TODO: implement commit-reveal flow via IRegistrarController once deployed
-        void name;
-        void tld;
-        void duration;
-        void owner;
-        throw new Error("register() not yet implemented — contracts not deployed");
+        chain: SupportedChain,
+        address: string,
+        walletClient: WalletClient,
+    ): Promise<Hash> {
+        const account = walletClient.account;
+        if (!account) throw new Error("walletClient.account is required");
+
+        const node = _namehash(name);
+        const coinType = BigInt(COIN_TYPES[chain]);
+        const addrBytes: Hex = chain === "eth"
+            ? toHex(toBytes(address as Address))
+            : toHex(toBytes(address as Hex));
+
+        return walletClient.writeContract({
+            address: this.addresses.PublicResolver,
+            abi: publicResolverAbi,
+            functionName: "setAddr",
+            args: [node, coinType, addrBytes],
+            chain: this.chain,
+            account,
+        });
     }
 
-    /**
-     * Set an address for a specific chain on an existing name.
-     *
-     * @param name    Full name with TLD (e.g. "kyy.id")
-     * @param chain   Target chain key (e.g. "sol")
-     * @param address Chain-native address to store
-     * @returns Transaction hash
-     */
-    async setAddress(name: string, chain: SupportedChain, address: string): Promise<string> {
-        // TODO: implement via Resolver.setAddr() once deployed
-        void name;
-        void chain;
-        void address;
-        throw new Error("setAddress() not yet implemented — contracts not deployed");
+    async setText(
+        name: string,
+        key: string,
+        value: string,
+        walletClient: WalletClient,
+    ): Promise<Hash> {
+        const account = walletClient.account;
+        if (!account) throw new Error("walletClient.account is required");
+
+        return walletClient.writeContract({
+            address: this.addresses.PublicResolver,
+            abi: publicResolverAbi,
+            functionName: "setText",
+            args: [_namehash(name), key, value],
+            chain: this.chain,
+            account,
+        });
+    }
+
+    async setResolver(name: string, resolver: Address, walletClient: WalletClient): Promise<Hash> {
+        const account = walletClient.account;
+        if (!account) throw new Error("walletClient.account is required");
+
+        return walletClient.writeContract({
+            address: this.addresses.Registry,
+            abi: registryAbi,
+            functionName: "setResolver",
+            args: [_namehash(name), resolver],
+            chain: this.chain,
+            account,
+        });
     }
 
     // ---------------------------------------------------------------
-    //                          UTILITIES
+    //                         UTILITIES
     // ---------------------------------------------------------------
 
-    /** ENSIP-1 namehash for a full name (e.g. "kyy.id") */
     namehash(name: string): Hex {
         return _namehash(name);
     }
 
-    /** keccak256 of a single label (e.g. "kyy") */
     labelhash(label: string): Hex {
         return _labelhash(label);
     }
 
-    /** Compute a subdomain node from a parent node + label */
     makeNode(parentNode: Hex, label: string): Hex {
         return _makeNode(parentNode, label);
     }
 
-    /**
-     * Parse a full name into its label and TLD.
-     *
-     * @example parseName("kyy.id") // { label: "kyy", tld: "id" }
-     * @returns null if the name is not a valid two-part name
-     */
     parseName(name: string): { label: string; tld: string } | null {
         const dot = name.indexOf(".");
         if (dot <= 0 || dot === name.length - 1) return null;
         const label = name.slice(0, dot);
         const tld = name.slice(dot + 1);
-        if (tld.includes(".")) return null; // sub-names not supported in v1
+        if (tld.includes(".")) return null;
         return { label, tld };
     }
 
-    /**
-     * SLIP-0044 coin type for a supported chain key.
-     *
-     * @example coinTypeFor("sol") // 501
-     */
     coinTypeFor(chain: SupportedChain): number {
         return COIN_TYPES[chain];
+    }
+
+    // ---------------------------------------------------------------
+    //                          PRIVATE
+    // ---------------------------------------------------------------
+
+    private _indexerUrl(path: string): string {
+        const base = this.config.indexerUrl ?? "http://localhost:42069";
+        return `${base.replace(/\/$/, "")}${path}`;
+    }
+
+    private _buildResolverData(
+        nameNode: Hex,
+        addresses?: Partial<Record<SupportedChain, string>>,
+        texts?: Record<string, string>,
+    ): Hex[] {
+        const calls: Hex[] = [];
+
+        if (addresses) {
+            for (const [chain, addr] of Object.entries(addresses) as [SupportedChain, string][]) {
+                if (!addr) continue;
+                const addrBytes: Hex = chain === "eth"
+                    ? toHex(toBytes(addr as Address))
+                    : toHex(toBytes(addr as Hex));
+                calls.push(
+                    encodeFunctionData({
+                        abi: publicResolverAbi,
+                        functionName: "setAddr",
+                        args: [nameNode, BigInt(COIN_TYPES[chain]), addrBytes],
+                    }),
+                );
+            }
+        }
+
+        if (texts) {
+            for (const [key, value] of Object.entries(texts)) {
+                calls.push(
+                    encodeFunctionData({
+                        abi: publicResolverAbi,
+                        functionName: "setText",
+                        args: [nameNode, key, value],
+                    }),
+                );
+            }
+        }
+
+        return calls;
     }
 }
