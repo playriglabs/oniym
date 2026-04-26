@@ -8,6 +8,7 @@ import { TLDManager } from "../../src/TLDManager.sol";
 import { TLDRegistrar } from "../../src/TLDRegistrar.sol";
 import { RegistrarController } from "../../src/RegistrarController.sol";
 import { PriceOracle } from "../../src/PriceOracle.sol";
+import { IReverseRegistrar } from "../../src/interfaces/IReverseRegistrar.sol";
 import { ProtocolHandler } from "./ProtocolHandler.sol";
 
 contract MockFeed {
@@ -39,7 +40,7 @@ contract ProtocolInvariantTest is StdInvariant, Test {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 5_00000000, protocolOwner);
-        ctrl = new RegistrarController(reg, mgr, oracle, protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
 
         reg.setOwner(ROOT, address(mgr));
 

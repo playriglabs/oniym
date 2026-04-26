@@ -9,6 +9,7 @@ import { ITLDManager } from "./interfaces/ITLDManager.sol";
 import { ITLDRegistrar } from "./interfaces/ITLDRegistrar.sol";
 import { IPriceOracle } from "./interfaces/IPriceOracle.sol";
 import { IRegistry } from "./interfaces/IRegistry.sol";
+import { IReverseRegistrar } from "./interfaces/IReverseRegistrar.sol";
 
 /// @title RegistrarController
 /// @notice Public-facing registration controller for all protocol TLDs.
@@ -28,6 +29,7 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
     IRegistry public immutable REGISTRY;
     ITLDManager public immutable TLD_MANAGER;
     IPriceOracle public immutable PRICE_ORACLE;
+    IReverseRegistrar public immutable REVERSE_REGISTRAR;
 
     /// @dev commitment hash => timestamp when it was submitted
     mapping(bytes32 => uint256) public override commitments;
@@ -36,11 +38,13 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
         IRegistry _registry,
         ITLDManager _tldManager,
         IPriceOracle _priceOracle,
+        IReverseRegistrar _reverseRegistrar,
         address initialOwner
     ) Ownable(initialOwner) {
         REGISTRY = _registry;
         TLD_MANAGER = _tldManager;
         PRICE_ORACLE = _priceOracle;
+        REVERSE_REGISTRAR = _reverseRegistrar;
     }
 
     // ---------------------------------------------------------------
@@ -166,7 +170,15 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
         // 7. Transfer NFT to actual owner — triggers _update hook which syncs registry
         IERC721(address(registrar)).safeTransferFrom(address(this), req.owner, tokenId);
 
-        // 8. Refund excess ETH
+        // 8. Optionally set reverse record
+        if (req.reverseRecord) {
+            string memory tldLabel = TLD_MANAGER.getTld(req.tld).label;
+            string memory fullName = string.concat(req.name, ".", tldLabel);
+            address resolver = req.resolver != address(0) ? req.resolver : REVERSE_REGISTRAR.defaultResolver();
+            REVERSE_REGISTRAR.setNameForAddr(req.owner, req.owner, resolver, fullName);
+        }
+
+        // 9. Refund excess ETH
         if (msg.value > total) {
             (bool sent,) = payable(msg.sender).call{ value: msg.value - total }("");
             require(sent, "refund failed");

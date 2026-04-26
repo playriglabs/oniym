@@ -9,6 +9,7 @@ import { RegistrarController } from "../src/RegistrarController.sol";
 import { PriceOracle } from "../src/PriceOracle.sol";
 import { PublicResolver } from "../src/PublicResolver.sol";
 import { IResolver } from "../src/interfaces/IResolver.sol";
+import { IReverseRegistrar } from "../src/interfaces/IReverseRegistrar.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 contract MockFeed {
@@ -47,7 +48,7 @@ contract PublicResolverTest is Test {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 5_00000000, protocolOwner);
-        ctrl = new RegistrarController(reg, mgr, oracle, protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
         resolver = new PublicResolver(reg);
 
         reg.setOwner(ROOT, address(mgr));

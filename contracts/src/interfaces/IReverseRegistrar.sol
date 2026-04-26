@@ -32,6 +32,8 @@ interface IReverseRegistrar {
 
     event ReverseClaimed(address indexed addr, bytes32 indexed node);
     event DefaultResolverChanged(address indexed resolver);
+    event ControllerAdded(address indexed controller);
+    event ControllerRemoved(address indexed controller);
 
     // ---------------------------------------------------------------
     //                           ERRORS

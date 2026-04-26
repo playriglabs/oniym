@@ -27,6 +27,9 @@ contract ReverseRegistrar is IReverseRegistrar, Ownable2Step {
 
     address private _defaultResolver;
 
+    /// @dev Approved controllers (e.g. RegistrarController) that may call setNameForAddr on behalf of any address.
+    mapping(address => bool) public controllers;
+
     constructor(
         IRegistry _registry,
         bytes32 _addrReverseNode,
@@ -36,6 +39,20 @@ contract ReverseRegistrar is IReverseRegistrar, Ownable2Step {
         REGISTRY = _registry;
         ADDR_REVERSE_NODE = _addrReverseNode;
         _defaultResolver = initialDefaultResolver;
+    }
+
+    // ---------------------------------------------------------------
+    //                           ADMIN
+    // ---------------------------------------------------------------
+
+    function addController(address controller) external onlyOwner {
+        controllers[controller] = true;
+        emit ControllerAdded(controller);
+    }
+
+    function removeController(address controller) external onlyOwner {
+        controllers[controller] = false;
+        emit ControllerRemoved(controller);
     }
 
     // ---------------------------------------------------------------
@@ -134,6 +151,7 @@ contract ReverseRegistrar is IReverseRegistrar, Ownable2Step {
     ///      or an operator approved on the reverse node owner's behalf.
     function _requireAuthorised(address addr) internal view {
         if (msg.sender == addr) return;
+        if (controllers[msg.sender]) return;
         bytes32 reverseNode = keccak256(abi.encodePacked(ADDR_REVERSE_NODE, keccak256(bytes(_addrToHex(addr))))); // forge-lint: disable-line(asm-keccak256)
         address currentOwner = REGISTRY.ownerOf(reverseNode);
         if (currentOwner != address(0)) {

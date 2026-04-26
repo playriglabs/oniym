@@ -9,6 +9,7 @@ import { RegistrarController } from "../src/RegistrarController.sol";
 import { PriceOracle } from "../src/PriceOracle.sol";
 import { PublicResolver } from "../src/PublicResolver.sol";
 import { ReverseRegistrar } from "../src/ReverseRegistrar.sol";
+import { IReverseRegistrar } from "../src/interfaces/IReverseRegistrar.sol";
 
 /// @dev Base Sepolia Chainlink ETH/USD feed (8 decimals)
 address constant BASE_SEPOLIA_ETH_USD_FEED = 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1;
@@ -117,24 +118,15 @@ contract Deploy is Script {
         PriceOracle priceOracle = new PriceOracle(feed, MAX_STALENESS, BASE_PRICE_USD, deployer);
         console.log("PriceOracle:          ", address(priceOracle));
 
-        // 4. Registrar controller
-        RegistrarController controller = new RegistrarController(
-            registry,
-            tldManager,
-            priceOracle,
-            deployer
-        );
-        console.log("RegistrarController:  ", address(controller));
-
-        // 5. PublicResolver
+        // 4. PublicResolver (needed by ReverseRegistrar as default resolver)
         PublicResolver publicResolver = new PublicResolver(registry);
         console.log("PublicResolver:       ", address(publicResolver));
 
-        // 6. ReverseRegistrar — must be wired before root is handed to TLDManager
+        // 5. ReverseRegistrar — must be wired before root is handed to TLDManager
         //    "reverse" is 7 chars so it can't go through addTld(); set up directly.
-        bytes32 reverseLabel   = keccak256(bytes("reverse"));
-        bytes32 addrLabel      = keccak256(bytes("addr"));
-        bytes32 tldReverseNode = keccak256(abi.encodePacked(bytes32(0), reverseLabel));
+        bytes32 reverseLabel    = keccak256(bytes("reverse"));
+        bytes32 addrLabel       = keccak256(bytes("addr"));
+        bytes32 tldReverseNode  = keccak256(abi.encodePacked(bytes32(0), reverseLabel));
         bytes32 addrReverseNode = keccak256(abi.encodePacked(tldReverseNode, addrLabel));
 
         ReverseRegistrar reverseRegistrar = new ReverseRegistrar(
@@ -144,6 +136,19 @@ contract Deploy is Script {
             deployer
         );
         console.log("ReverseRegistrar:     ", address(reverseRegistrar));
+
+        // 6. Registrar controller — takes ReverseRegistrar so it can set reverse records atomically
+        RegistrarController controller = new RegistrarController(
+            registry,
+            tldManager,
+            priceOracle,
+            IReverseRegistrar(address(reverseRegistrar)),
+            deployer
+        );
+        console.log("RegistrarController:  ", address(controller));
+
+        // Approve controller to call setNameForAddr on behalf of any registrant
+        reverseRegistrar.addController(address(controller));
 
         // Create "reverse" node owned by deployer, then "addr.reverse" owned by ReverseRegistrar
         registry.setSubnodeOwner(bytes32(0), reverseLabel, deployer);

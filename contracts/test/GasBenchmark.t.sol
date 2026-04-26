@@ -9,6 +9,7 @@ import { RegistrarController } from "../src/RegistrarController.sol";
 import { PriceOracle } from "../src/PriceOracle.sol";
 import { PublicResolver } from "../src/PublicResolver.sol";
 import { IRegistrarController } from "../src/interfaces/IRegistrarController.sol";
+import { IReverseRegistrar } from "../src/interfaces/IReverseRegistrar.sol";
 
 /// @notice ENS mainnet gas reference (from public benchmarks, Solidity 0.8.17):
 ///   ETHRegistrarController.register  ~280 000 gas
@@ -48,7 +49,7 @@ contract GasBenchmarkTest is Test {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 5_00000000, protocolOwner);
-        ctrl = new RegistrarController(reg, mgr, oracle, protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
         resolver = new PublicResolver(reg);
 
         reg.setOwner(ROOT, address(mgr));

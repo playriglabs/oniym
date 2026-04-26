@@ -8,6 +8,7 @@ import { TLDRegistrar } from "../src/TLDRegistrar.sol";
 import { RegistrarController } from "../src/RegistrarController.sol";
 import { PriceOracle } from "../src/PriceOracle.sol";
 import { IRegistrarController } from "../src/interfaces/IRegistrarController.sol";
+import { IReverseRegistrar } from "../src/interfaces/IReverseRegistrar.sol";
 
 /// @dev Minimal mock Chainlink feed for integration tests.
 contract MockFeed {
@@ -42,7 +43,7 @@ contract RegistrarControllerTest is Test {
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 5_00000000, protocolOwner);
 
-        ctrl = new RegistrarController(reg, mgr, oracle, protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
 
         // Hand registry root to TLDManager
         reg.setOwner(ROOT, address(mgr));
