@@ -42,7 +42,7 @@ jobs:
                   FOUNDRY_PROFILE: ci
 
             - name: Run coverage
-              run: forge coverage --report summary --report lcov
+              run: forge coverage --report summary --report lcov --ir-minimum
               env:
                   FOUNDRY_PROFILE: lite
 
