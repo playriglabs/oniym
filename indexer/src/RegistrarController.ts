@@ -10,9 +10,8 @@ function nameNode(tld: Hex, label: Hex): Hex {
 ponder.on("RegistrarController:NameRegistered", async ({ event, context }) => {
   const { name: label, tld, label: labelHash, owner, expires } = event.args;
 
-  const tldStr = TLD_MAP.get(tld) ?? tld; // fallback to raw bytes32 if TLD unknown
+  const tldStr = TLD_MAP.get(tld) ?? tld;
   const node = nameNode(tld, labelHash);
-  const fullName = `${label}.${tldStr}`;
 
   await context.db
     .insert(schema.name)
@@ -20,25 +19,21 @@ ponder.on("RegistrarController:NameRegistered", async ({ event, context }) => {
       id: node,
       label,
       tld: tldStr,
-      fullName,
+      fullName: `${label}.${tldStr}`,
       owner,
       resolver: null,
       expiresAt: expires,
       registeredAt: event.block.timestamp,
     })
-    .onConflictDoUpdate({
-      target: schema.name.id,
-      set: { owner, expiresAt: expires },
-    });
+    .onConflictDoUpdate({ owner, expiresAt: expires });
 });
 
 ponder.on("RegistrarController:NameRenewed", async ({ event, context }) => {
   const { tld, label: labelHash, expires } = event.args;
-
   const node = nameNode(tld, labelHash);
 
-  await context.db
-    .update(schema.name)
-    .set({ expiresAt: expires })
-    .where(({ id }) => id === node);
+  // No-op if name isn't in DB yet (shouldn't happen but guard anyway)
+  try {
+    await context.db.update(schema.name, { id: node }).set({ expiresAt: expires });
+  } catch {}
 });

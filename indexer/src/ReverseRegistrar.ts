@@ -6,13 +6,6 @@ ponder.on("ReverseRegistrar:ReverseClaimed", async ({ event, context }) => {
 
   await context.db
     .insert(schema.reverseRecord)
-    .values({
-      id: addr,
-      reverseNode: node,
-      updatedAt: event.block.timestamp,
-    })
-    .onConflictDoUpdate({
-      target: schema.reverseRecord.id,
-      set: { reverseNode: node, updatedAt: event.block.timestamp },
-    });
+    .values({ id: addr, reverseNode: node, updatedAt: event.block.timestamp })
+    .onConflictDoUpdate({ reverseNode: node, updatedAt: event.block.timestamp });
 });

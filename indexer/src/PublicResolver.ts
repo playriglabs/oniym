@@ -6,16 +6,8 @@ ponder.on("PublicResolver:AddrChanged", async ({ event, context }) => {
 
   await context.db
     .insert(schema.addrRecord)
-    .values({
-      nameNode: node,
-      coinType,
-      addr,
-      updatedAt: event.block.timestamp,
-    })
-    .onConflictDoUpdate({
-      target: [schema.addrRecord.nameNode, schema.addrRecord.coinType],
-      set: { addr, updatedAt: event.block.timestamp },
-    });
+    .values({ nameNode: node, coinType, addr, updatedAt: event.block.timestamp })
+    .onConflictDoUpdate({ addr, updatedAt: event.block.timestamp });
 });
 
 ponder.on("PublicResolver:TextChanged", async ({ event, context }) => {
@@ -23,16 +15,8 @@ ponder.on("PublicResolver:TextChanged", async ({ event, context }) => {
 
   await context.db
     .insert(schema.textRecord)
-    .values({
-      nameNode: node,
-      key,
-      value,
-      updatedAt: event.block.timestamp,
-    })
-    .onConflictDoUpdate({
-      target: [schema.textRecord.nameNode, schema.textRecord.key],
-      set: { value, updatedAt: event.block.timestamp },
-    });
+    .values({ nameNode: node, key, value, updatedAt: event.block.timestamp })
+    .onConflictDoUpdate({ value, updatedAt: event.block.timestamp });
 });
 
 ponder.on("PublicResolver:ContenthashChanged", async ({ event, context }) => {
@@ -40,13 +24,6 @@ ponder.on("PublicResolver:ContenthashChanged", async ({ event, context }) => {
 
   await context.db
     .insert(schema.contenthashRecord)
-    .values({
-      id: node,
-      contenthash: hash,
-      updatedAt: event.block.timestamp,
-    })
-    .onConflictDoUpdate({
-      target: schema.contenthashRecord.id,
-      set: { contenthash: hash, updatedAt: event.block.timestamp },
-    });
+    .values({ id: node, contenthash: hash, updatedAt: event.block.timestamp })
+    .onConflictDoUpdate({ contenthash: hash, updatedAt: event.block.timestamp });
 });
