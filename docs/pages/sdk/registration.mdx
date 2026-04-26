@@ -24,7 +24,7 @@ const hash = await oniym.register(
   {
     name: "alice",
     tld: "web3",
-    duration: 365 * 24 * 60 * 60, // 1 year (default)
+    duration: 30 * 24 * 60 * 60,  // 30 days (~$7); use 365 * 24 * 60 * 60 for 1 year (~$84)
     owner: "0x...",               // defaults to walletClient.account.address
     reverseRecord: true,          // set reverse record at registration
     addresses: {
@@ -46,7 +46,7 @@ const hash = await oniym.register(
 interface RegisterOptions {
   name: string;               // label only, e.g. "alice"
   tld: string;                // TLD label, e.g. "web3"
-  duration?: number;          // seconds, default 365 days
+  duration?: number;          // seconds — 30 days (~$7), 365 days (~$84)
   owner?: Address;            // default: walletClient.account.address
   resolver?: Address;         // default: PublicResolver
   reverseRecord?: boolean;    // default: false
@@ -86,7 +86,7 @@ Set the resolver contract for a name. Requires owning the name.
 ```ts
 const hash = await oniym.setResolver(
   "kyy.web3",
-  "0xA37eD413181537c60586317a70f612a304EB0681",
+  "0xcdE3eD98423FbE098E24Bba9B634dFC3b449AC1C",
   walletClient,
 );
 ```
