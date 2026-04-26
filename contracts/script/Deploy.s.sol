@@ -7,6 +7,8 @@ import { TLDManager } from "../src/TLDManager.sol";
 import { TLDRegistrar } from "../src/TLDRegistrar.sol";
 import { RegistrarController } from "../src/RegistrarController.sol";
 import { PriceOracle } from "../src/PriceOracle.sol";
+import { PublicResolver } from "../src/PublicResolver.sol";
+import { ReverseRegistrar } from "../src/ReverseRegistrar.sol";
 
 /// @dev Base Sepolia Chainlink ETH/USD feed (8 decimals)
 address constant BASE_SEPOLIA_ETH_USD_FEED = 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1;
@@ -103,22 +105,19 @@ contract Deploy is Script {
 
         vm.startBroadcast(pk);
 
-        // 1. Core registry
+        // 1. Core registry (deployer temporarily owns root for reverse namespace setup)
         Registry registry = new Registry();
         console.log("Registry:             ", address(registry));
 
-        // 2. TLD manager (owns the registry root after step 3)
+        // 2. TLD manager
         TLDManager tldManager = new TLDManager(registry, deployer);
         console.log("TLDManager:           ", address(tldManager));
 
-        // 3. Hand root node to TLDManager
-        registry.setOwner(bytes32(0), address(tldManager));
-
-        // 4. Price oracle
+        // 3. Price oracle
         PriceOracle priceOracle = new PriceOracle(feed, MAX_STALENESS, BASE_PRICE_USD, deployer);
         console.log("PriceOracle:          ", address(priceOracle));
 
-        // 5. Registrar controller
+        // 4. Registrar controller
         RegistrarController controller = new RegistrarController(
             registry,
             tldManager,
@@ -127,7 +126,35 @@ contract Deploy is Script {
         );
         console.log("RegistrarController:  ", address(controller));
 
-        // 6. Deploy TLDs and wire up controller
+        // 5. PublicResolver
+        PublicResolver publicResolver = new PublicResolver(registry);
+        console.log("PublicResolver:       ", address(publicResolver));
+
+        // 6. ReverseRegistrar — must be wired before root is handed to TLDManager
+        //    "reverse" is 7 chars so it can't go through addTld(); set up directly.
+        bytes32 reverseLabel   = keccak256(bytes("reverse"));
+        bytes32 addrLabel      = keccak256(bytes("addr"));
+        bytes32 tldReverseNode = keccak256(abi.encodePacked(bytes32(0), reverseLabel));
+        bytes32 addrReverseNode = keccak256(abi.encodePacked(tldReverseNode, addrLabel));
+
+        ReverseRegistrar reverseRegistrar = new ReverseRegistrar(
+            registry,
+            addrReverseNode,
+            address(publicResolver),
+            deployer
+        );
+        console.log("ReverseRegistrar:     ", address(reverseRegistrar));
+
+        // Create "reverse" node owned by deployer, then "addr.reverse" owned by ReverseRegistrar
+        registry.setSubnodeOwner(bytes32(0), reverseLabel, deployer);
+        registry.setSubnodeRecord(tldReverseNode, addrLabel, address(reverseRegistrar), address(publicResolver), 0);
+        // Hand "reverse" node to ReverseRegistrar
+        registry.setOwner(tldReverseNode, address(reverseRegistrar));
+
+        // 7. Hand root node to TLDManager (deployer loses direct registry access after this)
+        registry.setOwner(bytes32(0), address(tldManager));
+
+        // 8. Deploy TLDs and wire up controller
         for (uint256 i = 0; i < _tldLabels.length; i++) {
             string memory label = _tldLabels[i];
 
@@ -153,5 +180,7 @@ contract Deploy is Script {
         console.log("Network:              Base Sepolia");
         console.log("Deployer:             ", deployer);
         console.log("ETH/USD feed:         ", feed);
+        console.log("addrReverseNode:      ");
+        console.logBytes32(addrReverseNode);
     }
 }
