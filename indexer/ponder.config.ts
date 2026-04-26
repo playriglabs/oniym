@@ -3,7 +3,7 @@ import { http } from "viem";
 
 import deployments from "../contracts/deployments/base-sepolia.json";
 
-const START_BLOCK = 40700849;
+const START_BLOCK = 40711233;
 
 const registrarControllerAbi = [
     {

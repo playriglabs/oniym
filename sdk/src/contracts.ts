@@ -12,10 +12,10 @@ export const CONTRACT_ADDRESSES: Record<
     { Registry: Hex; RegistrarController: Hex; PublicResolver: Hex; ReverseRegistrar: Hex }
 > = {
     [CHAIN_IDS.baseSepolia]: {
-        Registry: "0x4d0203cf6188247c282f1ee1b866ea55f71aabe4",
-        RegistrarController: "0xF14E154633EFf408a99d3E6c9b01f918F93Ba5b1",
-        PublicResolver: "0xA37eD413181537c60586317a70f612a304EB0681",
-        ReverseRegistrar: "0xa5d904401d5f3ed1eb19188ce9de28bef3c083b9",
+        Registry: "0x24ee7fb02cac630e88c74d0a228eb771bc4badcf",
+        RegistrarController: "0x8cad65fb525d709ff32ec96b020eb90e3cb212f0",
+        PublicResolver: "0xcde3ed98423fbe098e24bba9b634dfc3b449ac1c",
+        ReverseRegistrar: "0x4bcfd49f89971a944badd921d29903e75a393fa4",
     },
     [CHAIN_IDS.base]: {
         // Sprint 8: mainnet deploy
