@@ -48,7 +48,7 @@ contract GasBenchmarkTest is Test {
     function setUp() public {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
-        oracle = new PriceOracle(address(new MockFeed()), 1 hours, 5_00000000, protocolOwner);
+        oracle = new PriceOracle(address(new MockFeed()), 1 hours, 3_00000000, 15_00000000, protocolOwner);
         ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
         resolver = new PublicResolver(reg);
 

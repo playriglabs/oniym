@@ -62,16 +62,16 @@ const name = await oniym.getName("0x11702b...");
 
 ## Check availability & price
 
-Pricing is flat: **$7/month** (~$84/year) for any name length, paid in ETH at the current Chainlink spot price. You can register for any duration in seconds.
+Pricing is two-tier: **$3/month** or **$15/year** for any name length, paid in ETH at the current Chainlink spot price. Annual saves $21 vs paying monthly.
 
 ```ts
 import { Oniym } from "@oniym/sdk";
 const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 const isAvailable = await oniym.available("alice", "web3");
 
-// 1 month (~$7)
+// 1 month ($3)
 const monthly = await oniym.rentPrice("alice", "web3", 30 * 24 * 60 * 60);
-// 1 year (~$84)
+// 1 year ($15)
 const annual  = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60);
 console.log(`Monthly: ${Number(monthly) / 1e18} ETH`);
 console.log(`Annual:  ${Number(annual) / 1e18} ETH`);

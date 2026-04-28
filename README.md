@@ -33,7 +33,7 @@ ENS solved this for Ethereum, but the crypto world is no longer single-chain. To
 **Oniym is a naming service built for the multichain era.**
 
 - Choose your TLD: `.id`, `.one`, `.xyz`, `.wagmi`, `.degen`, `.app` and 59 more
-- Register `kyy.id` **once** on Base (~$7/month, ~$84/year)
+- Register `kyy.id` **once** on Base ($3/month or $15/year)
 - Map it to addresses on Ethereum, Solana, Bitcoin, Sui, BNB, and more
 - Reverse resolution: any address resolves back to its primary name
 - Resolve from any app via SDK, REST API, or React hooks
@@ -225,7 +225,7 @@ REDIS_URL=redis://localhost:6379
 ## Principles
 
 1. **Fully decentralized** — ownership is on-chain, period
-2. **Cheap by design** — L2-first, $7/month flat pricing via Chainlink feed
+2. **Cheap by design** — L2-first, $3/month or $15/year via Chainlink feed
 3. **Multichain-native** — not a retrofit; built for the cross-chain reality
 4. **ENS-compatible where sensible** — ENSIP-1 namehash, SLIP-0044 coin types, resolver interface
 

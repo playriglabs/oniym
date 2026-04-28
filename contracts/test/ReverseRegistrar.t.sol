@@ -62,7 +62,7 @@ contract ReverseRegistrarTest is Test {
 
         // 5. Deploy rest of stack and hand root to TLDManager
         mgr = new TLDManager(reg, protocolOwner);
-        oracle = new PriceOracle(address(new MockFeed()), 1 hours, 5_00000000, protocolOwner);
+        oracle = new PriceOracle(address(new MockFeed()), 1 hours, 3_00000000, 15_00000000, protocolOwner);
         revRegistrar.addController(address(ctrl));
         ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(revRegistrar)), protocolOwner);
         reg.setOwner(ROOT, address(mgr));

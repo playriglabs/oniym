@@ -2,13 +2,14 @@
 pragma solidity 0.8.28;
 
 /// @title IPriceOracle
-/// @notice Prices name registrations in wei. Flat-rate pricing model.
+/// @notice Prices name registrations in wei. Two-tier pricing model.
 /// @dev Uses Chainlink ETH/USD price feed to translate USD-denominated prices
 ///      into wei at the time of quotation. Staleness-checked.
 ///
 /// Pricing model (configurable by owner):
-///   length 1-2    → reserved / unavailable (returns NameTooShort)
-///   length 3+     → BASE_PRICE_USD per year (default: $5)
+///   length 1-2                       → reserved (returns NameTooShort)
+///   length 3+, duration < 365 days   → monthlyPriceUsd per 30 days
+///   length 3+, duration >= 365 days  → annualPriceUsd per year
 ///
 /// Design choice: Oniym uses flat pricing (no length-based premiums) to
 /// differentiate from ENS's tiered model and fit Base's price-sensitive user
@@ -36,7 +37,8 @@ interface IPriceOracle {
 
     event PriceFeedUpdated(address indexed previous, address indexed next);
     event MaxStalenessUpdated(uint256 previous, uint256 next);
-    event BasePriceUpdated(uint256 previousUsd, uint256 nextUsd);
+    event MonthlyPriceUpdated(uint256 previousUsd, uint256 nextUsd);
+    event AnnualPriceUpdated(uint256 previousUsd, uint256 nextUsd);
 
     // ---------------------------------------------------------------
     //                           ERRORS
@@ -70,8 +72,7 @@ interface IPriceOracle {
     /// @notice Current ETH/USD price from Chainlink, scaled to 1e8
     function ethUsdPrice() external view returns (uint256);
 
-    /// @notice Annual USD price in 1e8 units for a given name length
-    /// @dev Returns 0 for lengths that are not registerable (too short)
-    ///      In flat-pricing mode, returns the same price for all valid lengths
+    /// @notice Effective annual USD price in 1e8 units for a given name length
+    /// @dev Returns annualPriceUsd for valid lengths, 0 for too-short names.
     function priceFor(uint256 length) external view returns (uint256 usdPerYear);
 }

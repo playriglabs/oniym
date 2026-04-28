@@ -14,8 +14,11 @@ import { IReverseRegistrar } from "../src/interfaces/IReverseRegistrar.sol";
 /// @dev Base Sepolia Chainlink ETH/USD feed (8 decimals)
 address constant BASE_SEPOLIA_ETH_USD_FEED = 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1;
 
-/// @dev $7.00/month ($84.00/year) in Chainlink's 1e8 USD units
-uint256 constant BASE_PRICE_USD = 84_00000000;
+/// @dev $3.00/month in Chainlink's 1e8 USD units
+uint256 constant MONTHLY_PRICE_USD = 3_00000000;
+
+/// @dev $15.00/year in Chainlink's 1e8 USD units
+uint256 constant ANNUAL_PRICE_USD = 15_00000000;
 
 /// @dev 1 hour staleness window
 uint256 constant MAX_STALENESS = 1 hours;
@@ -115,7 +118,7 @@ contract Deploy is Script {
         console.log("TLDManager:           ", address(tldManager));
 
         // 3. Price oracle
-        PriceOracle priceOracle = new PriceOracle(feed, MAX_STALENESS, BASE_PRICE_USD, deployer);
+        PriceOracle priceOracle = new PriceOracle(feed, MAX_STALENESS, MONTHLY_PRICE_USD, ANNUAL_PRICE_USD, deployer);
         console.log("PriceOracle:          ", address(priceOracle));
 
         // 4. PublicResolver (needed by ReverseRegistrar as default resolver)

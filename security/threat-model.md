@@ -39,7 +39,7 @@ This document enumerates attacks against Oniym and the mitigations for each. Upd
 
 **Mitigation:**
 
-- Flat-rate pricing ($7/month, $84/year) — squatters pay ongoing holding costs
+- Two-tier pricing ($3/month, $15/year) — squatters pay ongoing holding costs
 - Annual renewal requirement (names expire after registration period)
 - No mitigation for determined squatters with capital — this is an inherent naming-system problem
 
