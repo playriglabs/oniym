@@ -1,5 +1,9 @@
 # How it works
 
+## System overview
+
+![Oniym system overview](/architecture/system-overview.png)
+
 ## Name structure
 
 Every Oniym name is a two-part label: `<label>.<tld>` — for example `kyy.web3` or `alice.id`.
@@ -25,11 +29,7 @@ The node is the canonical on-chain identifier for a name — used as the primary
 
 Registration uses a **commit-reveal** scheme to prevent frontrunning:
 
-```
-1. commit(makeCommitment(req))   // name is hidden
-2. wait ≥ 60 seconds             // commitment matures
-3. register(req) + payment       // reveals and mints
-```
+![Oniym registration flow](/architecture/registration-flow.png)
 
 The `req` encodes name, TLD, owner, duration, a random secret, and optional resolver data. Because the commitment is a hash of all fields including the secret, nobody can copy your transaction and steal the name before you.
 
@@ -37,13 +37,17 @@ The `req` encodes name, TLD, owner, duration, a random secret, and optional reso
 
 Addresses are stored per coin type following [ENSIP-9](https://docs.ens.domains/ensip/9) / SLIP-0044:
 
-| Chain | Coin type |
-|-------|-----------|
-| Ethereum / Base / EVM | 60 |
-| Bitcoin | 0 |
-| Solana | 501 |
-| Sui | 784 |
-| BNB | 714 |
+| Chain                 | Coin type |
+| --------------------- | --------- |
+| Ethereum / Base / EVM | 60        |
+| Bitcoin               | 0         |
+| Solana                | 501       |
+| Sui                   | 784       |
+| BNB                   | 714       |
+
+## Resolution flow
+
+![Oniym resolution flow](/architecture/resolution-flow.png)
 
 ## Reverse resolution
 
