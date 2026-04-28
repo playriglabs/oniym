@@ -99,7 +99,7 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
         vm.deal(address(this), price);
 
         uint256 expectedExpiry = block.timestamp + duration;
-        ctrl.register{ value: price }(req);
+        ctrl.register{ value: price }(req, address(0));
 
         ghostTotalPaid += price;
         ghostLastExpiry[tokenId] = expectedExpiry;
@@ -123,7 +123,7 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
         uint256 price = base + premium;
         vm.deal(address(this), price);
 
-        ctrl.renew{ value: price }(name, tldNode, duration);
+        ctrl.renew{ value: price }(name, tldNode, duration, address(0));
 
         ghostTotalPaid += price;
         ghostLastExpiry[tokenId] = expectedExpiry;
@@ -135,7 +135,7 @@ contract ProtocolHandler is CommonBase, StdCheats, StdUtils {
 
         address treasury = makeAddr("treasury");
         vm.prank(protocolOwner);
-        ctrl.withdraw(treasury);
+        ctrl.withdrawEth(treasury);
 
         ghostTotalWithdrawn += bal;
     }

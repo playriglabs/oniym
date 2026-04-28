@@ -213,8 +213,23 @@ cd docs && pnpm dev
 
 ```bash
 # contracts/.env
+
+# Required
 DEPLOYER_ADDRESS=0x...
 PRIVATE_KEY=0x...
+
+# Optional — override for mainnet or other networks
+# Defaults to Base Sepolia values when omitted
+CHAINLINK_ETH_USD_FEED=   # Base Sepolia: 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1
+                           # Base Mainnet: 0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70
+USDC_ADDRESS=             # Base Sepolia: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+                           # Base Mainnet: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+
+# Optional — only needed for Register.s.sol
+REGISTER_LABEL=myname
+REGISTER_DURATION=2592000   # seconds (default: 30 days)
+REGISTER_OWNER=0x...        # default: DEPLOYER_ADDRESS
+PAYMENT_TOKEN=              # omit or address(0) = ETH; USDC address = pay with USDC
 
 # indexer/.env
 DATABASE_URL=postgresql://...

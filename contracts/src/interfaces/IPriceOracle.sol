@@ -75,4 +75,13 @@ interface IPriceOracle {
     /// @notice Effective annual USD price in 1e8 units for a given name length
     /// @dev Returns annualPriceUsd for valid lengths, 0 for too-short names.
     function priceFor(uint256 length) external view returns (uint256 usdPerYear);
+
+    /// @notice Quote total price for a USDC payment (6-decimal units)
+    /// @dev Same two-tier logic as {price} but returns USDC amount instead of wei.
+    ///      No Chainlink feed required — USDC is 1:1 with USD.
+    function priceUsdc(
+        string calldata name,
+        uint256 expires,
+        uint256 duration
+    ) external view returns (uint256 usdcAmount);
 }

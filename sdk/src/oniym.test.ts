@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { Oniym, COIN_TYPES, SUPPORTED_TLDS, MAX_TLD_COUNT, MAX_TLD_LENGTH } from "./oniym";
+import { Oniym, COIN_TYPES, MAX_TLD_COUNT, MAX_TLD_LENGTH } from "./oniym";
 import type { ResolveResult, LookupResult, NamesResult } from "./oniym";
+import { SUPPORTED_TLDS } from "./tlds";
 
 // ---------------------------------------------------------------
 //                     CONSTANTS

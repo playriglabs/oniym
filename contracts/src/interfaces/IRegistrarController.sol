@@ -76,8 +76,11 @@ interface IRegistrarController {
         uint256 expires
     );
 
-    /// @notice Emitted when accumulated registration fees are withdrawn
+    /// @notice Emitted when accumulated ETH fees are withdrawn
     event FeesWithdrawn(address indexed to, uint256 amount);
+
+    /// @notice Emitted when accumulated ERC-20 fees (e.g. USDC) are withdrawn
+    event TokenFeesWithdrawn(address indexed token, address indexed to, uint256 amount);
 
     // ---------------------------------------------------------------
     //                           ERRORS
@@ -97,6 +100,9 @@ interface IRegistrarController {
 
     /// @notice Insufficient ETH sent to cover the quoted price
     error InsufficientValue(uint256 required, uint256 provided);
+
+    /// @notice Payment token is not address(0) (ETH) or the whitelisted USDC address
+    error UnsupportedPaymentToken(address token);
 
     /// @notice Name label contains invalid characters or is below minimum length
     error InvalidName(string name);
@@ -166,20 +172,33 @@ interface IRegistrarController {
     ) external view returns (uint256 base, uint256 premium);
 
     /// @notice Register a name using a previously committed request
-    /// @dev Must be called with msg.value >= rentPrice. Excess ETH is refunded.
-    function register(RegisterRequest calldata req) external payable;
+    /// @param req Registration parameters
+    /// @param paymentToken address(0) to pay with ETH, USDC address to pay with USDC
+    /// @dev ETH path: msg.value >= rentPrice; excess refunded.
+    ///      USDC path: caller must approve controller first (or use EIP-2612 permit).
+    function register(RegisterRequest calldata req, address paymentToken) external payable;
 
     /// @notice Renew an existing registration — no commit-reveal required
+    /// @param paymentToken address(0) for ETH, USDC address for USDC
     /// @dev Renewal isn't frontrunnable because it doesn't change ownership.
-    function renew(string calldata name, bytes32 tld, uint256 duration) external payable;
+    function renew(string calldata name, bytes32 tld, uint256 duration, address paymentToken)
+        external
+        payable;
 
     // ---------------------------------------------------------------
     //                      ADMIN / PROTOCOL
     // ---------------------------------------------------------------
 
-    /// @notice Withdraw accumulated registration fees
+    /// @notice Withdraw accumulated ETH registration fees
     /// @dev Only callable by protocol owner (multisig / DAO)
-    function withdraw(address to) external;
+    function withdrawEth(address to) external;
+
+    /// @notice Withdraw accumulated ERC-20 registration fees (e.g. USDC)
+    /// @dev Only callable by protocol owner
+    function withdrawToken(address token, address to) external;
+
+    /// @notice The whitelisted USDC token address accepted as payment
+    function USDC_TOKEN() external view returns (address);
 
     /// @notice Pause all user-facing writes (commit, register, renew)
     /// @dev Only callable by protocol owner. Existing name ownership is NOT affected —

@@ -9,7 +9,9 @@ Registers a name via the commit-reveal flow. The SDK handles the full sequence a
 1. Generates a random secret
 2. Calls `commit(makeCommitment(req))`
 3. Waits `MIN_COMMITMENT_AGE` (60 seconds + 5s buffer)
-4. Calls `register(req)` with the correct payment
+4. Collects payment and calls `register(req, paymentToken)`
+
+### Pay with ETH (default)
 
 ```ts
 import { createWalletClient, custom } from "viem";
@@ -26,7 +28,7 @@ const hash = await oniym.register(
     tld: "web3",
     duration: 30 * 24 * 60 * 60,  // 30 days ($3); use 365 * 24 * 60 * 60 for 1 year ($15)
     owner: "0x...",               // defaults to walletClient.account.address
-    reverseRecord: true,          // set reverse record at registration
+    reverseRecord: true,
     addresses: {
       eth: "0x11702b8eF5F882191Af862a7e27096C44A5e2B37",
     },
@@ -40,16 +42,38 @@ const hash = await oniym.register(
 );
 ```
 
+### Pay with USDC
+
+Pass `paymentToken: "usdc"` to pay the exact USD amount with no ETH price exposure. The SDK automatically:
+
+1. Calls `PriceOracle.priceUsdc()` to get the exact USDC amount (e.g. `3_000000` for 30 days)
+2. Calls `USDC.approve(controller, amount)` — one extra transaction
+3. Calls `register(req, usdcAddress)` — no `msg.value` needed
+
+```ts
+const hash = await oniym.register(
+  {
+    name: "alice",
+    tld: "web3",
+    duration: 365 * 24 * 60 * 60,  // 1 year = exactly $15.00 USDC
+    paymentToken: "usdc",
+    reverseRecord: true,
+  },
+  walletClient,
+);
+```
+
 ### RegisterOptions
 
 ```ts
 interface RegisterOptions {
-  name: string;               // label only, e.g. "alice"
-  tld: string;                // TLD label, e.g. "web3"
-  duration?: number;          // seconds — 30 days ($3/month), 365 days ($15/year)
-  owner?: Address;            // default: walletClient.account.address
-  resolver?: Address;         // default: PublicResolver
-  reverseRecord?: boolean;    // default: false
+  name: string;                    // label only, e.g. "alice"
+  tld: string;                     // TLD label, e.g. "web3"
+  duration?: number;               // seconds — 30 days ($3/month), 365 days ($15/year)
+  owner?: Address;                 // default: walletClient.account.address
+  resolver?: Address;              // default: PublicResolver
+  reverseRecord?: boolean;         // default: false
+  paymentToken?: "eth" | "usdc";   // default: "eth"
   addresses?: Partial<Record<SupportedChain, string>>;
   texts?: Record<string, string>;
   onCommit?: (hash: Hash) => void;
@@ -58,6 +82,50 @@ interface RegisterOptions {
 ```
 
 **Returns:** `Hash` — transaction hash of the `register()` call
+
+## renew
+
+Renews an existing registration. No commit-reveal required.
+
+### Pay with ETH
+
+```ts
+const hash = await oniym.renew(
+  {
+    name: "alice",
+    tld: "web3",
+    duration: 365 * 24 * 60 * 60,  // 1 year
+  },
+  walletClient,
+);
+```
+
+### Pay with USDC
+
+```ts
+const hash = await oniym.renew(
+  {
+    name: "alice",
+    tld: "web3",
+    duration: 365 * 24 * 60 * 60,
+    paymentToken: "usdc",
+  },
+  walletClient,
+);
+```
+
+### RenewOptions
+
+```ts
+interface RenewOptions {
+  name: string;                    // label only, e.g. "alice"
+  tld: string;                     // TLD label, e.g. "web3"
+  duration?: number;               // seconds — default: 365 days
+  paymentToken?: "eth" | "usdc";   // default: "eth"
+}
+```
+
+**Returns:** `Hash` — transaction hash of the `renew()` call
 
 ## setAddress
 

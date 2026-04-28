@@ -64,7 +64,7 @@ contract ReverseRegistrarTest is Test {
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 3_00000000, 15_00000000, protocolOwner);
         revRegistrar.addController(address(ctrl));
-        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(revRegistrar)), protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(revRegistrar)), address(0), protocolOwner);
         reg.setOwner(ROOT, address(mgr));
 
         // 6. Set up ".id" TLD
@@ -103,7 +103,7 @@ contract ReverseRegistrarTest is Test {
         (uint256 base, uint256 premium) = ctrl.rentPrice(name, tldNode, YEAR);
         vm.deal(owner, base + premium);
         vm.prank(owner);
-        ctrl.register{ value: base + premium }(req);
+        ctrl.register{ value: base + premium }(req, address(0));
     }
 
     // ---------------------------------------------------------------

@@ -19,9 +19,12 @@ import {
     CONTRACT_ADDRESSES,
     registrarControllerAbi,
     publicResolverAbi,
+    priceOracleAbi,
+    erc20Abi,
     registryAbi,
     type ChainId,
 } from "./contracts";
+import { SUPPORTED_TLDS } from "./tlds";
 
 // ---------------------------------------------------------------
 //                          CONSTANTS
@@ -39,74 +42,6 @@ export type SupportedChain = keyof typeof COIN_TYPES;
 
 export const MAX_TLD_COUNT = 65;
 export const MAX_TLD_LENGTH = 5;
-
-export const SUPPORTED_TLDS = [
-    "id",
-    "one",
-    "me",
-    "co",
-    "xyz",
-    "web3",
-    "io",
-    "pro",
-    "app",
-    "dev",
-    "onm",
-    "go",
-    "ape",
-    "fud",
-    "hodl",
-    "fomo",
-    "moon",
-    "rekt",
-    "wagmi",
-    "ngmi",
-    "degen",
-    "whale",
-    "buidl",
-    "dyor",
-    "pump",
-    "alpha",
-    "safu",
-    "l2",
-    "gm",
-    "lfg",
-    "ser",
-    "fren",
-    "goat",
-    "cope",
-    "pepe",
-    "wen",
-    "mint",
-    "bear",
-    "gas",
-    "dao",
-    "ath",
-    "dex",
-    "cex",
-    "burn",
-    "node",
-    "swap",
-    "yield",
-    "bag",
-    "bags",
-    "seed",
-    "drop",
-    "stake",
-    "pool",
-    "wrap",
-    "farm",
-    "shill",
-    "xxx",
-    "regs",
-    "main",
-    "test",
-    "exit",
-    "fair",
-    "guh",
-    "bots",
-    "keys",
-] as const;
 
 export type SupportedTLD = (typeof SUPPORTED_TLDS)[number];
 
@@ -162,8 +97,16 @@ export interface RegisterOptions {
     reverseRecord?: boolean;
     addresses?: Partial<Record<SupportedChain, string>>;
     texts?: Record<string, string>;
+    paymentToken?: "eth" | "usdc";
     onCommit?: (hash: Hash) => void;
     onWaiting?: (remainingMs: number) => void;
+}
+
+export interface RenewOptions {
+    name: string;
+    tld: SupportedTLD | string;
+    duration?: number;
+    paymentToken?: "eth" | "usdc";
 }
 
 export interface OniymConfig {
@@ -332,16 +275,83 @@ export class Oniym {
         await new Promise<void>((r) => setTimeout(r, waitMs));
 
         // 3. Register
-        const total = await this.rentPrice(options.name, options.tld, duration);
-        return walletClient.writeContract({
-            address: this.addresses.RegistrarController,
-            abi: registrarControllerAbi,
-            functionName: "register",
-            args: [req],
-            value: total,
-            chain: this.chain,
-            account,
-        });
+        const useUsdc = options.paymentToken === "usdc";
+
+        if (useUsdc) {
+            const usdcAmount = await this._priceUsdc(options.name, duration);
+            await walletClient.writeContract({
+                address: this.addresses.USDC,
+                abi: erc20Abi,
+                functionName: "approve",
+                args: [this.addresses.RegistrarController, usdcAmount],
+                chain: this.chain,
+                account,
+            });
+            return walletClient.writeContract({
+                address: this.addresses.RegistrarController,
+                abi: registrarControllerAbi,
+                functionName: "register",
+                args: [req, this.addresses.USDC],
+                chain: this.chain,
+                account,
+            });
+        } else {
+            const total = await this.rentPrice(options.name, options.tld, duration);
+            return walletClient.writeContract({
+                address: this.addresses.RegistrarController,
+                abi: registrarControllerAbi,
+                functionName: "register",
+                args: [req, "0x0000000000000000000000000000000000000000"],
+                value: total,
+                chain: this.chain,
+                account,
+            });
+        }
+    }
+
+    async renew(options: RenewOptions, walletClient: WalletClient): Promise<Hash> {
+        const account = walletClient.account;
+        if (!account) throw new Error("walletClient.account is required");
+
+        const tldNode = _namehash(options.tld);
+        const duration = options.duration ?? 365 * 24 * 60 * 60;
+        const useUsdc = options.paymentToken === "usdc";
+
+        if (useUsdc) {
+            const usdcAmount = await this._priceUsdc(options.name, duration);
+            await walletClient.writeContract({
+                address: this.addresses.USDC,
+                abi: erc20Abi,
+                functionName: "approve",
+                args: [this.addresses.RegistrarController, usdcAmount],
+                chain: this.chain,
+                account,
+            });
+            return walletClient.writeContract({
+                address: this.addresses.RegistrarController,
+                abi: registrarControllerAbi,
+                functionName: "renew",
+                args: [options.name, tldNode, BigInt(duration), this.addresses.USDC],
+                chain: this.chain,
+                account,
+            });
+        } else {
+            const total = await this.rentPrice(options.name, options.tld, duration);
+            return walletClient.writeContract({
+                address: this.addresses.RegistrarController,
+                abi: registrarControllerAbi,
+                functionName: "renew",
+                args: [
+                    options.name,
+                    tldNode,
+                    BigInt(duration),
+                    "0x0000000000000000000000000000000000000000",
+                ],
+                value: total,
+                chain: this.chain,
+                account,
+            });
+        }
     }
 
     async setAddress(
@@ -432,6 +442,15 @@ export class Oniym {
     // ---------------------------------------------------------------
     //                          PRIVATE
     // ---------------------------------------------------------------
+
+    private async _priceUsdc(name: string, duration: number): Promise<bigint> {
+        return this.publicClient.readContract({
+            address: this.addresses.PriceOracle,
+            abi: priceOracleAbi,
+            functionName: "priceUsdc",
+            args: [name, 0n, BigInt(duration)],
+        });
+    }
 
     private _indexerUrl(path: string): string {
         const base = this.config.indexerUrl ?? "http://localhost:42069";

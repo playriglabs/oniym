@@ -2,6 +2,7 @@
 pragma solidity 0.8.28;
 
 import { Test } from "forge-std/Test.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Registry } from "../src/Registry.sol";
 import { TLDManager } from "../src/TLDManager.sol";
 import { TLDRegistrar } from "../src/TLDRegistrar.sol";
@@ -18,12 +19,24 @@ contract MockFeed {
     }
 }
 
+/// @dev Minimal ERC-20 mock for USDC in tests.
+contract MockUSDC is ERC20 {
+    constructor() ERC20("USD Coin", "USDC") {}
+
+    function decimals() public pure override returns (uint8) { return 6; }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
+}
+
 contract RegistrarControllerTest is Test {
     Registry reg;
     TLDManager mgr;
     TLDRegistrar registrar;
     PriceOracle oracle;
     RegistrarController ctrl;
+    MockUSDC usdc;
 
     address protocolOwner = makeAddr("protocol");
     address alice = makeAddr("alice");
@@ -34,6 +47,7 @@ contract RegistrarControllerTest is Test {
     bytes32 tldNodeId;
 
     uint256 constant YEAR = 365 days;
+    uint256 constant MONTH = 30 days;
 
     IRegistrarController.RegisterRequest baseReq;
 
@@ -42,8 +56,9 @@ contract RegistrarControllerTest is Test {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 3_00000000, 15_00000000, protocolOwner);
+        usdc = new MockUSDC();
 
-        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), address(usdc), protocolOwner);
 
         // Hand registry root to TLDManager
         reg.setOwner(ROOT, address(mgr));
@@ -127,7 +142,7 @@ contract RegistrarControllerTest is Test {
     }
 
     // ---------------------------------------------------------------
-    //                     FULL REGISTER FLOW
+    //                     FULL REGISTER FLOW (ETH)
     // ---------------------------------------------------------------
 
     function test_register_happy_path() public {
@@ -136,7 +151,7 @@ contract RegistrarControllerTest is Test {
 
         vm.deal(alice, price * 2);
         vm.prank(alice);
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
 
         // NFT owned by alice
         uint256 tokenId = uint256(keccak256(bytes("kyy")));
@@ -158,7 +173,7 @@ contract RegistrarControllerTest is Test {
         emit IRegistrarController.NameRegistered(
             "kyy", tldNodeId, bytes32(tokenId), alice, 0, 0, 0
         );
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
     }
 
     function test_register_refunds_excess() public {
@@ -169,7 +184,7 @@ contract RegistrarControllerTest is Test {
         vm.deal(alice, price + excess);
         uint256 balBefore = alice.balance;
         vm.prank(alice);
-        ctrl.register{ value: price + excess }(baseReq);
+        ctrl.register{ value: price + excess }(baseReq, address(0));
 
         assertEq(alice.balance, balBefore - price);
     }
@@ -183,7 +198,7 @@ contract RegistrarControllerTest is Test {
         vm.deal(alice, price);
         vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(IRegistrarController.CommitmentTooNew.selector, c));
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
     }
 
     function test_register_reverts_commitment_too_old() public {
@@ -195,7 +210,7 @@ contract RegistrarControllerTest is Test {
         vm.deal(alice, price);
         vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(IRegistrarController.CommitmentTooOld.selector, c));
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
     }
 
     function test_register_reverts_no_commitment() public {
@@ -204,7 +219,7 @@ contract RegistrarControllerTest is Test {
         vm.deal(alice, price);
         vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(IRegistrarController.CommitmentNotFound.selector, c));
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
     }
 
     function test_register_reverts_insufficient_value() public {
@@ -216,21 +231,21 @@ contract RegistrarControllerTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(IRegistrarController.InsufficientValue.selector, price, 0)
         );
-        ctrl.register{ value: 0 }(baseReq);
+        ctrl.register{ value: 0 }(baseReq, address(0));
     }
 
     function test_register_reverts_invalid_name_too_short() public {
         IRegistrarController.RegisterRequest memory req = baseReq;
         req.name = "ab";
         vm.expectRevert(abi.encodeWithSelector(IRegistrarController.InvalidName.selector, "ab"));
-        ctrl.register{ value: 1 ether }(req);
+        ctrl.register{ value: 1 ether }(req, address(0));
     }
 
     function test_register_reverts_invalid_name_uppercase() public {
         IRegistrarController.RegisterRequest memory req = baseReq;
         req.name = "Kyy";
         vm.expectRevert(abi.encodeWithSelector(IRegistrarController.InvalidName.selector, "Kyy"));
-        ctrl.register{ value: 1 ether }(req);
+        ctrl.register{ value: 1 ether }(req, address(0));
     }
 
     function test_register_reverts_name_unavailable() public {
@@ -238,7 +253,7 @@ contract RegistrarControllerTest is Test {
         uint256 price = _price(baseReq);
         vm.deal(alice, price);
         vm.prank(alice);
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
 
         // Second attempt with new commitment
         IRegistrarController.RegisterRequest memory req2 = baseReq;
@@ -251,7 +266,7 @@ contract RegistrarControllerTest is Test {
         vm.expectRevert(
             abi.encodeWithSelector(IRegistrarController.NameUnavailable.selector, "kyy", tldNodeId)
         );
-        ctrl.register{ value: price }(req2);
+        ctrl.register{ value: price }(req2, address(0));
     }
 
     function test_register_commitment_consumed_after_register() public {
@@ -260,14 +275,83 @@ contract RegistrarControllerTest is Test {
         uint256 price = _price(baseReq);
         vm.deal(alice, price);
         vm.prank(alice);
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
 
         // Commitment is gone
         assertEq(ctrl.commitments(c), 0);
     }
 
+    function test_register_reverts_unsupported_token() public {
+        _commit(baseReq);
+        address fakeToken = makeAddr("fake");
+        vm.expectRevert(
+            abi.encodeWithSelector(IRegistrarController.UnsupportedPaymentToken.selector, fakeToken)
+        );
+        ctrl.register(baseReq, fakeToken);
+    }
+
     // ---------------------------------------------------------------
-    //                           RENEW
+    //                     REGISTER FLOW (USDC)
+    // ---------------------------------------------------------------
+
+    function test_register_usdc_happy_path() public {
+        _commit(baseReq);
+        uint256 usdcAmount = oracle.priceUsdc("kyy", 0, YEAR);
+        // 1 year = $15 = 15_000000 USDC (6 decimals)
+        assertEq(usdcAmount, 15_000000);
+
+        usdc.mint(alice, usdcAmount);
+        vm.prank(alice);
+        usdc.approve(address(ctrl), usdcAmount);
+
+        vm.prank(alice);
+        ctrl.register(baseReq, address(usdc));
+
+        uint256 tokenId = uint256(keccak256(bytes("kyy")));
+        assertEq(registrar.ownerOf(tokenId), alice);
+        // USDC held in controller
+        assertEq(usdc.balanceOf(address(ctrl)), usdcAmount);
+        // Alice's USDC is spent
+        assertEq(usdc.balanceOf(alice), 0);
+    }
+
+    function test_register_usdc_monthly_price() public {
+        IRegistrarController.RegisterRequest memory req = baseReq;
+        req.duration = MONTH;
+        // forge-lint: disable-next-line(unsafe-typecast)
+        req.secret = bytes32("secret-monthly");
+
+        _commit(req);
+
+        uint256 usdcAmount = oracle.priceUsdc("kyy", 0, MONTH);
+        // 30 days = $3 = 3_000000 USDC
+        assertEq(usdcAmount, 3_000000);
+
+        usdc.mint(alice, usdcAmount);
+        vm.prank(alice);
+        usdc.approve(address(ctrl), usdcAmount);
+
+        vm.prank(alice);
+        ctrl.register(req, address(usdc));
+
+        uint256 tokenId = uint256(keccak256(bytes("kyy")));
+        assertEq(registrar.ownerOf(tokenId), alice);
+    }
+
+    function test_register_usdc_reverts_insufficient_allowance() public {
+        _commit(baseReq);
+        uint256 usdcAmount = oracle.priceUsdc("kyy", 0, YEAR);
+
+        usdc.mint(alice, usdcAmount);
+        // No approve — transferFrom will fail
+
+        vm.prank(alice);
+        vm.expectRevert();
+        ctrl.register(baseReq, address(usdc));
+    }
+
+    // ---------------------------------------------------------------
+    //                           RENEW (ETH)
     // ---------------------------------------------------------------
 
     function test_renew_extends_name() public {
@@ -275,7 +359,7 @@ contract RegistrarControllerTest is Test {
         uint256 price = _price(baseReq);
         vm.deal(alice, price * 2);
         vm.prank(alice);
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
 
         uint256 tokenId = uint256(keccak256(bytes("kyy")));
         uint256 expBefore = registrar.nameExpires(tokenId);
@@ -283,9 +367,35 @@ contract RegistrarControllerTest is Test {
         (uint256 renewPrice,) = ctrl.rentPrice("kyy", tldNodeId, YEAR);
         vm.deal(alice, renewPrice);
         vm.prank(alice);
-        ctrl.renew{ value: renewPrice }("kyy", tldNodeId, YEAR);
+        ctrl.renew{ value: renewPrice }("kyy", tldNodeId, YEAR, address(0));
 
         assertEq(registrar.nameExpires(tokenId), expBefore + YEAR);
+    }
+
+    // ---------------------------------------------------------------
+    //                           RENEW (USDC)
+    // ---------------------------------------------------------------
+
+    function test_renew_usdc() public {
+        _commit(baseReq);
+        uint256 price = _price(baseReq);
+        vm.deal(alice, price);
+        vm.prank(alice);
+        ctrl.register{ value: price }(baseReq, address(0));
+
+        uint256 tokenId = uint256(keccak256(bytes("kyy")));
+        uint256 expBefore = registrar.nameExpires(tokenId);
+
+        uint256 usdcAmount = oracle.priceUsdc("kyy", 0, YEAR);
+        usdc.mint(alice, usdcAmount);
+        vm.prank(alice);
+        usdc.approve(address(ctrl), usdcAmount);
+
+        vm.prank(alice);
+        ctrl.renew("kyy", tldNodeId, YEAR, address(usdc));
+
+        assertEq(registrar.nameExpires(tokenId), expBefore + YEAR);
+        assertEq(usdc.balanceOf(address(ctrl)), usdcAmount);
     }
 
     // ---------------------------------------------------------------
@@ -340,26 +450,52 @@ contract RegistrarControllerTest is Test {
     }
 
     // ---------------------------------------------------------------
-    //                          WITHDRAW
+    //                          WITHDRAW ETH
     // ---------------------------------------------------------------
 
-    function test_withdraw_sends_fees() public {
+    function test_withdrawEth_sends_fees() public {
         _commit(baseReq);
         uint256 price = _price(baseReq);
         vm.deal(alice, price);
         vm.prank(alice);
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
 
         address treasury = makeAddr("treasury");
         vm.prank(protocolOwner);
-        ctrl.withdraw(treasury);
+        ctrl.withdrawEth(treasury);
         assertEq(treasury.balance, price);
     }
 
-    function test_withdraw_reverts_if_not_owner() public {
+    function test_withdrawEth_reverts_if_not_owner() public {
         vm.prank(alice);
         vm.expectRevert();
-        ctrl.withdraw(alice);
+        ctrl.withdrawEth(alice);
+    }
+
+    // ---------------------------------------------------------------
+    //                         WITHDRAW TOKEN
+    // ---------------------------------------------------------------
+
+    function test_withdrawToken_sends_usdc_fees() public {
+        _commit(baseReq);
+        uint256 usdcAmount = oracle.priceUsdc("kyy", 0, YEAR);
+        usdc.mint(alice, usdcAmount);
+        vm.prank(alice);
+        usdc.approve(address(ctrl), usdcAmount);
+        vm.prank(alice);
+        ctrl.register(baseReq, address(usdc));
+
+        address treasury = makeAddr("treasury");
+        vm.prank(protocolOwner);
+        ctrl.withdrawToken(address(usdc), treasury);
+        assertEq(usdc.balanceOf(treasury), usdcAmount);
+        assertEq(usdc.balanceOf(address(ctrl)), 0);
+    }
+
+    function test_withdrawToken_reverts_if_not_owner() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        ctrl.withdrawToken(address(usdc), alice);
     }
 
     // ---------------------------------------------------------------
@@ -375,8 +511,16 @@ contract RegistrarControllerTest is Test {
         uint256 price = _price(baseReq);
         vm.deal(alice, price);
         vm.prank(alice);
-        ctrl.register{ value: price }(baseReq);
+        ctrl.register{ value: price }(baseReq, address(0));
         assertFalse(ctrl.available("kyy", tldNodeId));
+    }
+
+    // ---------------------------------------------------------------
+    //                      USDC_TOKEN CONSTANT
+    // ---------------------------------------------------------------
+
+    function test_usdc_token_set() public view {
+        assertEq(ctrl.USDC_TOKEN(), address(usdc));
     }
 
     // ---------------------------------------------------------------
@@ -384,10 +528,8 @@ contract RegistrarControllerTest is Test {
     // ---------------------------------------------------------------
 
     function testFuzz_valid_name_charset(bytes calldata raw) public view {
-        // Constructed names that are all lowercase ASCII letters should be valid if len >= 3
         vm.assume(raw.length >= 3 && raw.length <= 32);
         string memory name = string(raw);
-        // We're just checking it doesn't revert
         ctrl.valid(name);
     }
 

@@ -49,7 +49,7 @@ contract GasBenchmarkTest is Test {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 3_00000000, 15_00000000, protocolOwner);
-        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), address(0), protocolOwner);
         resolver = new PublicResolver(reg);
 
         reg.setOwner(ROOT, address(mgr));
@@ -104,7 +104,7 @@ contract GasBenchmarkTest is Test {
 
         uint256 gasBefore = gasleft();
         vm.prank(alice);
-        ctrl.register{ value: base + premium }(baseReq);
+        ctrl.register{ value: base + premium }(baseReq, address(0));
         uint256 gasUsed = gasBefore - gasleft();
 
         emit log_named_uint("register() no resolver gas", gasUsed);
@@ -140,7 +140,7 @@ contract GasBenchmarkTest is Test {
 
         uint256 gasBefore = gasleft();
         vm.prank(alice);
-        ctrl.register{ value: base + premium }(req);
+        ctrl.register{ value: base + premium }(req, address(0));
         uint256 gasUsed = gasBefore - gasleft();
 
         emit log_named_uint("register() + setAddr gas", gasUsed);
@@ -160,7 +160,7 @@ contract GasBenchmarkTest is Test {
         (uint256 base, uint256 premium) = ctrl.rentPrice("kyy", tldNode, YEAR);
         vm.deal(alice, (base + premium) * 2);
         vm.prank(alice);
-        ctrl.register{ value: base + premium }(baseReq);
+        ctrl.register{ value: base + premium }(baseReq, address(0));
 
         // Renew
         (uint256 renewBase, uint256 renewPremium) = ctrl.rentPrice("kyy", tldNode, YEAR);
@@ -169,7 +169,7 @@ contract GasBenchmarkTest is Test {
 
         uint256 gasBefore = gasleft();
         vm.prank(alice);
-        ctrl.renew{ value: renewPrice }("kyy", tldNode, YEAR);
+        ctrl.renew{ value: renewPrice }("kyy", tldNode, YEAR, address(0));
         uint256 gasUsed = gasBefore - gasleft();
 
         emit log_named_uint("renew() gas", gasUsed);
@@ -188,7 +188,7 @@ contract GasBenchmarkTest is Test {
         (uint256 base, uint256 premium) = ctrl.rentPrice("kyy", tldNode, YEAR);
         vm.deal(alice, base + premium);
         vm.prank(alice);
-        ctrl.register{ value: base + premium }(baseReq);
+        ctrl.register{ value: base + premium }(baseReq, address(0));
 
         // Set resolver
         vm.prank(alice);

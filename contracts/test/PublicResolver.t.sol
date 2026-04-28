@@ -48,7 +48,7 @@ contract PublicResolverTest is Test {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 3_00000000, 15_00000000, protocolOwner);
-        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), address(0), protocolOwner);
         resolver = new PublicResolver(reg);
 
         reg.setOwner(ROOT, address(mgr));
@@ -92,7 +92,7 @@ contract PublicResolverTest is Test {
         uint256 price = base + premium;
         vm.deal(owner, price);
         vm.prank(owner);
-        ctrl.register{ value: price }(req);
+        ctrl.register{ value: price }(req, address(0));
     }
 
     // ---------------------------------------------------------------

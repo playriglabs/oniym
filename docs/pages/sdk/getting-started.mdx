@@ -62,24 +62,23 @@ const name = await oniym.getName("0x11702b...");
 
 ## Check availability & price
 
-Pricing is two-tier: **$3/month** or **$15/year** for any name length, paid in ETH at the current Chainlink spot price. Annual saves $21 vs paying monthly.
+Pricing is two-tier: **$3/month** or **$15/year** for any name length. Pay with ETH or USDC.
 
 ```ts
 import { Oniym } from "@oniym/sdk";
 const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 const isAvailable = await oniym.available("alice", "web3");
 
-// 1 month ($3)
-const monthly = await oniym.rentPrice("alice", "web3", 30 * 24 * 60 * 60);
-// 1 year ($15)
-const annual  = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60);
+// ETH price — fluctuates with Chainlink feed
+const monthly = await oniym.rentPrice("alice", "web3", 30 * 24 * 60 * 60);   // ~$3
+const annual  = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60);  // ~$15
 console.log(`Monthly: ${Number(monthly) / 1e18} ETH`);
 console.log(`Annual:  ${Number(annual) / 1e18} ETH`);
 ```
 
 ## Register a name
 
-Registration requires a connected [viem](https://viem.sh) `WalletClient`.
+Registration requires a connected [viem](https://viem.sh) `WalletClient`. Pay with ETH (default) or USDC.
 
 ```ts
 import { Oniym } from "@oniym/sdk";
@@ -92,6 +91,7 @@ const walletClient = createWalletClient({
   transport: custom(window.ethereum),
 });
 
+// Pay with ETH (default)
 const hash = await oniym.register(
   {
     name: "alice",
@@ -104,7 +104,17 @@ const hash = await oniym.register(
   },
   walletClient,
 );
-console.log("Registered:", hash);
+
+// Pay with USDC — SDK approves + registers automatically (2 txs)
+const hash = await oniym.register(
+  {
+    name: "alice",
+    tld: "web3",
+    duration: 365 * 24 * 60 * 60,
+    paymentToken: "usdc",
+  },
+  walletClient,
+);
 ```
 
 The SDK handles the full commit → wait → reveal flow automatically.

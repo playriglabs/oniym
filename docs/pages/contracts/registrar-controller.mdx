@@ -1,6 +1,6 @@
 # RegistrarController
 
-The public entry point for name registration. Enforces commit-reveal, pricing, and name validation.
+The public entry point for name registration. Enforces commit-reveal, pricing, and name validation. Accepts ETH or USDC as payment.
 
 **Address (Base Sepolia):** `0x8CaD65fb525D709fF32Ec96b020Eb90e3Cb212F0`
 
@@ -15,11 +15,22 @@ The public entry point for name registration. Enforces commit-reveal, pricing, a
 ## Registration flow
 
 ```
-1. makeCommitment(req)  → bytes32 commitment hash (pure, off-chain)
-2. commit(commitment)   → stores timestamp on-chain
+1. makeCommitment(req)            → bytes32 commitment hash (pure, off-chain)
+2. commit(commitment)             → stores timestamp on-chain
 3. wait ≥ 60 seconds
-4. register(req)        → mints name, sets resolver data, transfers NFT
+4. register(req, paymentToken)   → mints name, sets resolver data, transfers NFT
 ```
+
+## Payment
+
+Pass `paymentToken` to choose how to pay:
+
+| `paymentToken` | Behaviour |
+|---|---|
+| `address(0)` | ETH — `msg.value` must cover quoted price; excess refunded |
+| USDC address | USDC — caller must `approve` first; exact USD amount pulled via `transferFrom` |
+
+USDC price is exact (no Chainlink feed needed) — `$3.000000` for 30 days, `$15.000000` for 1 year.
 
 ## Key functions
 
@@ -35,12 +46,23 @@ struct RegisterRequest {
     bool reverseRecord;   // set reverse record at registration
 }
 
+// paymentToken: address(0) = ETH, USDC address = stablecoin
+function register(RegisterRequest calldata req, address paymentToken) external payable;
+function renew(string calldata name, bytes32 tld, uint256 duration, address paymentToken)
+    external payable;
+
 function makeCommitment(RegisterRequest calldata req) external pure returns (bytes32);
 function commit(bytes32 commitment) external;
-function register(RegisterRequest calldata req) external payable;
 function rentPrice(string calldata name, bytes32 tld, uint256 duration)
     external view returns (uint256 base, uint256 premium);
 function available(string calldata name, bytes32 tld) external view returns (bool);
+
+// Owner only
+function withdrawEth(address to) external;
+function withdrawToken(address token, address to) external;
+
+// Immutable
+function USDC_TOKEN() external view returns (address);
 ```
 
 ## Name validation

@@ -100,6 +100,29 @@ contract PriceOracle is IPriceOracle, Ownable2Step {
         return annualPriceUsd;
     }
 
+    /// @inheritdoc IPriceOracle
+    function priceUsdc(
+        string calldata name,
+        uint256, /* expires — reserved */
+        uint256 duration
+    ) external view override returns (uint256) {
+        uint256 len = _strlen(name);
+        if (len < MIN_NAME_LENGTH) revert NameTooShort(len);
+
+        // Convert 1e8 USD units → 1e6 USDC units (divide by 100)
+        if (duration >= YEAR) {
+            uint256 numYears = duration / YEAR;
+            uint256 rem = duration % YEAR;
+            uint256 usdcAmount = (annualPriceUsd * numYears) / 100;
+            if (rem > 0) {
+                usdcAmount += (monthlyPriceUsd * rem) / (MONTH * 100);
+            }
+            return usdcAmount;
+        } else {
+            return (monthlyPriceUsd * duration) / (MONTH * 100);
+        }
+    }
+
     // ---------------------------------------------------------------
     //                           ADMIN
     // ---------------------------------------------------------------

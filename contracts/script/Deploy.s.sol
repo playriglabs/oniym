@@ -11,8 +11,17 @@ import { PublicResolver } from "../src/PublicResolver.sol";
 import { ReverseRegistrar } from "../src/ReverseRegistrar.sol";
 import { IReverseRegistrar } from "../src/interfaces/IReverseRegistrar.sol";
 
-/// @dev Base Sepolia Chainlink ETH/USD feed (8 decimals)
+/// @dev Chainlink ETH/USD feed (8 decimals)
+/// Base Sepolia: 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1
+/// Base Mainnet: 0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70
+/// Override via CHAINLINK_ETH_USD_FEED env var.
 address constant BASE_SEPOLIA_ETH_USD_FEED = 0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1;
+
+/// @dev Circle native USDC
+/// Base Sepolia: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+/// Base Mainnet: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+/// Override via USDC_ADDRESS env var.
+address constant BASE_SEPOLIA_USDC = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
 
 /// @dev $3.00/month in Chainlink's 1e8 USD units
 uint256 constant MONTHLY_PRICE_USD = 3_00000000;
@@ -104,8 +113,9 @@ contract Deploy is Script {
         address deployer = vm.envAddress("DEPLOYER_ADDRESS");
         uint256 pk = vm.envUint("PRIVATE_KEY");
 
-        // Allow overriding the price feed via env (e.g. for forks or other networks)
+        // Allow overriding the price feed and USDC via env (e.g. for forks or other networks)
         address feed = vm.envOr("CHAINLINK_ETH_USD_FEED", BASE_SEPOLIA_ETH_USD_FEED);
+        address usdc = vm.envOr("USDC_ADDRESS", BASE_SEPOLIA_USDC);
 
         vm.startBroadcast(pk);
 
@@ -146,6 +156,7 @@ contract Deploy is Script {
             tldManager,
             priceOracle,
             IReverseRegistrar(address(reverseRegistrar)),
+            usdc,
             deployer
         );
         console.log("RegistrarController:  ", address(controller));

@@ -40,7 +40,7 @@ contract ProtocolInvariantTest is StdInvariant, Test {
         reg = new Registry();
         mgr = new TLDManager(reg, protocolOwner);
         oracle = new PriceOracle(address(new MockFeed()), 1 hours, 3_00000000, 15_00000000, protocolOwner);
-        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), protocolOwner);
+        ctrl = new RegistrarController(reg, mgr, oracle, IReverseRegistrar(address(0)), address(0), protocolOwner);
 
         reg.setOwner(ROOT, address(mgr));
 

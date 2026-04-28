@@ -4,6 +4,8 @@ pragma solidity 0.8.28;
 import { Ownable2Step, Ownable } from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IRegistrarController } from "./interfaces/IRegistrarController.sol";
 import { ITLDManager } from "./interfaces/ITLDManager.sol";
 import { ITLDRegistrar } from "./interfaces/ITLDRegistrar.sol";
@@ -22,6 +24,8 @@ import { IReverseRegistrar } from "./interfaces/IReverseRegistrar.sol";
 ///      name node so it can set resolver data atomically, then transfers to
 ///      req.owner via NFT transfer (which triggers the registry sync hook).
 contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
+    using SafeERC20 for IERC20;
+
     uint256 public constant override MIN_COMMITMENT_AGE = 60 seconds;
     uint256 public constant override MAX_COMMITMENT_AGE = 24 hours;
     uint256 public constant MIN_NAME_LENGTH = 3;
@@ -31,6 +35,9 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
     IPriceOracle public immutable PRICE_ORACLE;
     IReverseRegistrar public immutable REVERSE_REGISTRAR;
 
+    /// @inheritdoc IRegistrarController
+    address public immutable override USDC_TOKEN;
+
     /// @dev commitment hash => timestamp when it was submitted
     mapping(bytes32 => uint256) public override commitments;
 
@@ -39,12 +46,14 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
         ITLDManager _tldManager,
         IPriceOracle _priceOracle,
         IReverseRegistrar _reverseRegistrar,
+        address _usdc,
         address initialOwner
     ) Ownable(initialOwner) {
         REGISTRY = _registry;
         TLD_MANAGER = _tldManager;
         PRICE_ORACLE = _priceOracle;
         REVERSE_REGISTRAR = _reverseRegistrar;
+        USDC_TOKEN = _usdc;
     }
 
     // ---------------------------------------------------------------
@@ -126,7 +135,7 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
     }
 
     /// @inheritdoc IRegistrarController
-    function register(RegisterRequest calldata req)
+    function register(RegisterRequest calldata req, address paymentToken)
         external
         payable
         override
@@ -146,10 +155,8 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
         ITLDRegistrar registrar = ITLDRegistrar(tldData.registrar);
         if (!registrar.available(tokenId)) revert NameUnavailable(req.name, req.tld);
 
-        // 4. Verify payment
-        IPriceOracle.Price memory p = PRICE_ORACLE.price(req.name, 0, req.duration);
-        uint256 total = p.base + p.premium;
-        if (msg.value < total) revert InsufficientValue(total, msg.value);
+        // 4. Collect payment
+        _collectPayment(req.name, req.duration, paymentToken);
 
         // 5. Register: mint to this contract temporarily so we can set resolver data atomically
         registrar.register(tokenId, address(this), req.duration);
@@ -178,12 +185,7 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
             REVERSE_REGISTRAR.setNameForAddr(req.owner, req.owner, resolver, fullName);
         }
 
-        // 9. Refund excess ETH
-        if (msg.value > total) {
-            (bool sent,) = payable(msg.sender).call{ value: msg.value - total }("");
-            require(sent, "refund failed");
-        }
-
+        IPriceOracle.Price memory p = PRICE_ORACLE.price(req.name, 0, req.duration);
         emit NameRegistered(
             req.name,
             req.tld,
@@ -199,22 +201,18 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
     function renew(
         string calldata name,
         bytes32 tld,
-        uint256 duration
+        uint256 duration,
+        address paymentToken
     ) external payable override whenNotPaused {
         ITLDManager.Tld memory tldData = _getTldOrRevert(tld);
 
-        IPriceOracle.Price memory p = PRICE_ORACLE.price(name, 0, duration);
-        uint256 total = p.base + p.premium;
-        if (msg.value < total) revert InsufficientValue(total, msg.value);
+        _collectPayment(name, duration, paymentToken);
 
         uint256 tokenId = uint256(keccak256(bytes(name)));
         uint256 expires = ITLDRegistrar(tldData.registrar).renew(tokenId, duration);
 
-        if (msg.value > total) {
-            (bool sent,) = payable(msg.sender).call{ value: msg.value - total }("");
-            require(sent, "refund failed");
-        }
-
+        IPriceOracle.Price memory p = PRICE_ORACLE.price(name, 0, duration);
+        uint256 total = p.base + p.premium;
         emit NameRenewed(name, tld, bytes32(tokenId), total, expires);
     }
 
@@ -223,11 +221,18 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
     // ---------------------------------------------------------------
 
     /// @inheritdoc IRegistrarController
-    function withdraw(address to) external override onlyOwner {
+    function withdrawEth(address to) external override onlyOwner {
         uint256 bal = address(this).balance;
         emit FeesWithdrawn(to, bal);
         (bool sent,) = payable(to).call{ value: bal }("");
         require(sent, "withdraw failed");
+    }
+
+    /// @inheritdoc IRegistrarController
+    function withdrawToken(address token, address to) external override onlyOwner {
+        uint256 bal = IERC20(token).balanceOf(address(this));
+        emit TokenFeesWithdrawn(token, to, bal);
+        IERC20(token).safeTransfer(to, bal);
     }
 
     /// @inheritdoc IRegistrarController
@@ -248,6 +253,26 @@ contract RegistrarController is IRegistrarController, Ownable2Step, Pausable {
     // ---------------------------------------------------------------
     //                          INTERNAL
     // ---------------------------------------------------------------
+
+    /// @dev Collects payment in ETH or USDC and refunds excess ETH.
+    function _collectPayment(string calldata name, uint256 duration, address paymentToken) internal {
+        if (paymentToken == address(0)) {
+            // ETH path
+            IPriceOracle.Price memory p = PRICE_ORACLE.price(name, 0, duration);
+            uint256 total = p.base + p.premium;
+            if (msg.value < total) revert InsufficientValue(total, msg.value);
+            if (msg.value > total) {
+                (bool sent,) = payable(msg.sender).call{ value: msg.value - total }("");
+                require(sent, "refund failed");
+            }
+        } else if (paymentToken == USDC_TOKEN) {
+            // USDC path — price already in USD, no Chainlink feed needed
+            uint256 usdcAmount = PRICE_ORACLE.priceUsdc(name, 0, duration);
+            IERC20(USDC_TOKEN).safeTransferFrom(msg.sender, address(this), usdcAmount);
+        } else {
+            revert UnsupportedPaymentToken(paymentToken);
+        }
+    }
 
     function _validateAndConsumeCommitment(bytes32 commitment) internal {
         uint256 ts = commitments[commitment];

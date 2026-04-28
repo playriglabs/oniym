@@ -2,11 +2,14 @@
 pragma solidity 0.8.28;
 
 import { Script, console } from "forge-std/Script.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IRegistrarController } from "../src/interfaces/IRegistrarController.sol";
+import { IPriceOracle } from "../src/interfaces/IPriceOracle.sol";
 
 contract Register is Script {
     address constant REGISTRAR_CONTROLLER = 0x8CaD65fb525D709fF32Ec96b020Eb90e3Cb212F0;
     address constant PUBLIC_RESOLVER = 0xcdE3eD98423FbE098E24Bba9B634dFC3b449AC1C;
+    address constant PRICE_ORACLE = 0x86689215a17ead50CD7b258FFeCd08C8f8897cE7;
 
     // keccak256(abi.encodePacked(bytes32(0), keccak256("app")))
     bytes32 constant TLD_APP = 0xf7e1414e83ef17e770a253cedccf6316ed40eab77328b139fc18136b2e1a2ae4;
@@ -16,6 +19,8 @@ contract Register is Script {
         uint256 pk = vm.envUint("PRIVATE_KEY");
         string memory label = vm.envOr("REGISTER_LABEL", string("kite"));
         uint256 duration = vm.envOr("REGISTER_DURATION", uint256(30 days));
+        // address(0) = ETH (default), any other address = that ERC-20 token (e.g. USDC)
+        address paymentToken = vm.envOr("PAYMENT_TOKEN", address(0));
         bytes32 secret = keccak256(abi.encodePacked("oniym-secret", owner, label));
 
         IRegistrarController ctrl = IRegistrarController(REGISTRAR_CONTROLLER);
@@ -43,30 +48,57 @@ contract Register is Script {
             reverseRecord: true
         });
 
-        (uint256 base, uint256 premium) = ctrl.rentPrice(label, TLD_APP, duration);
-        uint256 total = base + premium;
-        console.log("Price (wei):", total);
-
         bytes32 commitment = ctrl.makeCommitment(req);
         console.log("Commitment:");
         console.logBytes32(commitment);
 
-        uint256 existing = ctrl.commitments(commitment);
-        if (existing == 0) {
-            vm.startBroadcast(pk);
-            ctrl.commit(commitment);
-            vm.stopBroadcast();
-            console.log("Committed - wait 60 s then run the same command again");
-        } else {
-            uint256 age = block.timestamp - existing;
-            console.log("Commitment age (s):", age);
-            if (age < ctrl.MIN_COMMITMENT_AGE()) {
-                console.log("Too early - wait", ctrl.MIN_COMMITMENT_AGE() - age, "more seconds");
-            } else {
+        if (paymentToken == address(0)) {
+            (uint256 base, uint256 premium) = ctrl.rentPrice(label, TLD_APP, duration);
+            uint256 total = base + premium;
+            console.log("Payment: ETH");
+            console.log("Price (wei):", total);
+
+            uint256 existing = ctrl.commitments(commitment);
+            if (existing == 0) {
                 vm.startBroadcast(pk);
-                ctrl.register{ value: total }(req);
+                ctrl.commit(commitment);
                 vm.stopBroadcast();
-                console.log("Registered:", label, ".app");
+                console.log("Committed - wait 60s then run again");
+            } else {
+                uint256 age = block.timestamp - existing;
+                console.log("Commitment age (s):", age);
+                if (age < ctrl.MIN_COMMITMENT_AGE()) {
+                    console.log("Too early - wait", ctrl.MIN_COMMITMENT_AGE() - age, "more seconds");
+                } else {
+                    vm.startBroadcast(pk);
+                    ctrl.register{ value: total }(req, address(0));
+                    vm.stopBroadcast();
+                    console.log("Registered:", label, ".app");
+                }
+            }
+        } else {
+            uint256 usdcAmount = IPriceOracle(PRICE_ORACLE).priceUsdc(label, 0, duration);
+            console.log("Payment: ERC-20", paymentToken);
+            console.log("Price (token units):", usdcAmount);
+
+            uint256 existing = ctrl.commitments(commitment);
+            if (existing == 0) {
+                vm.startBroadcast(pk);
+                ctrl.commit(commitment);
+                vm.stopBroadcast();
+                console.log("Committed - wait 60s then run again");
+            } else {
+                uint256 age = block.timestamp - existing;
+                console.log("Commitment age (s):", age);
+                if (age < ctrl.MIN_COMMITMENT_AGE()) {
+                    console.log("Too early - wait", ctrl.MIN_COMMITMENT_AGE() - age, "more seconds");
+                } else {
+                    vm.startBroadcast(pk);
+                    IERC20(paymentToken).approve(address(ctrl), usdcAmount);
+                    ctrl.register(req, paymentToken);
+                    vm.stopBroadcast();
+                    console.log("Registered:", label, ".app");
+                }
             }
         }
     }
