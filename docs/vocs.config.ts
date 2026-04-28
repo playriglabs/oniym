@@ -4,8 +4,11 @@ export default defineConfig({
     rootDir: ".",
     title: "Oniym",
     description: "One name, all chains. Multichain-native naming service.",
-    logoUrl: "/logo.svg",
-    iconUrl: "/icon.svg",
+    logoUrl: {
+        dark: "/oniym-light.png",
+        light: "/oniym-dark.png",
+    },
+    iconUrl: "/oniym.jpg",
     ogImageUrl: "https://oniym.xyz/og.png",
     theme: {
         accentColor: {
@@ -17,7 +20,7 @@ export default defineConfig({
         google: "DM Sans",
         // Optional: Change the monospace/code font
         mono: {
-            google: "Source Code Pro",
+            google: "Fira Code",
         },
     },
     socials: [
@@ -92,6 +95,7 @@ export default defineConfig({
                 { text: "ADR-005 Playriglabs branding", link: "/adr/005" },
                 { text: "ADR-006 Pricing & controller design", link: "/adr/006" },
                 { text: "ADR-007 Multi-TLD identity", link: "/adr/007" },
+                { text: "ADR-008 Dual-payment ETH + USDC", link: "/adr/008" },
             ],
         },
     ],
