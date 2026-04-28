@@ -18,13 +18,8 @@
  * @packageDocumentation
  */
 
-export {
-    Oniym,
-    COIN_TYPES,
-    SUPPORTED_TLDS,
-    MAX_TLD_COUNT,
-    MAX_TLD_LENGTH,
-} from "./oniym";
+export { Oniym, COIN_TYPES, MAX_TLD_COUNT, MAX_TLD_LENGTH } from "./oniym";
+export { SUPPORTED_TLDS } from "./tlds";
 
 export type {
     OniymConfig,
