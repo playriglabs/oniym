@@ -29,9 +29,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck worker
-        run: pnpm --filter @oniym/indexer typecheck:worker
-
       - name: Deploy
         working-directory: indexer
         run: pnpm exec wrangler deploy

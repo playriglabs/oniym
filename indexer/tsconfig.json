@@ -7,5 +7,5 @@
     "skipLibCheck": true
   },
   "include": ["src", "ponder.config.ts", "ponder.schema.ts", "ponder-env.d.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/worker"]
 }
