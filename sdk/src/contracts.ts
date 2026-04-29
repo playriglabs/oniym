@@ -19,11 +19,11 @@ export const CONTRACT_ADDRESSES: Record<
     }
 > = {
     [CHAIN_IDS.baseSepolia]: {
-        Registry: "0x24ee7fb02cac630e88c74d0a228eb771bc4badcf",
-        RegistrarController: "0x8cad65fb525d709ff32ec96b020eb90e3cb212f0",
-        PublicResolver: "0xcde3ed98423fbe098e24bba9b634dfc3b449ac1c",
-        ReverseRegistrar: "0x4bcfd49f89971a944badd921d29903e75a393fa4",
-        PriceOracle: "0x86689215a17ead50cd7b258ffecd08c8f8897ce7",
+        Registry: "0xc937e37c1fa78b78b154ba5a76249e58c7d9d694",
+        RegistrarController: "0xb0d499a5c8e3dc9db30b7c3f685b2d5d8d62f69a",
+        PublicResolver: "0xe951ce73da1d75730e56df79844bfa745fa589d3",
+        ReverseRegistrar: "0x15536f4306c06cf14fbd1b76385ea35fb31f4fa4",
+        PriceOracle: "0x7ff70ea1a39fb0b46e986f6c8aae5f9dc9c11e28",
         USDC: "0x036cbd53842c5426634e7929541ec2318f3dcf7e",
     },
     [CHAIN_IDS.base]: {

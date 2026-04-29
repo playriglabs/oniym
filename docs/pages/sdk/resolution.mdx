@@ -20,7 +20,7 @@ interface ResolveResult {
   resolver: string | null;
   expiresAt: string;      // unix timestamp
   expired: boolean;
-  addresses: Record<string, string>; // coinType → address
+  addresses: Record<string, string>; // SLIP-0044 coinType → human-readable address
   texts: Record<string, string>;     // key → value
   contenthash: string | null;
 }

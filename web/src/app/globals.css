@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background-color: #0a0a0f;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #0a0a0f;
+    color: #f0f0ff;
+  }
+
+  ::selection {
+    background-color: rgba(133, 239, 255, 0.2);
+    color: #85efff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a0a0f;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1e1e3a;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(133, 239, 255, 0.2);
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #f0f0ff 0%, #85efff 60%, #14acc3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-subtle {
+    background: linear-gradient(135deg, #f0f0ff 0%, rgba(133, 239, 255, 0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dot-grid {
+    background-image: radial-gradient(rgba(133, 239, 255, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 40px rgba(133, 239, 255, 0.12), 0 0 80px rgba(133, 239, 255, 0.06);
+  }
+
+  .card-border {
+    border: 1px solid #1e1e3a;
+    transition: border-color 200ms ease;
+  }
+
+  .card-border:hover {
+    border-color: rgba(133, 239, 255, 0.25);
+  }
+
+  .font-name {
+    font-family: var(--font-mono);
+    letter-spacing: -0.01em;
+  }
+}

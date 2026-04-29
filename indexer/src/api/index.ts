@@ -65,6 +65,20 @@ function parseName(raw: string): { label: string; tld: string } | null {
     return { label: parts[0].toLowerCase(), tld: parts[1].toLowerCase() };
 }
 
+// Hex-native chains store raw address bytes (ETH=60, BNB=714, SUI=784).
+// Text-native chains (BTC=0, SOL=501) store UTF-8 bytes of the address string.
+const HEX_ADDR_COIN_TYPES = new Set([60n, 714n, 784n]);
+
+function decodeAddr(coinType: bigint, addr: string): string {
+    if (HEX_ADDR_COIN_TYPES.has(coinType)) return addr;
+    try {
+        const hex = addr.startsWith("0x") ? addr.slice(2) : addr;
+        return Buffer.from(hex, "hex").toString("utf8");
+    } catch {
+        return addr;
+    }
+}
+
 // ---------------------------------------------------------------
 //                           ROUTES
 // ---------------------------------------------------------------
@@ -108,7 +122,7 @@ app.get("/resolve/:name", async (c) => {
     ]);
 
     const addresses: Record<string, string> = {};
-    for (const r of addrs) addresses[r.coinType.toString()] = r.addr;
+    for (const r of addrs) addresses[r.coinType.toString()] = decodeAddr(r.coinType, r.addr);
 
     const textMap: Record<string, string> = {};
     for (const r of texts) textMap[r.key] = r.value;

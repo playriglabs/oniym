@@ -7,9 +7,9 @@ import { IRegistrarController } from "../src/interfaces/IRegistrarController.sol
 import { IPriceOracle } from "../src/interfaces/IPriceOracle.sol";
 
 contract Register is Script {
-    address constant REGISTRAR_CONTROLLER = 0x8CaD65fb525D709fF32Ec96b020Eb90e3Cb212F0;
-    address constant PUBLIC_RESOLVER = 0xcdE3eD98423FbE098E24Bba9B634dFC3b449AC1C;
-    address constant PRICE_ORACLE = 0x86689215a17ead50CD7b258FFeCd08C8f8897cE7;
+    address constant REGISTRAR_CONTROLLER = 0xb0d499a5c8E3Dc9Db30b7c3F685b2D5D8D62F69a;
+    address constant PUBLIC_RESOLVER = 0xE951cE73Da1d75730e56Df79844BFA745FA589D3;
+    address constant PRICE_ORACLE = 0x7Ff70eA1a39FB0B46e986f6C8AaE5F9Dc9c11E28;
 
     // keccak256(abi.encodePacked(bytes32(0), keccak256("app")))
     bytes32 constant TLD_APP = 0xf7e1414e83ef17e770a253cedccf6316ed40eab77328b139fc18136b2e1a2ae4;

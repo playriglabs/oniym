@@ -15,11 +15,13 @@ GET /resolve/kyy.web3
   "name": "kyy.web3",
   "node": "0xf7d7c4fb47297d0f2106ac50d24c93063bc0fe50d559ed65e99edb91cc86f8a2",
   "owner": "0x11702b8ef5f882191af862a7e27096c44a5e2b37",
-  "resolver": "0xa37ed413181537c60586317a70f612a304eb0681",
+  "resolver": "0xe951ce73da1d75730e56df79844bfa745fa589d3",
   "expiresAt": "1808715608",
   "expired": false,
   "addresses": {
-    "60": "0x11702b8ef5f882191af862a7e27096c44a5e2b37"
+    "60": "0x11702b8ef5f882191af862a7e27096c44a5e2b37",
+    "501": "7xKb3n36GAJ5jG5aG9Q8p6H3r4Y2Z1WjK9nLcXdE5gTf",
+    "0": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
   },
   "texts": {
     "twitter": "@kyy"
@@ -38,9 +40,16 @@ GET /resolve/kyy.web3
 | `resolver` | `string \| null` | Resolver contract address |
 | `expiresAt` | `string` | Unix timestamp of expiry |
 | `expired` | `boolean` | Whether the name is expired |
-| `addresses` | `Record<string, string>` | Coin type → address map |
+| `addresses` | `Record<string, string>` | SLIP-0044 coin type → human-readable address. ETH (coinType `60`) is a checksummed hex address; all other chains (SOL `501`, BTC `0`, SUI `784`, BNB `714`) are their native string format (base58, bech32, etc.) |
 | `texts` | `Record<string, string>` | Text record key → value map |
 | `contenthash` | `string \| null` | Raw contenthash hex |
+
+### Address encoding
+
+On-chain, all addresses are stored as raw bytes in `PublicResolver.setAddr()`. The indexer decodes them before serving:
+
+- **ETH (coinType 60):** 20-byte EVM address → returned as `0x`-prefixed hex
+- **All other chains:** bytes decoded as UTF-8 → returned as the original human-readable string (Solana base58, Bitcoin bech32, etc.)
 
 ## Errors
 

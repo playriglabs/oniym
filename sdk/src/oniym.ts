@@ -365,7 +365,7 @@ export class Oniym {
 
         const node = _namehash(name);
         const coinType = BigInt(COIN_TYPES[chain]);
-        const addrBytes: Hex = chain === "eth" ? toHex(toBytes(address)) : toHex(toBytes(address));
+        const addrBytes: Hex = toHex(toBytes(address));
 
         return walletClient.writeContract({
             address: this.addresses.PublicResolver,
@@ -467,8 +467,7 @@ export class Oniym {
         if (addresses) {
             for (const [chain, addr] of Object.entries(addresses) as [SupportedChain, string][]) {
                 if (!addr) continue;
-                const addrBytes: Hex =
-                    chain === "eth" ? toHex(toBytes(addr)) : toHex(toBytes(addr));
+                const addrBytes: Hex = toHex(toBytes(addr));
                 calls.push(
                     encodeFunctionData({
                         abi: publicResolverAbi,

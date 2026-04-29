@@ -12,7 +12,7 @@ export default defineConfig({
     ogImageUrl: "https://oniym.xyz/og.png",
     theme: {
         accentColor: {
-            light: "#40b5c7",
+            light: "#14acc3",
             dark: "#85efff",
         },
     },

@@ -2,18 +2,23 @@
 
 ## Base Sepolia (testnet)
 
-Chain ID: `84532`
+Chain ID: `84532` · Deployed: 2026-04-28
 
 | Contract | Address |
 |----------|---------|
-| Registry | `0x4d0203cf6188247c282f1ee1b866ea55f71aabe4` |
-| TLDManager | `0x17618fa81f652b926f9238c4e5e8a2b9f444f3b1` |
-| PriceOracle | `0x7b5fdc20922c336b6b3d768e6e5b32e4266eb7ae` |
-| RegistrarController | `0xF14E154633EFf408a99d3E6c9b01f918F93Ba5b1` |
-| PublicResolver | `0xA37eD413181537c60586317a70f612a304EB0681` |
-| ReverseRegistrar | `0xa5d904401d5f3ed1eb19188ce9de28bef3c083b9` |
+| Registry | `0xc937e37c1FA78b78b154BA5a76249e58C7d9d694` |
+| TLDManager | `0x4A32296ce23155093E94d71A26ffB8617A44baf6` |
+| PriceOracle | `0x7Ff70eA1a39FB0B46e986f6C8AaE5F9Dc9c11E28` |
+| RegistrarController | `0xb0d499a5c8E3Dc9Db30b7c3F685b2D5D8D62F69a` |
+| PublicResolver | `0xE951cE73Da1d75730e56Df79844BFA745FA589D3` |
+| ReverseRegistrar | `0x15536F4306C06Cf14fbD1b76385Ea35Fb31F4FA4` |
+| USDC (Circle native) | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` |
 
-All 71 contracts (core + 65 TLD registrars) were deployed and verified on Basescan.
+All 72 contracts (6 core + 1 USDC reference + 65 TLD registrars) deployed on Base Sepolia.
+
+:::info
+This deployment includes **ADR-008 dual-payment support** — both ETH and native USDC are accepted for registration and renewal.
+:::
 
 ## Base Mainnet
 
