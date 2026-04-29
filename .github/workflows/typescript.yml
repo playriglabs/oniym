@@ -9,8 +9,11 @@ on:
       - "indexer/**"
       - "examples/**"
       - "docs/**"
+      - "web/**"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "eslint.config.ts"
+      - "eslint.config.js"
       - ".github/workflows/typescript.yml"
   pull_request:
     paths:
@@ -19,8 +22,11 @@ on:
       - "indexer/**"
       - "examples/**"
       - "docs/**"
+      - "web/**"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "eslint.config.ts"
+      - "eslint.config.js"
       - ".github/workflows/typescript.yml"
 
 jobs:

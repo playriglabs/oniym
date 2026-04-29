@@ -11,7 +11,7 @@ An 8-sprint journey from zero to mainnet launch. Deliverables are hard gates —
 
 ## Timeline
 
-### 1 — Foundations ✅ *complete*
+### 1 — Foundations ✅ _complete_
 
 **Theme:** Prove cryptographic foundations, establish CI and project structure.
 
@@ -29,7 +29,7 @@ An 8-sprint journey from zero to mainnet launch. Deliverables are hard gates —
 
 **Exit criteria:** Public repo green on CI, namehash parity test passes, ADRs merged.
 
-### 2 — Core contracts ✅ *complete*
+### 2 — Core contracts ✅ _complete_
 
 **Theme:** Ownership layer. Multi-TLD names as NFTs, commit-reveal registration.
 
@@ -43,7 +43,7 @@ An 8-sprint journey from zero to mainnet launch. Deliverables are hard gates —
 
 **Exit criteria:** End-to-end registration works on Base Sepolia. `forge test` passes with >95% coverage.
 
-### 3 — Resolvers + security pass ✅ *complete*
+### 3 — Resolvers + security pass ✅ _complete_
 
 **Theme:** The multichain payload. Slither/Mythril self-audit.
 
@@ -68,34 +68,34 @@ An 8-sprint journey from zero to mainnet launch. Deliverables are hard gates —
 - [x] Redis cache layer
 - [x] Rate limiting
 - [x] Docker Compose for local dev
-- [ ] Deploy to Railway
+- [ ] Deploy to cloudflare
 
 **Exit criteria:** `curl https://api.oniym.xyz/resolve/kyy.id` returns all chain addresses. P99 latency < 200ms.
 
-### 5 — SDK
+### 5 — SDK ✅ _complete_
 
 **Theme:** Developer experience.
 
-- [ ] `@oniym/sdk` full impl — `Oniym` class: `getName()`, `getAddress()`, `getAddresses()`, `register()`, `setAddress()`
-- [ ] `@oniym/react` — TanStack Query hooks
-- [ ] Generated TypeDoc site
-- [ ] Example Next.js and Expo apps
+- [x] `@oniym/sdk` full impl — `Oniym` class: `getName()`, `getAddress()`, `getAddresses()`, `register()`, `setAddress()`
+- [x] `@oniym/react` — wagmi-based hooks (`useOniym`, context provider)
+- [x] Generated TypeDoc site
 - [ ] Published to npm (semantic release)
 
 **Exit criteria:** `pnpm add @oniym/sdk` works, docs site live, 2 working examples.
 
-### 6 — Frontend
+### 6 — Frontend ✅ _complete_
 
 **Theme:** The product users actually touch.
 
-- [ ] Next.js 15 app with App Router
-- [ ] Search + availability check
-- [ ] Register flow with commit-reveal UX
-- [ ] Manage page (addresses, avatar, text records)
-- [ ] Privy wallet connection
+- [x] Next.js 15 app with App Router
+- [x] Search + availability check (live debounced, animated states)
+- [x] Register flow with commit-reveal UX
+- [x] Manage page (multichain addresses, text records)
+- [x] Profile page
+- [x] Wallet connection (wagmi + Reown AppKit — injected, Coinbase, WalletConnect)
+- [x] Mobile responsive, dark mode
 - [ ] IPFS avatar upload
-- [ ] Mobile responsive, dark mode
-- [ ] Deploy to Vercel at `oniym.xyz`
+- [ ] Deploy to Cloudflare pages at `oniym.xyz`
 
 **Exit criteria:** A non-developer can register a name without help.
 
