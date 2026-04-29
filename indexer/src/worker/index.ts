@@ -1,4 +1,5 @@
-import { Hono } from "hono";
+import type { KVNamespace } from "@cloudflare/workers-types";
+import { ExecutionContext, Hono } from "hono";
 import { cors } from "hono/cors";
 import { eq, and } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
@@ -42,10 +43,7 @@ function createApp(env: Env) {
     app.use("*", cors());
 
     app.use("*", async (c, next) => {
-        const ip =
-            c.req.header("cf-connecting-ip") ??
-            c.req.header("x-forwarded-for") ??
-            "unknown";
+        const ip = c.req.header("cf-connecting-ip") ?? c.req.header("x-forwarded-for") ?? "unknown";
         const key = `ratelimit:${ip}`;
         try {
             const current = await env.RATE_LIMIT.get(key);
