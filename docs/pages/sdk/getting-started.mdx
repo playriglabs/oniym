@@ -24,18 +24,18 @@ yarn add @oniym/sdk viem
 import { Oniym } from "@oniym/sdk";
 
 const oniym = new Oniym({
-  indexerUrl: "https://api.oniym.xyz", // fast reads
-  rpcUrl: "https://mainnet.base.org",  // fallback / write calls
+    indexerUrl: "https://api.oniym.xyz", // fast reads
+    rpcUrl: "https://mainnet.base.org", // fallback / write calls
 });
 ```
 
 ### Config options
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `indexerUrl` | `string` | Base URL of the Oniym indexer API. Defaults to `http://localhost:42069`. |
-| `rpcUrl` | `string` | Base RPC URL for direct contract reads and write calls. Defaults to the public Base Sepolia endpoint. |
-| `chainId` | `84532 \| 8453` | Chain to use. Defaults to `84532` (Base Sepolia). |
+| Option       | Type            | Description                                                                                           |
+| ------------ | --------------- | ----------------------------------------------------------------------------------------------------- |
+| `indexerUrl` | `string`        | Base URL of the Oniym indexer API. Defaults to `https://api.oniym.xyz`.                               |
+| `rpcUrl`     | `string`        | Base RPC URL for direct contract reads and write calls. Defaults to the public Base Sepolia endpoint. |
+| `chainId`    | `84532 \| 8453` | Chain to use. Defaults to `84532` (Base Sepolia).                                                     |
 
 ## Read a name
 
@@ -44,10 +44,10 @@ import { Oniym } from "@oniym/sdk";
 const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 // All records for a name
 const result = await oniym.resolve("kyy.web3");
-console.log(result?.owner);      // "0x..."
-console.log(result?.expiresAt);  // unix timestamp string
-console.log(result?.addresses);  // { "60": "0x..." }
-console.log(result?.texts);      // { "twitter": "..." }
+console.log(result?.owner); // "0x..."
+console.log(result?.expiresAt); // unix timestamp string
+console.log(result?.addresses); // { "60": "0x..." }
+console.log(result?.texts); // { "twitter": "..." }
 
 // Just one chain's address
 const eth = await oniym.getAddress("kyy.web3", "eth");
@@ -70,8 +70,8 @@ const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 const isAvailable = await oniym.available("alice", "web3");
 
 // ETH price — fluctuates with Chainlink feed
-const monthly = await oniym.rentPrice("alice", "web3", 30 * 24 * 60 * 60);   // ~$3
-const annual  = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60);  // ~$15
+const monthly = await oniym.rentPrice("alice", "web3", 30 * 24 * 60 * 60); // ~$3
+const annual = await oniym.rentPrice("alice", "web3", 365 * 24 * 60 * 60); // ~$15
 console.log(`Monthly: ${Number(monthly) / 1e18} ETH`);
 console.log(`Annual:  ${Number(annual) / 1e18} ETH`);
 ```
@@ -87,33 +87,33 @@ import { baseSepolia } from "viem/chains";
 
 const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 const walletClient = createWalletClient({
-  chain: baseSepolia,
-  transport: custom(window.ethereum),
+    chain: baseSepolia,
+    transport: custom(window.ethereum),
 });
 
 // Pay with ETH (default)
 const hash = await oniym.register(
-  {
-    name: "alice",
-    tld: "web3",
-    duration: 365 * 24 * 60 * 60,
-    reverseRecord: true,
-    addresses: { eth: "0x11702b8eF5F882191Af862a7e27096C44A5e2B37" },
-    onCommit: (hash) => console.log("Committed:", hash),
-    onWaiting: (ms) => console.log(`Waiting ${ms / 1000}s...`),
-  },
-  walletClient,
+    {
+        name: "alice",
+        tld: "web3",
+        duration: 365 * 24 * 60 * 60,
+        reverseRecord: true,
+        addresses: { eth: "0x11702b8eF5F882191Af862a7e27096C44A5e2B37" },
+        onCommit: (hash) => console.log("Committed:", hash),
+        onWaiting: (ms) => console.log(`Waiting ${ms / 1000}s...`),
+    },
+    walletClient,
 );
 
 // Pay with USDC — SDK approves + registers automatically (2 txs)
 const hash = await oniym.register(
-  {
-    name: "alice",
-    tld: "web3",
-    duration: 365 * 24 * 60 * 60,
-    paymentToken: "usdc",
-  },
-  walletClient,
+    {
+        name: "alice",
+        tld: "web3",
+        duration: 365 * 24 * 60 * 60,
+        paymentToken: "usdc",
+    },
+    walletClient,
 );
 ```
 

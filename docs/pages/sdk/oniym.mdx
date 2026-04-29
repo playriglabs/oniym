@@ -14,39 +14,39 @@ const oniym = new Oniym(config?: OniymConfig);
 
 ```ts
 interface OniymConfig {
-  indexerUrl?: string; // default: "http://localhost:42069"
-  rpcUrl?: string;     // default: public Base Sepolia RPC
-  chainId?: 84532 | 8453; // default: 84532 (Base Sepolia)
+    indexerUrl?: string; // default: "https://api.oniym.xyz"
+    rpcUrl?: string; // default: public Base Sepolia RPC
+    chainId?: 84532 | 8453; // default: 84532 (Base Sepolia)
 }
 ```
 
 ## Read methods
 
-| Method | Description |
-|--------|-------------|
-| [`resolve(name)`](/sdk/resolution#resolve) | All records for a name |
-| [`getName(address)`](/sdk/resolution#getname) | Reverse lookup |
-| [`getAddress(name, chain)`](/sdk/resolution#getaddress) | Single chain address |
-| [`getAddresses(name)`](/sdk/resolution#getaddresses) | All chain addresses |
-| [`available(name, tld)`](/sdk/resolution#available) | Availability check (RPC) |
-| [`rentPrice(name, tld, duration)`](/sdk/resolution#rentprice) | Price in wei (RPC) |
-| [`getTLDs()`](/sdk/utilities#gettlds) | List all supported TLDs |
+| Method                                                        | Description              |
+| ------------------------------------------------------------- | ------------------------ |
+| [`resolve(name)`](/sdk/resolution#resolve)                    | All records for a name   |
+| [`getName(address)`](/sdk/resolution#getname)                 | Reverse lookup           |
+| [`getAddress(name, chain)`](/sdk/resolution#getaddress)       | Single chain address     |
+| [`getAddresses(name)`](/sdk/resolution#getaddresses)          | All chain addresses      |
+| [`available(name, tld)`](/sdk/resolution#available)           | Availability check (RPC) |
+| [`rentPrice(name, tld, duration)`](/sdk/resolution#rentprice) | Price in wei (RPC)       |
+| [`getTLDs()`](/sdk/utilities#gettlds)                         | List all supported TLDs  |
 
 ## Write methods
 
-| Method | Description |
-|--------|-------------|
-| [`register(options, walletClient)`](/sdk/registration) | Full commit-reveal registration |
-| [`setAddress(name, chain, address, walletClient)`](/sdk/registration#setaddress) | Set a chain address |
-| [`setText(name, key, value, walletClient)`](/sdk/registration#settext) | Set a text record |
-| [`setResolver(name, resolver, walletClient)`](/sdk/registration#setresolver) | Set the resolver |
+| Method                                                                           | Description                     |
+| -------------------------------------------------------------------------------- | ------------------------------- |
+| [`register(options, walletClient)`](/sdk/registration)                           | Full commit-reveal registration |
+| [`setAddress(name, chain, address, walletClient)`](/sdk/registration#setaddress) | Set a chain address             |
+| [`setText(name, key, value, walletClient)`](/sdk/registration#settext)           | Set a text record               |
+| [`setResolver(name, resolver, walletClient)`](/sdk/registration#setresolver)     | Set the resolver                |
 
 ## Utility methods
 
-| Method | Description |
-|--------|-------------|
-| [`namehash(name)`](/sdk/utilities#namehash) | ENSIP-1 namehash |
-| [`labelhash(label)`](/sdk/utilities#labelhash) | keccak256 of a label |
-| [`makeNode(parentNode, label)`](/sdk/utilities#makenode) | Subdomain node |
-| [`parseName(name)`](/sdk/utilities#parsename) | Split label + TLD |
-| [`coinTypeFor(chain)`](/sdk/utilities#cointypefor) | SLIP-0044 coin type |
+| Method                                                   | Description          |
+| -------------------------------------------------------- | -------------------- |
+| [`namehash(name)`](/sdk/utilities#namehash)              | ENSIP-1 namehash     |
+| [`labelhash(label)`](/sdk/utilities#labelhash)           | keccak256 of a label |
+| [`makeNode(parentNode, label)`](/sdk/utilities#makenode) | Subdomain node       |
+| [`parseName(name)`](/sdk/utilities#parsename)            | Split label + TLD    |
+| [`coinTypeFor(chain)`](/sdk/utilities#cointypefor)       | SLIP-0044 coin type  |

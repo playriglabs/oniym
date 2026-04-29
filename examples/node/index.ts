@@ -8,7 +8,7 @@
 import { Oniym } from "@oniym/sdk";
 
 const oniym = new Oniym({
-    indexerUrl: "http://localhost:42069",
+    indexerUrl: "https://api.oniym.xyz",
     rpcUrl: "https://sepolia.base.org",
 });
 

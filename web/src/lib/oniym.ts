@@ -1,7 +1,7 @@
 import { Oniym } from "@oniym/sdk";
 
 export const oniym = new Oniym({
-    indexerUrl: process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:42069",
+    indexerUrl: process.env.NEXT_PUBLIC_INDEXER_URL,
     rpcUrl: process.env.NEXT_PUBLIC_RPC_URL,
 });
 

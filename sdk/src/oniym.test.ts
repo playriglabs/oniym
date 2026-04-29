@@ -224,7 +224,7 @@ function notFound(): Response {
 }
 
 describe("Oniym.resolve (mocked fetch)", () => {
-    const oniym = new Oniym({ indexerUrl: "http://localhost:42069" });
+    const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 
     beforeEach(() => void vi.stubGlobal("fetch", vi.fn()));
     afterEach(() => vi.unstubAllGlobals());
@@ -249,7 +249,7 @@ describe("Oniym.resolve (mocked fetch)", () => {
 });
 
 describe("Oniym.getName (mocked fetch)", () => {
-    const oniym = new Oniym({ indexerUrl: "http://localhost:42069" });
+    const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 
     beforeEach(() => void vi.stubGlobal("fetch", vi.fn()));
     afterEach(() => vi.unstubAllGlobals());
@@ -284,7 +284,7 @@ describe("Oniym.getName (mocked fetch)", () => {
 });
 
 describe("Oniym.getAddress (mocked fetch)", () => {
-    const oniym = new Oniym({ indexerUrl: "http://localhost:42069" });
+    const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 
     beforeEach(() => void vi.stubGlobal("fetch", vi.fn()));
     afterEach(() => vi.unstubAllGlobals());
@@ -315,7 +315,7 @@ describe("Oniym.getAddress (mocked fetch)", () => {
 });
 
 describe("Oniym.getAddresses (mocked fetch)", () => {
-    const oniym = new Oniym({ indexerUrl: "http://localhost:42069" });
+    const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 
     beforeEach(() => void vi.stubGlobal("fetch", vi.fn()));
     afterEach(() => vi.unstubAllGlobals());
@@ -340,7 +340,7 @@ describe("Oniym.getAddresses (mocked fetch)", () => {
 });
 
 describe("Oniym.getNames (mocked fetch)", () => {
-    const oniym = new Oniym({ indexerUrl: "http://localhost:42069" });
+    const oniym = new Oniym({ indexerUrl: "https://api.oniym.xyz" });
 
     beforeEach(() => void vi.stubGlobal("fetch", vi.fn()));
     afterEach(() => vi.unstubAllGlobals());

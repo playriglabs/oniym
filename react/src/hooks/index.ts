@@ -32,7 +32,7 @@ export function useName(address: string | undefined): UseQueryResult<string | nu
         queryKey: ["oniym", "name", address],
         queryFn: async (): Promise<string | null> => {
             const res = await fetch(
-                `${(oniym.config.indexerUrl ?? "http://localhost:42069").replace(/\/$/, "")}/lookup/${address!}`,
+                `${oniym.config.indexerUrl!.replace(/\/$/, "")}/lookup/${address!}`,
             );
             if (res.status === 404) return null;
             const data = (await res.json()) as LookupResult;

@@ -453,8 +453,8 @@ export class Oniym {
     }
 
     private _indexerUrl(path: string): string {
-        const base = this.config.indexerUrl ?? "http://localhost:42069";
-        return `${base.replace(/\/$/, "")}${path}`;
+        const base = this.config.indexerUrl;
+        return `${base?.replace(/\/$/, "")}${path}`;
     }
 
     private _buildResolverData(

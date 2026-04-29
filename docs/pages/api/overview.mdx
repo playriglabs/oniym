@@ -4,10 +4,10 @@ The Oniym indexer is a [Ponder](https://ponder.sh) application that reads on-cha
 
 ## Base URL
 
-| Environment | URL |
-|-------------|-----|
-| Local dev | `http://localhost:42069` |
-| Testnet (Base Sepolia) | Coming soon |
+| Environment            | URL                      |
+| ---------------------- | ------------------------ |
+| Local dev              | `https://api.oniym.xyz/` |
+| Testnet (Base Sepolia) | Coming soon              |
 
 ## Rate limiting
 
@@ -15,11 +15,11 @@ The Oniym indexer is a [Ponder](https://ponder.sh) application that reads on-cha
 
 ## Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | [`/resolve/:name`](/api/resolve) | Resolve a name to all its records |
-| `GET` | [`/lookup/:address`](/api/lookup) | Reverse lookup — address to claimed name |
-| `GET` | [`/names/:address`](/api/names) | List all names owned by an address |
+| Method | Path                              | Description                              |
+| ------ | --------------------------------- | ---------------------------------------- |
+| `GET`  | [`/resolve/:name`](/api/resolve)  | Resolve a name to all its records        |
+| `GET`  | [`/lookup/:address`](/api/lookup) | Reverse lookup — address to claimed name |
+| `GET`  | [`/names/:address`](/api/names)   | List all names owned by an address       |
 
 ## Caching
 
