@@ -44,6 +44,15 @@ const config: Linter.Config[] = [
         },
     },
     {
+        files: ["indexer/src/**/*.ts"],
+        rules: {
+            "@typescript-eslint/explicit-function-return-type": "off",
+            "@typescript-eslint/no-misused-promises": "off",
+            "@typescript-eslint/no-unnecessary-condition": "off",
+            "@typescript-eslint/no-unsafe-argument": "off",
+        },
+    },
+    {
         files: ["web/src/**/*.{ts,tsx}"],
         rules: {
             "@typescript-eslint/explicit-function-return-type": "off",

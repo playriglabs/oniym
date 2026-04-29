@@ -1,0 +1,39 @@
+name: Deploy Indexer API
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "indexer/src/worker/**"
+      - "indexer/wrangler.toml"
+      - "indexer/package.json"
+      - ".github/workflows/indexer.yml"
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Workers
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck worker
+        run: pnpm --filter @oniym/indexer typecheck:worker
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          workingDirectory: indexer

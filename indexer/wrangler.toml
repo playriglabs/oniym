@@ -1,0 +1,12 @@
+name = "oniym-api"
+main = "src/worker/index.ts"
+compatibility_date = "2024-11-01"
+
+# DATABASE_URL is set as a secret:
+#   wrangler secret put DATABASE_URL
+# Use a Neon Postgres connection string.
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "5102ea5f46ef40d7b23ad45dd59fb460"
+preview_id = "d0a8578529574561bc5c55ab045e947c"

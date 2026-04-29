@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { db } from "ponder:api";
 import { Hono } from "hono";
 import { eq, and } from "drizzle-orm";
