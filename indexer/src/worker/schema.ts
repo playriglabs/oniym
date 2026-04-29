@@ -8,11 +8,11 @@ export const name = pgTable(
         id: text("id").primaryKey(),
         label: text("label").notNull(),
         tld: text("tld").notNull(),
-        fullName: text("fullName").notNull(),
+        fullName: text("full_name").notNull(),
         owner: text("owner").notNull(),
         resolver: text("resolver"),
-        expiresAt: bigint("expiresAt", { mode: "bigint" }).notNull(),
-        registeredAt: bigint("registeredAt", { mode: "bigint" }).notNull(),
+        expiresAt: bigint("expires_at", { mode: "bigint" }).notNull(),
+        registeredAt: bigint("registered_at", { mode: "bigint" }).notNull(),
     },
     (table) => [
         index("name_owner_idx").on(table.owner),
@@ -23,10 +23,10 @@ export const name = pgTable(
 export const addrRecord = pgTable(
     "addr_record",
     {
-        nameNode: text("nameNode").notNull(),
-        coinType: bigint("coinType", { mode: "bigint" }).notNull(),
+        nameNode: text("name_node").notNull(),
+        coinType: bigint("coin_type", { mode: "bigint" }).notNull(),
         addr: text("addr").notNull(),
-        updatedAt: bigint("updatedAt", { mode: "bigint" }).notNull(),
+        updatedAt: bigint("updated_at", { mode: "bigint" }).notNull(),
     },
     (table) => [
         primaryKey({ columns: [table.nameNode, table.coinType] }),
@@ -37,10 +37,10 @@ export const addrRecord = pgTable(
 export const textRecord = pgTable(
     "text_record",
     {
-        nameNode: text("nameNode").notNull(),
+        nameNode: text("name_node").notNull(),
         key: text("key").notNull(),
         value: text("value").notNull(),
-        updatedAt: bigint("updatedAt", { mode: "bigint" }).notNull(),
+        updatedAt: bigint("updated_at", { mode: "bigint" }).notNull(),
     },
     (table) => [
         primaryKey({ columns: [table.nameNode, table.key] }),
@@ -51,11 +51,11 @@ export const textRecord = pgTable(
 export const contenthashRecord = pgTable("contenthash_record", {
     id: text("id").primaryKey(),
     contenthash: text("contenthash").notNull(),
-    updatedAt: bigint("updatedAt", { mode: "bigint" }).notNull(),
+    updatedAt: bigint("updated_at", { mode: "bigint" }).notNull(),
 });
 
 export const reverseRecord = pgTable("reverse_record", {
     id: text("id").primaryKey(),
-    reverseNode: text("reverseNode").notNull(),
-    updatedAt: bigint("updatedAt", { mode: "bigint" }).notNull(),
+    reverseNode: text("reverse_node").notNull(),
+    updatedAt: bigint("updated_at", { mode: "bigint" }).notNull(),
 });
