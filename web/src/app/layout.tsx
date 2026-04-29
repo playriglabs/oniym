@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import type { Metadata } from "next";
 import { DM_Sans, Fira_Code } from "next/font/google";
 import { Providers } from "@/providers/Providers";
@@ -44,7 +42,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en" className={`${dmSans.variable} ${firaCode.variable}`}>
             <body
                 className="font-sans text-text-primary antialiased"
-                style={{ background: "radial-gradient(ellipse at 50% 30%, #0d2b32 0%, #091520 50%, #060a10 100%) fixed, #060a10" }}
+                style={{
+                    background:
+                        "radial-gradient(ellipse at 50% 30%, #0d2b32 0%, #091520 50%, #060a10 100%) fixed, #060a10",
+                }}
             >
                 <Providers>{children}</Providers>
             </body>

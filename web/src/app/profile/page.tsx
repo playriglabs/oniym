@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -112,7 +111,12 @@ export default function ProfilePage() {
                                     </p>
                                     <div className="space-y-2">
                                         {expired.map((name, i) => (
-                                            <NameRow key={name.node} name={name} index={i} expired />
+                                            <NameRow
+                                                key={name.node}
+                                                name={name}
+                                                index={i}
+                                                expired
+                                            />
                                         ))}
                                     </div>
                                 </div>
@@ -162,18 +166,14 @@ function NameRow({
             <div className="flex items-center gap-2 flex-shrink-0">
                 {expired ? (
                     <button
-                        onClick={() =>
-                            router.push(`/register/${encodeURIComponent(name.name)}`)
-                        }
+                        onClick={() => router.push(`/register/${encodeURIComponent(name.name)}`)}
                         className="px-3 py-1 rounded-lg bg-cyan text-bg-base text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
                     >
                         Renew
                     </button>
                 ) : (
                     <button
-                        onClick={() =>
-                            router.push(`/manage/${encodeURIComponent(name.name)}`)
-                        }
+                        onClick={() => router.push(`/manage/${encodeURIComponent(name.name)}`)}
                         className="px-3 py-1 rounded-lg border border-border-cyan text-cyan text-xs font-medium hover:bg-cyan-muted active:scale-95 transition-all"
                     >
                         Manage

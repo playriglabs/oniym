@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

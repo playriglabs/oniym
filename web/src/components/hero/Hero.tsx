@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 "use client";
 
 import { motion } from "framer-motion";

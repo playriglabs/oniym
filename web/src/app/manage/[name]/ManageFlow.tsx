@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 "use client";
 
 import { useState, useEffect } from "react";

@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-misused-promises */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -136,7 +132,7 @@ export function RegisterFlow({ label, tld }: Props) {
     const durationSecs = duration === "monthly" ? MONTHLY_DURATION : ANNUAL_DURATION;
 
     useEffect(() => {
-        oniym.rentPrice(label, tld, durationSecs).then(setEthPrice);
+        void oniym.rentPrice(label, tld, durationSecs).then(setEthPrice);
     }, [label, tld, durationSecs]);
 
     const handleRegister = useCallback(async () => {
