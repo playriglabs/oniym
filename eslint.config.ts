@@ -15,6 +15,7 @@ const config: Linter.Config[] = [
                         "docs/*.config.ts",
                         "react/*.config.ts",
                         "examples/node/index.ts",
+                        "indexer/src/worker/*.ts",
                     ],
                 },
                 tsconfigRootDir: import.meta.dirname,
