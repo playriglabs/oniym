@@ -64,6 +64,10 @@ const config: Linter.Config[] = [
             "**/out/**",
             "**/cache/**",
             "contracts/lib/**",
+            "web/next-env.d.ts",
+            "web/.next/**",
+            "web/*.config.cjs",
+            "web/*.config.js",
         ],
     },
 ];
