@@ -1,4 +1,4 @@
 name = "oniym-web"
-pages_build_output_dir = ".vercel/output/static"
+pages_build_output_dir = ".open-next/assets"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]

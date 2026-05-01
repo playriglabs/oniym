@@ -34,15 +34,11 @@ jobs:
 
       - name: Build
         working-directory: web
-        run: pnpm exec next build
-
-      - name: Process with next-on-pages
-        working-directory: web
-        run: pnpm exec @cloudflare/next-on-pages
+        run: pnpm exec opennextjs-cloudflare build
 
       - name: Deploy
         working-directory: web
-        run: pnpm exec wrangler pages deploy .vercel/output/static --project-name=oniym-web --commit-dirty=true
+        run: pnpm exec wrangler pages deploy --project-name=oniym-web --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

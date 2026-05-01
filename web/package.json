@@ -21,7 +21,7 @@
     "wagmi": "^2.15.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1",
+    "@opennextjs/cloudflare": "^1",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -29,6 +29,6 @@
     "postcss": "^8.5.4",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
-    "wrangler": "^3.101.0"
+    "wrangler": "^4"
   }
 }
