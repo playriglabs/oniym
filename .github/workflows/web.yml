@@ -36,16 +36,14 @@ jobs:
         working-directory: web
         run: pnpm exec opennextjs-cloudflare build
 
-      - name: Debug build output
-        working-directory: web
-        run: find .open-next -maxdepth 3 | sort
-
       - name: Prepare Pages deploy
         working-directory: web
         run: |
-          if [ -f .open-next/worker.js ] && [ ! -f .open-next/assets/_worker.js ]; then
-            cp .open-next/worker.js .open-next/assets/_worker.js
-          fi
+          cp .open-next/worker.js .open-next/assets/_worker.js
+          cp -r .open-next/cloudflare .open-next/assets/cloudflare
+          cp -r .open-next/middleware .open-next/assets/middleware
+          cp -r .open-next/.build .open-next/assets/.build
+          cp -r .open-next/server-functions .open-next/assets/server-functions
 
       - name: Create Pages project (if not exists)
         working-directory: web
