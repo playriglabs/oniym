@@ -36,6 +36,17 @@ jobs:
         working-directory: web
         run: pnpm exec opennextjs-cloudflare build
 
+      - name: Debug build output
+        working-directory: web
+        run: find .open-next -maxdepth 3 | sort
+
+      - name: Prepare Pages deploy
+        working-directory: web
+        run: |
+          if [ -f .open-next/worker.js ] && [ ! -f .open-next/assets/_worker.js ]; then
+            cp .open-next/worker.js .open-next/assets/_worker.js
+          fi
+
       - name: Create Pages project (if not exists)
         working-directory: web
         run: pnpm exec wrangler pages project create oniym-web --production-branch=master || true
