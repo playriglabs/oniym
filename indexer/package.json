@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS=--no-deprecation ponder dev",
-    "start": "NODE_OPTIONS=--no-deprecation ponder start",
+    "dev": "NODE_OPTIONS=--no-deprecation ponder dev --schema public",
+    "start": "NODE_OPTIONS=--no-deprecation ponder start --schema public",
     "codegen": "ponder codegen",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
     "worker:dev": "wrangler dev",
