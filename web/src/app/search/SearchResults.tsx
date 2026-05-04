@@ -22,21 +22,23 @@ const TLD_META: Record<string, { bg: string; color: string; label: string }> = {
     dev: { bg: "rgba(99,102,241,0.18)", color: "#a5b4fc", label: "Developers" },
     pro: { bg: "rgba(168,162,158,0.18)", color: "#d6d3d1", label: "Professionals" },
 };
-
 const FALLBACK_META = { bg: "rgba(133,239,255,0.12)", color: "#85efff", label: "Oniym" };
 
 const SUGGESTION_TLDS = [
-    "id", "me", "web3", "xyz", "app", "co", "one", "wagmi", "degen", "gm", "io", "dev", "pro",
+    "me", "web3", "xyz", "app", "co", "one", "wagmi", "degen", "gm", "io", "dev", "pro",
 ];
 
 const BATCH_SIZE = 3;
 const BATCH_DELAY = 150;
 
 type RowStatus = "loading" | "available" | "taken" | "error";
+type ViewMode = "list" | "grid";
+type FilterMode = "all" | "available" | "taken";
 
 interface TldRow {
     tld: string;
     status: RowStatus;
+    isPrimary?: boolean;
 }
 
 async function checkBatched(
@@ -67,26 +69,68 @@ interface Props {
     tld: string;
 }
 
+function TldBadge({ tld, size = 36 }: { tld: string; size?: number }) {
+    const meta = TLD_META[tld] ?? FALLBACK_META;
+    const short = tld.length > 4 ? tld.slice(0, 4) : tld;
+    return (
+        <div
+            className="rounded-xl flex items-center justify-center flex-shrink-0 text-[10px] font-mono font-bold"
+            style={{ width: size, height: size, background: meta.bg, color: meta.color }}
+        >
+            .{short}
+        </div>
+    );
+}
+
+function StatusBadge({ status }: { status: RowStatus }) {
+    if (status === "loading") {
+        return <span className="w-3.5 h-3.5 rounded-full border border-text-muted/40 border-t-text-muted/80 animate-spin inline-block" />;
+    }
+    if (status === "available") {
+        return (
+            <span className="text-[11px] font-bold tracking-widest uppercase text-cyan">
+                Available
+            </span>
+        );
+    }
+    if (status === "taken") {
+        return (
+            <span className="text-[11px] font-bold tracking-widest uppercase text-text-muted/60">
+                Taken
+            </span>
+        );
+    }
+    return null;
+}
+
 export function SearchResults({ label, tld }: Props) {
     const router = useRouter();
     const { address } = useAccount();
 
     const [query, setQuery] = useState(label);
-    const [mainStatus, setMainStatus] = useState<RowStatus>("loading");
-    const [isOwner, setIsOwner] = useState(false);
-    const [suggestions, setSuggestions] = useState<TldRow[]>([]);
+    const [view, setView] = useState<ViewMode>("list");
+    const [filter, setFilter] = useState<FilterMode>("all");
     const [showAll, setShowAll] = useState(false);
+    const [rows, setRows] = useState<TldRow[]>([]);
+    const [isOwner, setIsOwner] = useState(false);
 
-    const suggestionTlds = SUGGESTION_TLDS.filter((t) => t !== tld).slice(0, 12);
+    const suggestionTlds = SUGGESTION_TLDS.filter((t) => t !== tld);
 
     useEffect(() => {
-        setMainStatus("loading");
         setIsOwner(false);
+        const initial: TldRow[] = [
+            { tld, status: "loading", isPrimary: true },
+            ...suggestionTlds.map((t) => ({ tld: t, status: "loading" as RowStatus })),
+        ];
+        setRows(initial);
+
+        const update = (t: string, status: RowStatus) =>
+            setRows((prev) => prev.map((r) => (r.tld === t ? { ...r, status } : r)));
 
         void oniym
             .available(label, tld)
             .then(async (avail) => {
-                setMainStatus(avail ? "available" : "taken");
+                update(tld, avail ? "available" : "taken");
                 if (!avail && address) {
                     const result = await oniym.resolve(`${label}.${tld}`);
                     if (result?.owner.toLowerCase() === address.toLowerCase()) {
@@ -94,12 +138,9 @@ export function SearchResults({ label, tld }: Props) {
                     }
                 }
             })
-            .catch(() => setMainStatus("error"));
+            .catch(() => update(tld, "error"));
 
-        setSuggestions(suggestionTlds.map((t) => ({ tld: t, status: "loading" })));
-        void checkBatched(label, suggestionTlds, (t, status) => {
-            setSuggestions((prev) => prev.map((row) => (row.tld === t ? { ...row, status } : row)));
-        });
+        void checkBatched(label, suggestionTlds, update);
     }, [label, tld, address]);
 
     function handleSearch() {
@@ -108,29 +149,46 @@ export function SearchResults({ label, tld }: Props) {
         router.push(`/search?q=${encodeURIComponent(q + "." + tld)}`);
     }
 
+    function handleRefresh() {
+        setRows((prev) => prev.map((r) => ({ ...r, status: "loading" })));
+        const update = (t: string, status: RowStatus) =>
+            setRows((prev) => prev.map((r) => (r.tld === t ? { ...r, status } : r)));
+        const allTlds = rows.map((r) => r.tld);
+        void checkBatched(label, allTlds, update);
+    }
+
     function handleLoadAll() {
         setShowAll(true);
-        const all = SUPPORTED_TLDS.filter((t) => t !== tld);
-        setSuggestions((prev) => {
+        setRows((prev) => {
             const existing = new Set(prev.map((r) => r.tld));
-            const newTlds = all.filter((t) => !existing.has(t));
-            void checkBatched(label, newTlds, (t, status) => {
-                setSuggestions((s) => s.map((row) => (row.tld === t ? { ...row, status } : row)));
-            });
-            return [
-                ...prev,
-                ...newTlds.map((t) => ({ tld: t, status: "loading" as RowStatus })),
-            ];
+            const newTlds = SUPPORTED_TLDS.filter((t) => !existing.has(t));
+            const update = (t: string, status: RowStatus) =>
+                setRows((s) => s.map((r) => (r.tld === t ? { ...r, status } : r)));
+            void checkBatched(label, newTlds, update);
+            return [...prev, ...newTlds.map((t) => ({ tld: t, status: "loading" as RowStatus }))];
         });
     }
 
-    const mainMeta = TLD_META[tld] ?? FALLBACK_META;
+    function handleSelect(row: TldRow) {
+        if (row.status !== "available") return;
+        router.push(`/register/${encodeURIComponent(label + "." + row.tld)}`);
+    }
+
+    function handleManage(row: TldRow) {
+        router.push(`/manage/${encodeURIComponent(label + "." + row.tld)}`);
+    }
+
+    const filteredRows = rows.filter((r) => {
+        if (filter === "available") return r.status === "available";
+        if (filter === "taken") return r.status === "taken";
+        return true;
+    });
 
     return (
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
             {/* Search bar */}
-            <div className="flex items-center gap-2 mb-8">
-                <div className="flex-1 flex items-center bg-bg-surface border border-border-dark rounded-xl shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+            <div className="flex items-center gap-2 mb-6">
+                <div className="flex-1 flex items-center bg-bg-surface border border-border-dark rounded-xl">
                     <input
                         type="text"
                         value={query}
@@ -152,181 +210,231 @@ export function SearchResults({ label, tld }: Props) {
                 </button>
             </div>
 
-            {/* Main result */}
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={`${label}.${tld}`}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`rounded-2xl border p-4 mb-8 flex items-center gap-4 ${
-                        mainStatus === "available"
-                            ? "border-border-cyan bg-cyan-muted"
-                            : mainStatus === "taken"
-                              ? "border-error/25 bg-error-muted"
-                              : "border-border-dark bg-bg-surface"
-                    }`}
-                >
-                    {/* Badge */}
-                    <div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-[11px] font-mono font-bold"
-                        style={{ background: mainMeta.bg, color: mainMeta.color }}
+            {/* Toolbar */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-medium text-text-secondary">
+                    Search for{" "}
+                    <span className="font-mono font-semibold text-text-primary">{label}</span>
+                </h2>
+
+                <div className="flex items-center gap-2">
+                    {/* Refresh */}
+                    <button
+                        onClick={handleRefresh}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border-dark text-text-muted hover:text-text-secondary hover:border-border-cyan transition-colors"
                     >
-                        .{tld.length > 3 ? tld.slice(0, 3) : tld}
-                    </div>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M12 7A5 5 0 1 1 7 2a5 5 0 0 1 3.5 1.5L12 2v4H8l1.5-1.5A3 3 0 1 0 10 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </button>
 
-                    {/* Name */}
-                    <div className="flex-1 min-w-0">
-                        <div className="font-mono font-medium text-text-primary">
-                            <span>{label}</span>
-                            <span style={{ color: mainMeta.color }}>.{tld}</span>
-                        </div>
-                        <div className="text-xs text-text-muted mt-0.5">{mainMeta.label}</div>
-                    </div>
-
-                    {/* Status + CTA */}
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                        {mainStatus === "loading" && (
-                            <span className="w-4 h-4 rounded-full border border-text-muted/40 border-t-text-muted animate-spin" />
-                        )}
-                        {mainStatus === "available" && (
-                            <>
-                                <div className="text-right hidden sm:block">
-                                    <div className="text-xs font-bold tracking-widest uppercase text-cyan">Available</div>
-                                    <div className="text-xs text-text-muted">$3 / mo</div>
-                                </div>
-                                <button
-                                    onClick={() =>
-                                        router.push(`/register/${encodeURIComponent(label + "." + tld)}`)
-                                    }
-                                    className="px-4 py-2 rounded-xl bg-cyan text-bg-base text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
-                                >
-                                    Register
-                                </button>
-                            </>
-                        )}
-                        {mainStatus === "taken" && !isOwner && (
-                            <span className="text-xs font-bold tracking-widest uppercase text-error/70">
-                                Taken
-                            </span>
-                        )}
-                        {mainStatus === "taken" && isOwner && (
+                    {/* Filter */}
+                    <div className="flex items-center rounded-lg border border-border-dark overflow-hidden">
+                        {(["all", "available", "taken"] as FilterMode[]).map((f) => (
                             <button
-                                onClick={() =>
-                                    router.push(`/manage/${encodeURIComponent(label + "." + tld)}`)
-                                }
-                                className="px-4 py-2 rounded-xl border border-border-cyan text-cyan text-sm font-medium hover:bg-cyan-muted active:scale-95 transition-all"
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                className={`px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+                                    filter === f
+                                        ? "bg-cyan text-bg-base"
+                                        : "text-text-muted hover:text-text-secondary"
+                                }`}
                             >
-                                Manage
+                                {f}
                             </button>
-                        )}
+                        ))}
                     </div>
-                </motion.div>
-            </AnimatePresence>
 
-            {/* Other TLDs */}
-            <div
-                className="rounded-2xl border border-border-dark overflow-hidden"
-                style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}
-            >
-                <div className="px-4 pt-3 pb-2 border-b border-border-dark">
-                    <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">
-                        More options
-                    </span>
-                </div>
-
-                <div>
-                    {suggestions.map((row, i) => {
-                        const meta = TLD_META[row.tld] ?? FALLBACK_META;
-                        const isAvailable = row.status === "available";
-                        const isTaken = row.status === "taken";
-                        const isLoading = row.status === "loading";
-
-                        return (
-                            <motion.button
-                                key={row.tld}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: Math.min(i * 0.025, 0.3) }}
-                                onClick={() =>
-                                    isAvailable &&
-                                    router.push(
-                                        `/register/${encodeURIComponent(label + "." + row.tld)}`,
-                                    )
-                                }
-                                className={`w-full flex items-center gap-3 px-4 py-3 border-b border-border-dark/60 last:border-b-0 transition-colors group ${
-                                    isAvailable
-                                        ? "hover:bg-white/[0.025] cursor-pointer"
-                                        : "cursor-default"
-                                } ${isTaken ? "opacity-40" : ""}`}
-                            >
-                                {/* Badge */}
-                                <div
-                                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[11px] font-mono font-bold"
-                                    style={{ background: meta.bg, color: meta.color }}
-                                >
-                                    .{row.tld.length > 3 ? row.tld.slice(0, 3) : row.tld}
-                                </div>
-
-                                {/* Name */}
-                                <div className="flex-1 text-left min-w-0">
-                                    <div className="text-sm font-mono font-medium text-text-primary leading-tight">
-                                        <span>{label}</span>
-                                        <span style={{ color: meta.color }}>.{row.tld}</span>
-                                    </div>
-                                    <div className="text-xs text-text-muted mt-0.5">{meta.label}</div>
-                                </div>
-
-                                {/* Status */}
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                    {isLoading && (
-                                        <span className="w-3 h-3 rounded-full border border-text-muted/30 border-t-text-muted/70 animate-spin" />
-                                    )}
-                                    {isAvailable && (
-                                        <span className="text-[11px] font-bold tracking-widest uppercase text-cyan">
-                                            Available
-                                        </span>
-                                    )}
-                                    {isTaken && (
-                                        <span className="text-[11px] font-bold tracking-widest uppercase text-text-muted">
-                                            Taken
-                                        </span>
-                                    )}
-                                    {isAvailable && (
-                                        <svg
-                                            width="15"
-                                            height="15"
-                                            viewBox="0 0 15 15"
-                                            fill="none"
-                                            className="text-text-muted group-hover:text-text-secondary transition-colors"
-                                        >
-                                            <path
-                                                d="M5.5 3.5L9.5 7.5L5.5 11.5"
-                                                stroke="currentColor"
-                                                strokeWidth="1.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            />
-                                        </svg>
-                                    )}
-                                </div>
-                            </motion.button>
-                        );
-                    })}
-                </div>
-
-                {/* Load all */}
-                {!showAll && (
-                    <div className="px-4 py-3 border-t border-border-dark">
+                    {/* View toggle */}
+                    <div className="flex items-center rounded-lg border border-border-dark overflow-hidden">
                         <button
-                            onClick={handleLoadAll}
-                            className="text-xs text-text-muted hover:text-text-secondary transition-colors"
+                            onClick={() => setView("list")}
+                            className={`w-8 h-8 flex items-center justify-center transition-colors ${
+                                view === "list" ? "bg-cyan text-bg-base" : "text-text-muted hover:text-text-secondary"
+                            }`}
                         >
-                            Check all {SUPPORTED_TLDS.length} TLDs →
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <rect x="1" y="2" width="12" height="2" rx="1" fill="currentColor"/>
+                                <rect x="1" y="6" width="12" height="2" rx="1" fill="currentColor"/>
+                                <rect x="1" y="10" width="12" height="2" rx="1" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setView("grid")}
+                            className={`w-8 h-8 flex items-center justify-center transition-colors ${
+                                view === "grid" ? "bg-cyan text-bg-base" : "text-text-muted hover:text-text-secondary"
+                            }`}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor"/>
+                                <rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor"/>
+                                <rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor"/>
+                                <rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor"/>
+                            </svg>
                         </button>
                     </div>
-                )}
+                </div>
             </div>
+
+            {/* List view */}
+            <AnimatePresence mode="wait">
+                {view === "list" && (
+                    <motion.div
+                        key="list"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="rounded-2xl border border-border-dark overflow-hidden"
+                    >
+                        {/* Column headers */}
+                        <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_160px_auto_auto] gap-4 px-4 py-2.5 border-b border-border-dark bg-bg-surface/50">
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Domain</span>
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest hidden sm:block">Type</span>
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Price</span>
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Status</span>
+                        </div>
+
+                        {filteredRows.map((row, i) => {
+                            const meta = TLD_META[row.tld] ?? FALLBACK_META;
+                            const isAvailable = row.status === "available";
+                            const isTaken = row.status === "taken";
+                            const isPrimary = row.isPrimary;
+
+                            return (
+                                <motion.div
+                                    key={row.tld}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: Math.min(i * 0.02, 0.25) }}
+                                    className={`grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_160px_auto_auto] gap-4 items-center px-4 py-3 border-b border-border-dark/60 last:border-b-0 transition-colors ${
+                                        isAvailable ? "hover:bg-white/[0.02] cursor-pointer" : ""
+                                    } ${isTaken ? "opacity-40" : ""} ${isPrimary ? "bg-cyan/[0.03]" : ""}`}
+                                    onClick={() => isAvailable && handleSelect(row)}
+                                >
+                                    {/* Domain */}
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <TldBadge tld={row.tld} size={34} />
+                                        <span className="font-mono text-sm font-medium text-text-primary truncate">
+                                            {label}
+                                            <span style={{ color: meta.color }}>.{row.tld}</span>
+                                        </span>
+                                    </div>
+
+                                    {/* Type */}
+                                    <span className="text-xs text-text-muted hidden sm:block truncate">{meta.label}</span>
+
+                                    {/* Price */}
+                                    <div className="flex-shrink-0">
+                                        {isAvailable && (
+                                            <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-cyan/10 text-cyan border border-cyan/20">
+                                                $3/mo
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Status + action */}
+                                    <div className="flex items-center gap-2 flex-shrink-0 justify-end">
+                                        <StatusBadge status={row.status} />
+                                        {isAvailable && (
+                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-text-muted">
+                                                <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        )}
+                                        {isTaken && isPrimary && isOwner && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleManage(row); }}
+                                                className="px-2.5 py-1 rounded-lg border border-border-cyan text-cyan text-xs font-medium hover:bg-cyan-muted transition-all"
+                                            >
+                                                Manage
+                                            </button>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
+
+                        {/* Load all footer */}
+                        {!showAll && (
+                            <div className="px-4 py-3 border-t border-border-dark">
+                                <button
+                                    onClick={handleLoadAll}
+                                    className="text-xs text-text-muted hover:text-text-secondary transition-colors"
+                                >
+                                    Check all {SUPPORTED_TLDS.length} TLDs →
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+
+                {/* Grid view */}
+                {view === "grid" && (
+                    <motion.div
+                        key="grid"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                    >
+                        <div className="grid grid-cols-2 gap-3">
+                            {filteredRows.map((row, i) => {
+                                const meta = TLD_META[row.tld] ?? FALLBACK_META;
+                                const isAvailable = row.status === "available";
+                                const isTaken = row.status === "taken";
+
+                                return (
+                                    <motion.div
+                                        key={row.tld}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: Math.min(i * 0.03, 0.3) }}
+                                        onClick={() => isAvailable && handleSelect(row)}
+                                        className={`p-4 rounded-2xl border transition-all ${
+                                            isAvailable
+                                                ? "border-border-dark hover:border-border-cyan bg-bg-surface cursor-pointer"
+                                                : "border-border-dark bg-bg-surface opacity-40"
+                                        } ${row.isPrimary ? "ring-1 ring-cyan/20" : ""}`}
+                                    >
+                                        <div className="flex items-center gap-2.5 mb-3">
+                                            <TldBadge tld={row.tld} size={32} />
+                                            <div className="min-w-0">
+                                                <div className="font-mono text-sm font-medium text-text-primary leading-tight truncate">
+                                                    {label}
+                                                    <span style={{ color: meta.color }}>.{row.tld}</span>
+                                                </div>
+                                                <div className="text-[11px] text-text-muted mt-0.5">{meta.label}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            {isAvailable ? (
+                                                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-cyan/10 text-cyan border border-cyan/20">
+                                                    $3/mo
+                                                </span>
+                                            ) : (
+                                                <span />
+                                            )}
+                                            <StatusBadge status={row.status} />
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+
+                        {!showAll && (
+                            <div className="mt-4 text-center">
+                                <button
+                                    onClick={handleLoadAll}
+                                    className="text-xs text-text-muted hover:text-text-secondary transition-colors"
+                                >
+                                    Check all {SUPPORTED_TLDS.length} TLDs →
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
