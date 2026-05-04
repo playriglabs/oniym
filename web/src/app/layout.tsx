@@ -25,7 +25,7 @@ export const metadata: Metadata = {
             "Multichain-native naming service. Register .id, .me, .wagmi, .degen, and 61 more.",
         url: "https://oniym.xyz",
         siteName: "Oniym",
-        images: [{ url: "https://oniym.xyz/og.png", width: 1200, height: 630 }],
+        images: [{ url: "/og.jpeg", width: 1200, height: 630, alt: "Oniym — One name. Every chain." }],
         type: "website",
     },
     twitter: {
@@ -33,6 +33,7 @@ export const metadata: Metadata = {
         title: "Oniym — One name. Every chain.",
         description: "Multichain-native naming service. From $3/month.",
         site: "@oniymxyz",
+        images: ["/og.jpeg"],
     },
     metadataBase: new URL("https://oniym.xyz"),
 };
