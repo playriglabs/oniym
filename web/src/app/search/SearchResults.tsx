@@ -229,7 +229,7 @@ export function SearchResults({ label, tld }: Props) {
                     </button>
 
                     {/* Filter */}
-                    <div className="flex items-center rounded-lg border border-border-dark overflow-hidden">
+                    <div className="flex items-center rounded-lg border border-white/10 overflow-hidden bg-bg-surface">
                         {(["all", "available", "taken"] as FilterMode[]).map((f) => (
                             <button
                                 key={f}
@@ -246,7 +246,7 @@ export function SearchResults({ label, tld }: Props) {
                     </div>
 
                     {/* View toggle */}
-                    <div className="flex items-center rounded-lg border border-border-dark overflow-hidden">
+                    <div className="flex items-center rounded-lg border border-white/10 overflow-hidden bg-bg-surface">
                         <button
                             onClick={() => setView("list")}
                             className={`w-8 h-8 flex items-center justify-center transition-colors ${
