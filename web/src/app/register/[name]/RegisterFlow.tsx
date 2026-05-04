@@ -16,6 +16,29 @@ interface Props {
     tld: string;
 }
 
+function EthLogo({ size = 24 }: { size?: number }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L4.5 12.5L12 16.5L19.5 12.5L12 2Z" fill="#627EEA" fillOpacity="0.5" />
+            <path d="M12 2L4.5 12.5L12 16.5V2Z" fill="#627EEA" />
+            <path d="M12 18L4.5 13.5L12 22L19.5 13.5L12 18Z" fill="#627EEA" fillOpacity="0.5" />
+            <path d="M12 18L4.5 13.5L12 22V18Z" fill="#627EEA" />
+        </svg>
+    );
+}
+
+function UsdcLogo({ size = 24 }: { size?: number }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="12" fill="#2775CA" />
+            <path
+                d="M15.2 13.8c0-1.5-0.9-2-2.7-2.2l-0.3 0V9.2c0.8 0.1 1.4 0.5 1.5 1.2h1.4c-0.1-1.5-1.2-2.4-2.9-2.6V7h-1v0.8C9.5 8 8.3 9 8.3 10.4c0 1.5 1 2 2.7 2.2l0.3 0.1v2.5c-0.9-0.1-1.6-0.6-1.7-1.4H8.1c0.1 1.6 1.3 2.5 3 2.7V17h1v-0.8c1.7-0.2 3.1-1.2 3.1-2.4Zm-5.3-3.5c0-0.8 0.6-1.3 1.6-1.5v2.9C10.5 11.5 9.9 11.1 9.9 10.3Zm3.1 5V12.6c1.1 0.2 1.7 0.7 1.7 1.5 0 0.9-0.7 1.4-1.7 1.6Z"
+                fill="white"
+            />
+        </svg>
+    );
+}
+
 function StepIndicator({ current }: { current: Step }) {
     const steps = [
         { id: "configure", label: "Configure" },
@@ -281,7 +304,7 @@ export function RegisterFlow({ label, tld }: Props) {
                                         ["eth", "ETH", "Price varies with market"],
                                         ["usdc", "USDC", "Exact $3 or $15 — no slippage"],
                                     ] as const
-                                ).map(([token, label, desc]) => (
+                                ).map(([token, name, desc]) => (
                                     <button
                                         key={token}
                                         onClick={() => {
@@ -293,11 +316,14 @@ export function RegisterFlow({ label, tld }: Props) {
                                                 : "border-border-dark bg-bg-surface hover:border-border-cyan"
                                         }`}
                                     >
-                                        <span
-                                            className={`block text-sm font-mono font-semibold mb-1 ${paymentToken === token ? "text-cyan" : "text-text-primary"}`}
-                                        >
-                                            {label}
-                                        </span>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            {token === "eth" ? <EthLogo size={22} /> : <UsdcLogo size={22} />}
+                                            <span
+                                                className={`text-sm font-mono font-semibold ${paymentToken === token ? "text-cyan" : "text-text-primary"}`}
+                                            >
+                                                {name}
+                                            </span>
+                                        </div>
                                         <span className="block text-xs text-text-muted leading-snug">
                                             {desc}
                                         </span>
@@ -346,20 +372,26 @@ export function RegisterFlow({ label, tld }: Props) {
                         {ethPrice !== null && paymentToken === "eth" && (
                             <div className="flex items-center justify-between p-4 rounded-xl bg-bg-surface border border-border-dark">
                                 <span className="text-sm text-text-secondary">Total</span>
-                                <span className="font-mono text-text-primary font-semibold">
-                                    {formatEth(ethPrice)} ETH
-                                    <span className="text-text-muted font-normal text-xs ml-1.5">
+                                <div className="flex items-center gap-2">
+                                    <EthLogo size={18} />
+                                    <span className="font-mono text-text-primary font-semibold">
+                                        {formatEth(ethPrice)} ETH
+                                    </span>
+                                    <span className="text-text-muted font-normal text-xs">
                                         (~{duration === "monthly" ? "$3" : "$15"})
                                     </span>
-                                </span>
+                                </div>
                             </div>
                         )}
                         {paymentToken === "usdc" && (
                             <div className="flex items-center justify-between p-4 rounded-xl bg-bg-surface border border-border-dark">
                                 <span className="text-sm text-text-secondary">Total</span>
-                                <span className="font-mono text-text-primary font-semibold">
-                                    {duration === "monthly" ? "3.00" : "15.00"} USDC
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <UsdcLogo size={18} />
+                                    <span className="font-mono text-text-primary font-semibold">
+                                        {duration === "monthly" ? "3.00" : "15.00"} USDC
+                                    </span>
+                                </div>
                             </div>
                         )}
 
