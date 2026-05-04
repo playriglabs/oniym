@@ -9,7 +9,10 @@ export default defineConfig({
         light: "/oniym-dark.png",
     },
     iconUrl: "/oniym.jpg",
-    ogImageUrl: "https://oniym.xyz/og.jpeg",
+    ogImageUrl: {
+        "/": "https://oniym.xyz/og.jpeg",
+        "/:path": "https://vocs.dev/api/og?logo=%logo&title=%title&description=%description",
+    },
     theme: {
         accentColor: {
             light: "#14acc3",
