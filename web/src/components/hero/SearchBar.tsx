@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { oniym } from "@/lib/oniym";
 
-const DROPDOWN_TLDS = ["id", "me", "web3", "xyz", "app", "wagmi", "degen", "gm", "one", "co"];
+const DROPDOWN_TLDS = ["id", "me", "web3", "xyz", "app"];
 
 const TLD_META: Record<string, { bg: string; color: string; label: string }> = {
     id: { bg: "rgba(20,172,195,0.18)", color: "#85efff", label: "Oniym Identity" },
