@@ -8,7 +8,7 @@ export const wagmiConfig = createConfig({
     chains: [baseSepolia],
     connectors: [
         injected(),
-        coinbaseWallet({ appName: "Oniym", appLogoUrl: "https://oniym.xyz/og.png" }),
+        coinbaseWallet({ appName: "Oniym", appLogoUrl: "" }),
         ...(projectId ? [walletConnect({ projectId })] : []),
     ],
     transports: {

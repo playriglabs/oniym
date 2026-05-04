@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { oniym } from "@/lib/oniym";
 
-const DROPDOWN_TLDS = ["id", "me", "web3", "xyz", "app"];
+const DROPDOWN_TLDS = ["app", "web3", "xyz"];
 
 const TLD_META: Record<string, { bg: string; color: string; label: string }> = {
     id: { bg: "rgba(20,172,195,0.18)", color: "#85efff", label: "Oniym Identity" },
@@ -51,17 +51,22 @@ export function SearchBar() {
 
         const timer = setTimeout(() => {
             DROPDOWN_TLDS.forEach((tld) => {
-                void oniym.available(normalizedQuery, tld).then((isAvailable) => {
-                    setResults((prev) =>
-                        prev.map((r) =>
-                            r.tld === tld ? { tld, status: isAvailable ? "available" : "taken" } : r,
-                        ),
-                    );
-                }).catch(() => {
-                    setResults((prev) =>
-                        prev.map((r) => (r.tld === tld ? { tld, status: "idle" } : r)),
-                    );
-                });
+                void oniym
+                    .available(normalizedQuery, tld)
+                    .then((isAvailable) => {
+                        setResults((prev) =>
+                            prev.map((r) =>
+                                r.tld === tld
+                                    ? { tld, status: isAvailable ? "available" : "taken" }
+                                    : r,
+                            ),
+                        );
+                    })
+                    .catch(() => {
+                        setResults((prev) =>
+                            prev.map((r) => (r.tld === tld ? { tld, status: "idle" } : r)),
+                        );
+                    });
             });
         }, 400);
 
@@ -134,7 +139,10 @@ export function SearchBar() {
                         exit={{ opacity: 0, y: -6, scale: 0.99 }}
                         transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                         className="absolute top-full left-0 right-0 mt-2 bg-bg-elevated border border-border-dark rounded-2xl overflow-hidden z-50"
-                        style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03) inset" }}
+                        style={{
+                            boxShadow:
+                                "0 8px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03) inset",
+                        }}
                     >
                         {/* Header */}
                         <div className="px-4 pt-3 pb-2">
@@ -169,16 +177,23 @@ export function SearchBar() {
                                             className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[11px] font-mono font-bold"
                                             style={{ background: meta.bg, color: meta.color }}
                                         >
-                                            .{result.tld.length > 3 ? result.tld.slice(0, 3) : result.tld}
+                                            .
+                                            {result.tld.length > 3
+                                                ? result.tld.slice(0, 3)
+                                                : result.tld}
                                         </div>
 
                                         {/* Name + label */}
                                         <div className="flex-1 text-left min-w-0">
                                             <div className="text-sm font-mono font-medium text-text-primary leading-tight">
                                                 <span>{normalizedQuery}</span>
-                                                <span style={{ color: meta.color }}>.{result.tld}</span>
+                                                <span style={{ color: meta.color }}>
+                                                    .{result.tld}
+                                                </span>
                                             </div>
-                                            <div className="text-xs text-text-muted mt-0.5">{meta.label}</div>
+                                            <div className="text-xs text-text-muted mt-0.5">
+                                                {meta.label}
+                                            </div>
                                         </div>
 
                                         {/* Status */}

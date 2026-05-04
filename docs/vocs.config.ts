@@ -10,7 +10,7 @@ export default defineConfig({
     },
     iconUrl: "/oniym.jpg",
     ogImageUrl: {
-        "/": "https://oniym.xyz/og.jpeg",
+        "/": "https://app.oniym.xyz/og.jpeg",
         "/:path": "https://vocs.dev/api/og?logo=%logo&title=%title&description=%description",
     },
     theme: {

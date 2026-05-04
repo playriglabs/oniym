@@ -136,7 +136,7 @@ export function Header() {
                 <OniymLogo />
                 <nav className="hidden sm:flex items-center gap-6 text-sm text-text-secondary">
                     <Link
-                        href="https://docs.oniym.xyz"
+                        href="https://sdk.oniym.xyz"
                         className="hover:text-text-primary transition-colors"
                     >
                         Docs

@@ -52,9 +52,14 @@ function TldBadge({ tld, size = 40 }: { tld: string; size?: number }) {
     );
 }
 
-function ExpiryLabel({ expiresAt, expired }: { expiresAt: bigint; expired: boolean }) {
-    const date = new Date(Number(expiresAt) * 1000);
-    const formatted = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+function ExpiryLabel({ expiresAt, expired }: { expiresAt: number; expired: boolean }) {
+    const date = new Date(expiresAt * 1000);
+
+    const formatted = date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
     return (
         <span className={`text-xs ${expired ? "text-error/70" : "text-text-muted"}`}>
             {expired ? "Expired" : "Expires"} {formatted}
@@ -82,9 +87,6 @@ export default function ProfilePage() {
             .finally(() => setLoading(false));
     }, [address]);
 
-    const active = names.filter((n) => !n.expired);
-    const expired = names.filter((n) => n.expired);
-
     const filteredNames = names.filter((n) => {
         if (filter === "active") return !n.expired;
         if (filter === "expired") return n.expired;
@@ -98,13 +100,22 @@ export default function ProfilePage() {
                 <div className="max-w-3xl mx-auto">
                     {/* Breadcrumb */}
                     <div className="flex items-center gap-2 text-xs text-text-muted mb-6">
-                        <Link href="/" className="hover:text-text-secondary transition-colors">oniym</Link>
+                        <Link href="/" className="hover:text-text-secondary transition-colors">
+                            oniym
+                        </Link>
                         <span>/</span>
-                        <Link href="/profile" className="hover:text-text-secondary transition-colors">profile</Link>
+                        <Link
+                            href="/profile"
+                            className="hover:text-text-secondary transition-colors"
+                        >
+                            profile
+                        </Link>
                         {address && (
                             <>
                                 <span>/</span>
-                                <span className="font-mono text-text-secondary">{truncateAddress(address)}</span>
+                                <span className="font-mono text-text-secondary">
+                                    {truncateAddress(address)}
+                                </span>
                             </>
                         )}
                     </div>
@@ -113,13 +124,30 @@ export default function ProfilePage() {
                         <div className="bg-bg-surface border border-border-dark rounded-2xl p-10 text-center">
                             <div className="w-12 h-12 rounded-2xl bg-cyan-muted border border-border-cyan flex items-center justify-center mx-auto mb-5">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <rect x="2" y="6" width="16" height="11" rx="2" stroke="#85efff" strokeWidth="1.5"/>
-                                    <path d="M6 6V5a4 4 0 0 1 8 0v1" stroke="#85efff" strokeWidth="1.5" strokeLinecap="round"/>
-                                    <circle cx="10" cy="12" r="1.5" fill="#85efff"/>
+                                    <rect
+                                        x="2"
+                                        y="6"
+                                        width="16"
+                                        height="11"
+                                        rx="2"
+                                        stroke="#85efff"
+                                        strokeWidth="1.5"
+                                    />
+                                    <path
+                                        d="M6 6V5a4 4 0 0 1 8 0v1"
+                                        stroke="#85efff"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                    />
+                                    <circle cx="10" cy="12" r="1.5" fill="#85efff" />
                                 </svg>
                             </div>
-                            <p className="text-text-primary font-medium mb-1">Connect your wallet</p>
-                            <p className="text-text-muted text-sm mb-6">View and manage your registered names</p>
+                            <p className="text-text-primary font-medium mb-1">
+                                Connect your wallet
+                            </p>
+                            <p className="text-text-muted text-sm mb-6">
+                                View and manage your registered names
+                            </p>
                             <div className="flex flex-col gap-2 max-w-xs mx-auto">
                                 {connectors.slice(0, 3).map((c) => (
                                     <button
@@ -140,7 +168,9 @@ export default function ProfilePage() {
                         </div>
                     ) : names.length === 0 ? (
                         <div className="bg-bg-surface border border-border-dark rounded-2xl p-10 text-center">
-                            <p className="text-text-secondary text-sm mb-4">No names registered yet.</p>
+                            <p className="text-text-secondary text-sm mb-4">
+                                No names registered yet.
+                            </p>
                             <button
                                 onClick={() => router.push("/")}
                                 className="px-5 py-2.5 rounded-xl bg-cyan text-bg-base text-sm font-semibold hover:opacity-90 transition-all"
@@ -150,25 +180,6 @@ export default function ProfilePage() {
                         </div>
                     ) : (
                         <div>
-                            {/* Stats */}
-                            <div className="grid grid-cols-3 gap-3 mb-6">
-                                {[
-                                    { label: "Total", value: names.length },
-                                    { label: "Active", value: active.length, accent: true },
-                                    { label: "Expired", value: expired.length, warn: expired.length > 0 },
-                                ].map((s) => (
-                                    <div
-                                        key={s.label}
-                                        className="p-4 rounded-2xl bg-bg-surface border border-border-dark text-center"
-                                    >
-                                        <div className={`text-2xl font-bold font-mono ${s.accent ? "text-cyan" : s.warn ? "text-error" : "text-text-primary"}`}>
-                                            {s.value}
-                                        </div>
-                                        <div className="text-xs text-text-muted mt-0.5">{s.label}</div>
-                                    </div>
-                                ))}
-                            </div>
-
                             {/* Toolbar */}
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center rounded-lg border border-white/10 overflow-hidden bg-bg-surface">
@@ -193,9 +204,30 @@ export default function ProfilePage() {
                                         className={`w-8 h-8 flex items-center justify-center transition-colors ${view === "list" ? "bg-cyan text-bg-base" : "text-text-muted hover:text-text-secondary"}`}
                                     >
                                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                            <rect x="1" y="2" width="12" height="2" rx="1" fill="currentColor"/>
-                                            <rect x="1" y="6" width="12" height="2" rx="1" fill="currentColor"/>
-                                            <rect x="1" y="10" width="12" height="2" rx="1" fill="currentColor"/>
+                                            <rect
+                                                x="1"
+                                                y="2"
+                                                width="12"
+                                                height="2"
+                                                rx="1"
+                                                fill="currentColor"
+                                            />
+                                            <rect
+                                                x="1"
+                                                y="6"
+                                                width="12"
+                                                height="2"
+                                                rx="1"
+                                                fill="currentColor"
+                                            />
+                                            <rect
+                                                x="1"
+                                                y="10"
+                                                width="12"
+                                                height="2"
+                                                rx="1"
+                                                fill="currentColor"
+                                            />
                                         </svg>
                                     </button>
                                     <button
@@ -203,10 +235,38 @@ export default function ProfilePage() {
                                         className={`w-8 h-8 flex items-center justify-center transition-colors ${view === "grid" ? "bg-cyan text-bg-base" : "text-text-muted hover:text-text-secondary"}`}
                                     >
                                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                            <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor"/>
-                                            <rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor"/>
-                                            <rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor"/>
-                                            <rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor"/>
+                                            <rect
+                                                x="1"
+                                                y="1"
+                                                width="5"
+                                                height="5"
+                                                rx="1"
+                                                fill="currentColor"
+                                            />
+                                            <rect
+                                                x="8"
+                                                y="1"
+                                                width="5"
+                                                height="5"
+                                                rx="1"
+                                                fill="currentColor"
+                                            />
+                                            <rect
+                                                x="1"
+                                                y="8"
+                                                width="5"
+                                                height="5"
+                                                rx="1"
+                                                fill="currentColor"
+                                            />
+                                            <rect
+                                                x="8"
+                                                y="8"
+                                                width="5"
+                                                height="5"
+                                                rx="1"
+                                                fill="currentColor"
+                                            />
                                         </svg>
                                     </button>
                                 </div>
@@ -224,9 +284,15 @@ export default function ProfilePage() {
                                         className="rounded-2xl border border-border-dark overflow-hidden"
                                     >
                                         <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_140px_auto_auto] gap-4 px-4 py-2.5 border-b border-border-dark bg-bg-surface/50">
-                                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Name</span>
-                                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest hidden sm:block">Expiry</span>
-                                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Status</span>
+                                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">
+                                                Name
+                                            </span>
+                                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest hidden sm:block">
+                                                Expiry
+                                            </span>
+                                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">
+                                                Status
+                                            </span>
                                             <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest"></span>
                                         </div>
 
@@ -248,35 +314,54 @@ export default function ProfilePage() {
                                                         <div className="min-w-0">
                                                             <div className="font-mono text-sm font-medium text-text-primary truncate">
                                                                 {label}
-                                                                <span style={{ color: meta.color }}>.{tld}</span>
+                                                                <span style={{ color: meta.color }}>
+                                                                    .{tld}
+                                                                </span>
                                                             </div>
-                                                            <div className="text-[11px] text-text-muted">{meta.label}</div>
+                                                            <div className="text-[11px] text-text-muted">
+                                                                {meta.label}
+                                                            </div>
                                                         </div>
                                                     </div>
 
                                                     <div className="hidden sm:block">
-                                                        <ExpiryLabel expiresAt={name.expiresAt} expired={name.expired} />
+                                                        <ExpiryLabel
+                                                            expiresAt={Number(name.expiresAt)}
+                                                            expired={name.expired}
+                                                        />
                                                     </div>
 
                                                     <div>
                                                         {name.expired ? (
-                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-error/70">Expired</span>
+                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-error/70">
+                                                                Expired
+                                                            </span>
                                                         ) : (
-                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-cyan">Active</span>
+                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-cyan">
+                                                                Active
+                                                            </span>
                                                         )}
                                                     </div>
 
                                                     <div>
                                                         {name.expired ? (
                                                             <button
-                                                                onClick={() => router.push(`/register/${encodeURIComponent(name.name)}`)}
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/register/${encodeURIComponent(name.name)}`,
+                                                                    )
+                                                                }
                                                                 className="px-3 py-1 rounded-lg bg-cyan text-bg-base text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
                                                             >
                                                                 Renew
                                                             </button>
                                                         ) : (
                                                             <button
-                                                                onClick={() => router.push(`/manage/${encodeURIComponent(name.name)}`)}
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/manage/${encodeURIComponent(name.name)}`,
+                                                                    )
+                                                                }
                                                                 className="px-3 py-1 rounded-lg border border-border-cyan text-cyan text-xs font-medium hover:bg-cyan-muted active:scale-95 transition-all"
                                                             >
                                                                 Manage
@@ -316,30 +401,49 @@ export default function ProfilePage() {
                                                         <div className="min-w-0">
                                                             <div className="font-mono text-sm font-medium text-text-primary truncate">
                                                                 {label}
-                                                                <span style={{ color: meta.color }}>.{tld}</span>
+                                                                <span style={{ color: meta.color }}>
+                                                                    .{tld}
+                                                                </span>
                                                             </div>
-                                                            <div className="text-[11px] text-text-muted mt-0.5">{meta.label}</div>
+                                                            <div className="text-[11px] text-text-muted mt-0.5">
+                                                                {meta.label}
+                                                            </div>
                                                         </div>
                                                     </div>
 
-                                                    <ExpiryLabel expiresAt={name.expiresAt} expired={name.expired} />
+                                                    <ExpiryLabel
+                                                        expiresAt={Number(name.expiresAt)}
+                                                        expired={name.expired}
+                                                    />
 
                                                     <div className="flex items-center justify-between mt-3">
                                                         {name.expired ? (
-                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-error/70">Expired</span>
+                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-error/70">
+                                                                Expired
+                                                            </span>
                                                         ) : (
-                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-cyan">Active</span>
+                                                            <span className="text-[11px] font-bold tracking-widest uppercase text-cyan">
+                                                                Active
+                                                            </span>
                                                         )}
                                                         {name.expired ? (
                                                             <button
-                                                                onClick={() => router.push(`/register/${encodeURIComponent(name.name)}`)}
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/register/${encodeURIComponent(name.name)}`,
+                                                                    )
+                                                                }
                                                                 className="px-3 py-1 rounded-lg bg-cyan text-bg-base text-xs font-semibold hover:opacity-90 active:scale-95 transition-all"
                                                             >
                                                                 Renew
                                                             </button>
                                                         ) : (
                                                             <button
-                                                                onClick={() => router.push(`/manage/${encodeURIComponent(name.name)}`)}
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/manage/${encodeURIComponent(name.name)}`,
+                                                                    )
+                                                                }
                                                                 className="px-3 py-1 rounded-lg border border-border-cyan text-cyan text-xs font-medium hover:bg-cyan-muted active:scale-95 transition-all"
                                                             >
                                                                 Manage

@@ -25,7 +25,18 @@ const TLD_META: Record<string, { bg: string; color: string; label: string }> = {
 const FALLBACK_META = { bg: "rgba(133,239,255,0.12)", color: "#85efff", label: "Oniym" };
 
 const SUGGESTION_TLDS = [
-    "me", "web3", "xyz", "app", "co", "one", "wagmi", "degen", "gm", "io", "dev", "pro",
+    "me",
+    "web3",
+    "xyz",
+    "app",
+    "co",
+    "one",
+    "wagmi",
+    "degen",
+    "gm",
+    "io",
+    "dev",
+    "pro",
 ];
 
 const BATCH_SIZE = 3;
@@ -84,7 +95,9 @@ function TldBadge({ tld, size = 36 }: { tld: string; size?: number }) {
 
 function StatusBadge({ status }: { status: RowStatus }) {
     if (status === "loading") {
-        return <span className="w-3.5 h-3.5 rounded-full border border-text-muted/40 border-t-text-muted/80 animate-spin inline-block" />;
+        return (
+            <span className="w-3.5 h-3.5 rounded-full border border-text-muted/40 border-t-text-muted/80 animate-spin inline-block" />
+        );
     }
     if (status === "available") {
         return (
@@ -149,14 +162,6 @@ export function SearchResults({ label, tld }: Props) {
         router.push(`/search?q=${encodeURIComponent(q + "." + tld)}`);
     }
 
-    function handleRefresh() {
-        setRows((prev) => prev.map((r) => ({ ...r, status: "loading" })));
-        const update = (t: string, status: RowStatus) =>
-            setRows((prev) => prev.map((r) => (r.tld === t ? { ...r, status } : r)));
-        const allTlds = rows.map((r) => r.tld);
-        void checkBatched(label, allTlds, update);
-    }
-
     function handleLoadAll() {
         setShowAll(true);
         setRows((prev) => {
@@ -218,16 +223,6 @@ export function SearchResults({ label, tld }: Props) {
                 </h2>
 
                 <div className="flex items-center gap-2">
-                    {/* Refresh */}
-                    <button
-                        onClick={handleRefresh}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-border-dark text-text-muted hover:text-text-secondary hover:border-border-cyan transition-colors"
-                    >
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M12 7A5 5 0 1 1 7 2a5 5 0 0 1 3.5 1.5L12 2v4H8l1.5-1.5A3 3 0 1 0 10 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                    </button>
-
                     {/* Filter */}
                     <div className="flex items-center rounded-lg border border-white/10 overflow-hidden bg-bg-surface">
                         {(["all", "available", "taken"] as FilterMode[]).map((f) => (
@@ -250,26 +245,51 @@ export function SearchResults({ label, tld }: Props) {
                         <button
                             onClick={() => setView("list")}
                             className={`w-8 h-8 flex items-center justify-center transition-colors ${
-                                view === "list" ? "bg-cyan text-bg-base" : "text-text-muted hover:text-text-secondary"
+                                view === "list"
+                                    ? "bg-cyan text-bg-base"
+                                    : "text-text-muted hover:text-text-secondary"
                             }`}
                         >
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <rect x="1" y="2" width="12" height="2" rx="1" fill="currentColor"/>
-                                <rect x="1" y="6" width="12" height="2" rx="1" fill="currentColor"/>
-                                <rect x="1" y="10" width="12" height="2" rx="1" fill="currentColor"/>
+                                <rect
+                                    x="1"
+                                    y="2"
+                                    width="12"
+                                    height="2"
+                                    rx="1"
+                                    fill="currentColor"
+                                />
+                                <rect
+                                    x="1"
+                                    y="6"
+                                    width="12"
+                                    height="2"
+                                    rx="1"
+                                    fill="currentColor"
+                                />
+                                <rect
+                                    x="1"
+                                    y="10"
+                                    width="12"
+                                    height="2"
+                                    rx="1"
+                                    fill="currentColor"
+                                />
                             </svg>
                         </button>
                         <button
                             onClick={() => setView("grid")}
                             className={`w-8 h-8 flex items-center justify-center transition-colors ${
-                                view === "grid" ? "bg-cyan text-bg-base" : "text-text-muted hover:text-text-secondary"
+                                view === "grid"
+                                    ? "bg-cyan text-bg-base"
+                                    : "text-text-muted hover:text-text-secondary"
                             }`}
                         >
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor"/>
-                                <rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor"/>
-                                <rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor"/>
-                                <rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor"/>
+                                <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" />
+                                <rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor" />
+                                <rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor" />
+                                <rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor" />
                             </svg>
                         </button>
                     </div>
@@ -289,10 +309,18 @@ export function SearchResults({ label, tld }: Props) {
                     >
                         {/* Column headers */}
                         <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_160px_auto_auto] gap-4 px-4 py-2.5 border-b border-border-dark bg-bg-surface/50">
-                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Domain</span>
-                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest hidden sm:block">Type</span>
-                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Price</span>
-                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">Status</span>
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">
+                                Domain
+                            </span>
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest hidden sm:block">
+                                Type
+                            </span>
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">
+                                Price
+                            </span>
+                            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-widest">
+                                Status
+                            </span>
                         </div>
 
                         {filteredRows.map((row, i) => {
@@ -322,7 +350,9 @@ export function SearchResults({ label, tld }: Props) {
                                     </div>
 
                                     {/* Type */}
-                                    <span className="text-xs text-text-muted hidden sm:block truncate">{meta.label}</span>
+                                    <span className="text-xs text-text-muted hidden sm:block truncate">
+                                        {meta.label}
+                                    </span>
 
                                     {/* Price */}
                                     <div className="flex-shrink-0">
@@ -337,13 +367,28 @@ export function SearchResults({ label, tld }: Props) {
                                     <div className="flex items-center gap-2 flex-shrink-0 justify-end">
                                         <StatusBadge status={row.status} />
                                         {isAvailable && (
-                                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-text-muted">
-                                                <path d="M5 3L9 7L5 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <svg
+                                                width="14"
+                                                height="14"
+                                                viewBox="0 0 14 14"
+                                                fill="none"
+                                                className="text-text-muted"
+                                            >
+                                                <path
+                                                    d="M5 3L9 7L5 11"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.5"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                />
                                             </svg>
                                         )}
                                         {isTaken && isPrimary && isOwner && (
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); handleManage(row); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleManage(row);
+                                                }}
                                                 className="px-2.5 py-1 rounded-lg border border-border-cyan text-cyan text-xs font-medium hover:bg-cyan-muted transition-all"
                                             >
                                                 Manage
@@ -381,7 +426,6 @@ export function SearchResults({ label, tld }: Props) {
                             {filteredRows.map((row, i) => {
                                 const meta = TLD_META[row.tld] ?? FALLBACK_META;
                                 const isAvailable = row.status === "available";
-                                const isTaken = row.status === "taken";
 
                                 return (
                                     <motion.div
@@ -401,9 +445,13 @@ export function SearchResults({ label, tld }: Props) {
                                             <div className="min-w-0">
                                                 <div className="font-mono text-sm font-medium text-text-primary leading-tight truncate">
                                                     {label}
-                                                    <span style={{ color: meta.color }}>.{row.tld}</span>
+                                                    <span style={{ color: meta.color }}>
+                                                        .{row.tld}
+                                                    </span>
                                                 </div>
-                                                <div className="text-[11px] text-text-muted mt-0.5">{meta.label}</div>
+                                                <div className="text-[11px] text-text-muted mt-0.5">
+                                                    {meta.label}
+                                                </div>
                                             </div>
                                         </div>
 
